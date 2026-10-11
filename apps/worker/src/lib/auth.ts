@@ -15,6 +15,8 @@ import { isDev } from "../env";
 import { decryptSecret, randomCode, randomToken, sha256Hex } from "./crypto";
 import { mailProvider } from "./mail";
 import { verifyTotp } from "./totp";
+import { RECOVERY_CODE, useRecoveryCode } from "./recovery";
+import { auditStmt } from "./audit";
 import { HttpError, ipHash, uaShort } from "./http";
 
 export const SESSION_TTL_SHORT = 12 * 3600_000; // 12 h
@@ -130,8 +132,18 @@ export async function consumeChallenge(env: Env, challengeId: string, code: stri
   // the authenticator app's code (members who have one, or the invitation setting it up), else the emailed code
   const totp = await totpOf(env, ch);
   let step: number | null = null;
-  if (totp) step = await verifyTotp(totp.secret, code.trim(), totp.lastStep);
-  const ok = totp ? step != null : timingSafeEqual(await codeHash(env, ch.id, code.trim()), ch.code_hash);
+  if (totp && /^\d{6}$/.test(code.trim())) step = await verifyTotp(totp.secret, code.trim(), totp.lastStep);
+  let ok = totp ? step != null : timingSafeEqual(await codeHash(env, ch.id, code.trim()), ch.code_hash);
+  // phone lost: one of her recovery codes signs her in instead (each works once)
+  if (!ok && purpose === "login" && RECOVERY_CODE.test(code.trim())) {
+    const m = await env.DB.prepare("SELECT recovery_codes FROM team_members WHERE id = ?").bind(ch.member_id).first<{ recovery_codes: string | null }>();
+    const used = await useRecoveryCode(env, m?.recovery_codes ?? null, code);
+    if (used.ok) {
+      const res = await env.DB.prepare("UPDATE team_members SET recovery_codes = ? WHERE id = ? AND recovery_codes = ?").bind(used.remaining, ch.member_id, m!.recovery_codes).run();
+      ok = res.meta.changes === 1; // the same code sent twice at once: only one wins
+      if (ok) await auditStmt(env, `member:${ch.member_id}`, "recovery_code_used", "team_member", ch.member_id).run();
+    }
+  }
   if (!ok) {
     await env.DB.prepare("UPDATE auth_challenges SET attempts = attempts + 1 WHERE id = ?").bind(ch.id).run();
     throw new HttpError(400, "code_invalid", { attemptsLeft: MAX_CODE_ATTEMPTS - ch.attempts - 1 });

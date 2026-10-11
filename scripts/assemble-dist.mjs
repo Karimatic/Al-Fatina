@@ -33,14 +33,17 @@ cpSync(admin, join(dist, "admin"), { recursive: true });
 // sha256, never 'unsafe-inline'. Data only goes back to the site itself; frames only for
 // the shop's Google Maps card; every font is self-hosted.
 const SCRIPT_SRC = "script-src 'self'";
+// photos and videos come from the shop itself (/media, /hero, /ig), or from a separate media
+// domain when MEDIA_ORIGIN is set at build time: never from just any website
+const MEDIA = (process.env.MEDIA_ORIGIN ?? "").trim();
 const pagePolicy = (hashes) =>
   [
     "default-src 'self'",
     [SCRIPT_SRC, ...hashes].join(" "),
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' data:",
-    "img-src 'self' data: blob: https:",
-    "media-src 'self' blob: https:",
+    `img-src 'self' data: blob:${MEDIA ? ` ${MEDIA}` : ""}`,
+    `media-src 'self' blob:${MEDIA ? ` ${MEDIA}` : ""}`,
     "connect-src 'self'",
     "frame-src https://www.google.com",
     "worker-src 'self'",

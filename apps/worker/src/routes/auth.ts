@@ -3,6 +3,7 @@
  * team invitations. Every response is deliberately vague about whether an email exists.
  */
 import { Hono } from "hono";
+import { newRecoveryCodes } from "../lib/recovery";
 import { z } from "zod";
 import type { AppEnv } from "../env";
 import { auditStmt } from "../lib/audit";
@@ -31,7 +32,8 @@ export const authRoutes = new Hono<AppEnv>();
 
 const email = z.string().trim().toLowerCase().email().max(120);
 const key = z.string().refine(passwordKeyValid, "invalid_key");
-const code = z.string().trim().regex(/^\d{6}$/, "code_format");
+// the 6-digit code, or (phone lost) one of the recovery codes
+const code = z.string().trim().regex(/^(\d{6}|[2-9A-HJ-NP-Z]{5}-?[2-9A-HJ-NP-Z]{5})$/i, "code_format");
 
 async function sendCode(c: Parameters<typeof devEcho>[0], to: string, name: string, purpose: "login" | "reset" | "invite", value: string) {
   const subject =
@@ -166,15 +168,17 @@ authRoutes.post("/invite/verify", async (c) => {
   const row = await inviteRow(c, input.token);
   const ch = await consumeChallenge(c.env, input.challenge, input.code, "invite");
   if (ch.member_id !== row.member_id) throw new HttpError(400, "code_invalid");
+  // a new authenticator comes with new recovery codes, shown once on the next screen
+  const recovery = ch.pending_totp ? await newRecoveryCodes(c.env) : null;
   await c.env.DB.batch([
     c.env.DB.prepare(
-      "UPDATE team_members SET password_hash = ?, password_salt = ?, email_verified_at = ?, is_active = 1, totp_secret_enc = COALESCE(?, totp_secret_enc), totp_last_step = COALESCE(?, totp_last_step) WHERE id = ?",
-    ).bind(ch.pending_hash, ch.pending_salt, Date.now(), ch.pending_totp, ch.pending_totp ? ch.totp_step : null, row.member_id),
+      "UPDATE team_members SET password_hash = ?, password_salt = ?, email_verified_at = ?, is_active = 1, totp_secret_enc = COALESCE(?, totp_secret_enc), totp_last_step = COALESCE(?, totp_last_step), recovery_codes = COALESCE(?, recovery_codes) WHERE id = ?",
+    ).bind(ch.pending_hash, ch.pending_salt, Date.now(), ch.pending_totp, ch.pending_totp ? ch.totp_step : null, recovery?.stored ?? null, row.member_id),
     c.env.DB.prepare("UPDATE auth_challenges SET consumed_at = ? WHERE id = ?").bind(Date.now(), row.id),
     auditStmt(c.env, `member:${row.member_id}`, "invite_accepted", "team_member", row.member_id),
   ]);
   await createSession(c, row.member_id, true);
-  return c.json({ ok: true });
+  return c.json({ ok: true, recoveryCodes: recovery?.codes ?? null });
 });
 
 /** Creates an invitation link (used by Admin → Équipe and the CLI bootstrap). */

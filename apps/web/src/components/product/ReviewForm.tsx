@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useFormGuard } from "@/lib/formGuard";
 import { normalizeDzPhone } from "@henine/shared";
 import { inputCls, Spinner } from "@/components/ui/kit";
 import { ApiError, apiForm } from "@/lib/api";
@@ -35,6 +36,7 @@ export function ReviewForm({ productId, code: fixedCode, token: fixedToken, onDo
   const [state, setState] = useState<"idle" | "sending" | "error">("idle");
   const [photos, setPhotos] = useState<{ blob: Blob; url: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const guard = useFormGuard();
 
   const normalizedCode = code.trim().toUpperCase();
   const token = fixedToken ?? saved.find((o) => o.code === normalizedCode)?.token;
@@ -48,9 +50,11 @@ export function ReviewForm({ productId, code: fixedCode, token: fixedToken, onDo
     setState("sending");
     try {
       const form = new FormData();
-      form.set("data", JSON.stringify({ code: normalizedCode, token, phone: p ?? undefined, productId, rating, text: text.trim() || undefined }));
       for (const ph of photos) form.append("photo", ph.blob, ph.blob.type === "image/webp" ? "photo.webp" : "photo.jpg");
-      const res = await apiForm<{ status: string }>("/reviews", form);
+      const res = await guard.send((g) => {
+        form.set("data", JSON.stringify({ code: normalizedCode, token, phone: p ?? undefined, productId, rating, text: text.trim() || undefined, guard: g }));
+        return apiForm<{ status: string }>("/reviews", form);
+      });
       setState("idle");
       onDone?.(res.status);
     } catch (err) {
@@ -62,6 +66,7 @@ export function ReviewForm({ productId, code: fixedCode, token: fixedToken, onDo
 
   return (
     <form onSubmit={submit} className="space-y-3">
+      <guard.Trap />
       <fieldset>
         <legend className="mb-1 text-sm font-medium">{R.rate}</legend>
         <div className="flex gap-1" role="radiogroup" aria-label={R.rate} dir="ltr">

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFormGuard } from "@/lib/formGuard";
 import { buzz } from "@/lib/haptics";
 import { dateLocale, formatDA, normalizeDzPhone, type ImageRef, type ProductCardDTO, type ProductDetailDTO, type SiteConfigDTO } from "@henine/shared";
 import { FlashPanel } from "@/components/home/HomeExtras";
@@ -515,6 +516,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
 }
 
 function NotifyMe({ variantId }: { variantId: number }) {
+  const guard = useFormGuard();
   const { t, locale } = useLocale();
   const [phone, setPhone] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
@@ -555,13 +557,14 @@ function NotifyMe({ variantId }: { variantId: number }) {
         if (!p) return setState("error");
         setState("sending");
         try {
-          await apiPost("/stock-alert", { variantId, phone: p });
+          await guard.send((g) => apiPost("/stock-alert", { variantId, phone: p, guard: g }));
           setState("done");
         } catch {
           setState("error");
         }
       }}
     >
+      <guard.Trap />
       <p className="text-sm font-medium">{t.product.notifyMe}</p>
       <div className="flex gap-2">
         <input className={inputCls} type="tel" inputMode="tel" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} />

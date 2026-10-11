@@ -705,6 +705,8 @@ export const teamMembers = sqliteTable("team_members", {
   ordersSeenAt: integer("orders_seen_at"),
   /** authenticator app (TOTP) secret, encrypted with SETTINGS_KEY: the sign-in code when no email service is set */
   totpSecretEnc: text("totp_secret_enc"),
+  /** one-time recovery codes (JSON array of peppered hashes): sign in when the phone is lost */
+  recoveryCodes: text("recovery_codes"),
   /** the last 30-second step used (a code works once) */
   totpLastStep: integer("totp_last_step"),
   createdAt: createdAt(),

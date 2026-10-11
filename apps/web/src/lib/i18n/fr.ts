@@ -192,6 +192,7 @@ export const fr = {
       coupon_invalid: "Ce code promo n'est pas valable.",
       delivery_unavailable: "Livraison indisponible pour ce choix.",
       too_many_orders: "Trop de commandes récentes avec ce numéro. Réessayez plus tard ou contactez-nous.",
+      form_expired: "La page a expiré. Rechargez-la puis réessayez.",
       too_many_pieces: "10 pièces au maximum par commande. Pour une grosse commande, contactez-nous sur WhatsApp.",
       rate_limited: "Trop de tentatives, patientez une minute.",
       maintenance: STORE_TEXTS.fr.pause,

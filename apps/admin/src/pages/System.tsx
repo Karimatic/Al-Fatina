@@ -1,4 +1,5 @@
 import { SIZE_GUIDE_TEMPLATE } from "@henine/shared";
+import { RecoveryCodesBox } from "../lib/recoveryCodes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -129,7 +130,7 @@ interface Integrations {
 export function MyAccount() {
   const me = useMe();
   const toast = useToast();
-  const q = useQuery({ queryKey: ["account"], queryFn: () => api<{ member: { email: string; name: string; roleName: string }; sessions: { id: number; user_agent: string; created_at: number; last_seen_at: number; current: boolean }[] }>("/account") });
+  const q = useQuery({ queryKey: ["account"], queryFn: () => api<{ member: { email: string; name: string; roleName: string }; sessions: { id: number; user_agent: string; created_at: number; last_seen_at: number; current: boolean }[]; recovery?: { left: number; totp: boolean } }>("/account") });
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
   const [busy, setBusy] = useState(false);
   const revoke = useSave((id: number) => del(`/account/sessions/${id}`), ["account"], tr("Appareil déconnecté"));
@@ -193,6 +194,7 @@ export function MyAccount() {
       </div>
       <Button type="submit" className="mt-3" loading={busy} disabled={!pw.current || !pw.next}>{tr("Changer le mot de passe")}</Button>
       </form>
+      {q.data?.recovery?.totp && <RecoveryCodesSection email={q.data.member.email} left={q.data.recovery.left} />}
       <h3 className="mb-2 mt-5 text-sm font-semibold">{tr("Appareils connectés")}</h3>
       <ul className="space-y-2 text-sm">
         {q.data?.sessions.map((s) => (
@@ -204,6 +206,65 @@ export function MyAccount() {
       </ul>
     </Card>
     </>
+  );
+}
+
+/**
+ * Recovery codes: how many are left, and new ones (the old ones stop working) after re-entering
+ * the password. They sign in once each if the phone with the authenticator app is lost.
+ */
+function RecoveryCodesSection({ email, left }: { email: string; left: number }) {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [asking, setAsking] = useState(false);
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [codes, setCodes] = useState<string[] | null>(null);
+  async function renew() {
+    setBusy(true);
+    try {
+      const r = await post<{ codes: string[] }>("/account/recovery-codes", { currentKey: await derivePasswordKey(email, pw) });
+      setCodes(r.codes);
+      setAsking(false);
+      setPw("");
+      void qc.invalidateQueries({ queryKey: ["account"] });
+    } catch (e) {
+      toast(errorMessage(e), "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mt-5 rounded-xl border border-line p-3">
+      <h3 className="text-sm font-semibold">{tr("🔑 Codes de secours")}</h3>
+      <p className={`mt-1 text-sm ${left <= 2 ? "font-semibold text-amber-800" : "text-ink-soft"}`}>
+        {left ? tr("{0} code(s) encore utilisable(s), si vous perdez le téléphone de l'application.", { 0: left }) : tr("Aucun code : si vous perdez le téléphone de l'application, vous ne pourrez plus vous connecter. Créez-en maintenant.")}
+      </p>
+      {codes ? (
+        <div className="mt-3">
+          <RecoveryCodesBox codes={codes} onDone={() => setCodes(null)} doneLabel={tr("C'est noté")} />
+        </div>
+      ) : asking ? (
+        <form
+          className="mt-3 flex flex-wrap items-end gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void renew();
+          }}
+        >
+          <div className="min-w-0 flex-1">
+            <TextField label={tr("Votre mot de passe")} type="password" autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} />
+          </div>
+          <Button type="submit" variant="primary" loading={busy} disabled={!pw}>
+            {tr("Créer les codes")}
+          </Button>
+        </form>
+      ) : (
+        <Button size="sm" className="mt-3" onClick={() => setAsking(true)}>
+          {left ? tr("Créer de nouveaux codes") : tr("Créer mes codes de secours")}
+        </Button>
+      )}
+    </div>
   );
 }
 

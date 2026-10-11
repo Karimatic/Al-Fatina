@@ -48,6 +48,7 @@ import { bumpCatalogStmt, getSetting, getSettings } from "../lib/settings";
 import { notifyNewOrder, sendTelegramText, syncOrderMessage } from "../lib/telegram";
 import { exchangeAlert, receiptIssueAlert } from "../lib/alerts";
 import { liveEvent } from "../lib/live";
+import { checkFormGuard, issueTicket } from "../lib/form-guard";
 import { isPushEndpoint, sendRestockPushes, vapidKeys } from "../lib/webpush";
 import { z } from "zod";
 
@@ -209,9 +210,17 @@ publicRoutes.post("/visit", async (c) => {
   return c.body(null, 204);
 });
 
+/** The signed ticket of the public forms (see lib/form-guard.ts), taken when a page opens. */
+publicRoutes.get("/form-ticket", async (c) => {
+  await rateLimit(c.env.RL_LOOKUP, `ticket:${clientIp(c)}`);
+  c.header("Cache-Control", "no-store");
+  return c.json(await issueTicket(c.env));
+});
+
 publicRoutes.post("/orders", async (c) => {
   await rateLimit(c.env.RL_WRITE, `order:${clientIp(c)}`);
   const input = await body(c, createOrderInput);
+  await checkFormGuard(c, input.guard);
   const maintenance = await getSetting(c.env, "maintenance");
   if (maintenance.active) throw new HttpError(503, "maintenance");
 
@@ -629,6 +638,7 @@ publicRoutes.post("/reviews", async (c) => {
   } else {
     input = await body(c, reviewInput);
   }
+  await checkFormGuard(c, input.guard);
   const o = await c.env.DB.prepare("SELECT id, status, phone, name, track_token_hash FROM orders WHERE public_code = ?")
     .bind(input.code)
     .first<{ id: number; status: string; phone: string; name: string; track_token_hash: string }>();
@@ -673,6 +683,7 @@ publicRoutes.post("/reviews", async (c) => {
 publicRoutes.post("/contact", async (c) => {
   await rateLimit(c.env.RL_WRITE, `contact:${clientIp(c)}`);
   const input = await body(c, contactInput);
+  await checkFormGuard(c, input.guard);
   await c.env.DB.prepare("INSERT INTO contact_messages (name, phone, subject, message, status, created_at) VALUES (?, ?, ?, ?, 'new', ?)")
     .bind(input.name, input.phone ?? null, input.subject ?? null, input.message, Date.now())
     .run();
@@ -686,6 +697,7 @@ publicRoutes.post("/contact", async (c) => {
 publicRoutes.post("/stock-alert", async (c) => {
   await rateLimit(c.env.RL_WRITE, `alert:${clientIp(c)}`);
   const input = await body(c, stockAlertInput);
+  await checkFormGuard(c, input.guard);
   await c.env.DB.prepare(
     `INSERT INTO stock_alerts (variant_id, phone, created_at)
      SELECT ?, ?, ? WHERE NOT EXISTS (SELECT 1 FROM stock_alerts WHERE variant_id = ? AND phone = ? AND notified_at IS NULL)`,

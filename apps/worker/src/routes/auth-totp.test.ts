@@ -55,6 +55,28 @@ describe("admin sign-in without an email service: authenticator app", () => {
     expect((await call(e, "/login", { email: "ilyas@shop.test", key: "b".repeat(64) })).status).toBe(401);
   });
 
+  it("phone lost: a recovery code given at activation signs in once", async () => {
+    const db = testDb();
+    const e = env(db);
+    db.sqlite.exec("INSERT INTO team_members (id, email, name, role_id, is_active) VALUES (1, 'ilyas@shop.test', 'Ilyas', (SELECT id FROM roles WHERE key = 'owner'), 1)");
+    const token = await createInvite(e, 1);
+    const accept = await call(e, "/invite/accept", { token, key: KEY });
+    const done = await call(e, "/invite/verify", { token, challenge: accept.body.challenge, code: await totpCode(accept.body.totp!.secret, totpStep()) });
+    const codes = done.body.recoveryCodes as string[];
+    expect(codes).toHaveLength(8);
+    expect(codes[0]).toMatch(/^[2-9A-HJ-NP-Z]{5}-[2-9A-HJ-NP-Z]{5}$/);
+
+    const signIn = async (code: string) => {
+      const login = await call(e, "/login", { email: "ilyas@shop.test", key: KEY });
+      return (await call(e, "/verify", { challenge: login.body.challenge, code })).status;
+    };
+    expect(await signIn("ZZZZZ-ZZZZZ")).toBe(400); // not one of hers
+    expect(await signIn(codes[0]!.toLowerCase().replace("-", ""))).toBe(200); // case and dash don't matter
+    expect(await signIn(codes[0]!)).toBe(400); // used: gone
+    expect(await signIn(codes[1]!)).toBe(200);
+    expect(await db.prepare("SELECT COUNT(*) AS n FROM audit_log WHERE action = 'recovery_code_used'").first("n")).toBe(2);
+  });
+
   it("with an email service the invitation still uses emailed codes", async () => {
     const db = testDb();
     const e = { ...env(db), MAIL_PROVIDER: "resend", MAIL_API_KEY: "k", MAIL_FROM: "Shop <a@b.c>" } as unknown as Env;

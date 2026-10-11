@@ -1,0 +1,1 @@
+ALTER TABLE `team_members` ADD `recovery_codes` text;

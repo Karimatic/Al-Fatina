@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useFormGuard } from "@/lib/formGuard";
 import { normalizeDzPhone, toE164, type LinkDTO, type PageDTO, type SiteConfigDTO } from "@henine/shared";
 import { Blossom, InstagramIcon } from "@/components/ui/icons";
 import { Markdown } from "@/components/ui/Markdown";
@@ -13,6 +14,7 @@ export function ContactView() {
   const site = useApi<SiteConfigDTO>("/site");
   const [form, setForm] = useState({ name: "", phone: "", subject: "", message: "" });
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const guard = useFormGuard();
   const c = site.data?.contact;
   const wa = c?.whatsapp ? toE164(c.whatsapp)?.replace("+", "") : null;
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -34,13 +36,14 @@ export function ContactView() {
               if (form.phone && !phone) return setState("error");
               setState("sending");
               try {
-                await apiPost("/contact", { name: form.name.trim(), phone: phone ?? undefined, subject: form.subject.trim() || undefined, message: form.message.trim() });
+                await guard.send((g) => apiPost("/contact", { name: form.name.trim(), phone: phone ?? undefined, subject: form.subject.trim() || undefined, message: form.message.trim(), guard: g }));
                 setState("sent");
               } catch {
                 setState("error");
               }
             }}
           >
+            <guard.Trap />
             <input className={inputCls} placeholder={t.contact.name} value={form.name} onChange={set("name")} maxLength={80} aria-label={t.contact.name} />
             <input className={inputCls} placeholder={t.contact.phone} value={form.phone} onChange={set("phone")} type="tel" dir="ltr" aria-label={t.contact.phone} />
             <input className={inputCls} placeholder={t.contact.subject} value={form.subject} onChange={set("subject")} maxLength={120} aria-label={t.contact.subject} />

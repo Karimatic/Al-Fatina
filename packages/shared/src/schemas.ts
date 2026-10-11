@@ -42,6 +42,9 @@ export const orderLine = z.object({
 });
 
 /** What the storefront sends. Prices are NEVER accepted from the client. */
+/** Invisible bot check of the public forms: the page's signed ticket + the hidden field (empty). */
+export const formGuard = z.object({ ticket: z.string().max(120), hp: z.string().max(200).optional() }).optional();
+
 /**
  * Loyalty points are personal: they show and apply only when this phone holds the private link
  * (code + token) of an earlier order of the same number. A phone number alone proves nothing.
@@ -53,6 +56,7 @@ const orderProofs = z
 
 export const createOrderInput = z
   .object({
+    guard: formGuard,
     proofs: orderProofs,
     idempotencyKey: z.string().uuid(),
     /** checkout autosave id: the saved abandoned checkout is marked recovered */
@@ -162,6 +166,7 @@ export const reviewInput = z
     productId: z.number().int().positive(),
     rating: z.number().int().min(1).max(5),
     text: cleanText(1000).optional(),
+    guard: formGuard,
   })
   .refine((r) => !!r.token || !!r.phone, { message: "proof_required", path: ["phone"] });
 
@@ -170,11 +175,13 @@ export const contactInput = z.object({
   phone: dzPhone.optional(),
   subject: cleanText(120).optional(),
   message: cleanText(2000).pipe(z.string().min(5)),
+  guard: formGuard,
 });
 
 export const stockAlertInput = z.object({
   variantId: z.number().int().positive(),
   phone: dzPhone,
+  guard: formGuard,
 });
 
 /** "Prévenez-moi" by notification: the browser's push subscription for one variant. */

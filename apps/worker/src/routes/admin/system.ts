@@ -2,6 +2,7 @@
  * Admin → Tableau de bord, Analyse, Système (Équipe, Comptes, Contenu, Erreurs) + /me.
  */
 import { Hono } from "hono";
+import { newRecoveryCodes, recoveryLeft } from "../../lib/recovery";
 import { z } from "zod";
 import { cleanText, hasPermission, PERMISSIONS, ROLE_PRESETS, type Permission } from "@henine/shared";
 import type { AppEnv, Env } from "../../env";
@@ -622,7 +623,31 @@ systemRoutes.get("/account", async (c) => {
   )
     .bind(m.id, Date.now())
     .all<{ id: number }>();
-  return c.json({ member: { id: m.id, email: m.email, name: m.name, roleName: m.roleName }, sessions: results.map((s) => ({ ...s, current: s.id === m.sessionId })) });
+  const rec = await c.env.DB.prepare("SELECT recovery_codes, totp_secret_enc IS NOT NULL AS totp FROM team_members WHERE id = ?").bind(m.id).first<{ recovery_codes: string | null; totp: number }>();
+  return c.json({
+    member: { id: m.id, email: m.email, name: m.name, roleName: m.roleName },
+    sessions: results.map((s) => ({ ...s, current: s.id === m.sessionId })),
+    /** recovery codes still usable, and whether she signs in with an authenticator app */
+    recovery: { left: recoveryLeft(rec?.recovery_codes ?? null), totp: !!rec?.totp },
+  });
+});
+
+/**
+ * New recovery codes (the old ones stop working), after re-entering the password: shown once,
+ * to keep somewhere safe (paper, another phone). Each signs in once if the phone is lost.
+ */
+systemRoutes.post("/account/recovery-codes", async (c) => {
+  const m = c.get("member");
+  await rateLimit(c.env.RL_AUTH, `password:${m.id}`);
+  const input = await body(c, z.object({ currentKey: z.string().refine(passwordKeyValid) }));
+  const row = await c.env.DB.prepare("SELECT password_hash, password_salt FROM team_members WHERE id = ?").bind(m.id).first<{ password_hash: string | null; password_salt: string | null }>();
+  if (!(await checkPassword(c.env, input.currentKey, row?.password_hash ?? null, row?.password_salt ?? null))) throw new HttpError(403, "wrong_password");
+  const { codes, stored } = await newRecoveryCodes(c.env);
+  await c.env.DB.batch([
+    c.env.DB.prepare("UPDATE team_members SET recovery_codes = ? WHERE id = ?").bind(stored, m.id),
+    auditStmt(c.env, actorOf(m), "update", "recovery_codes", m.id),
+  ]);
+  return c.json({ codes });
 });
 
 /** Anyone changes the name the team sees (orders history, Telegram, the welcome line). */

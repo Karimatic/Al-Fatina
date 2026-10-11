@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFormGuard } from "@/lib/formGuard";
 import { CONTACT_TIME_LABEL, CONTACT_TIMES, formatDA, normalizeDzPhone, type CommuneDTO, type ContactTime, type CreatedOrderDTO, type QuoteDTO, type SiteConfigDTO, type WilayaDTO } from "@henine/shared";
 import { inputCls, ProductImage, Spinner } from "@/components/ui/kit";
 import { ApiError, apiGet, apiPost, useApi } from "@/lib/api";
@@ -44,6 +45,8 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
   const [address, setAddress] = useState(memory?.address ?? "");
   const [note, setNote] = useState("");
   const [contactTime, setContactTime] = useState<ContactTime | null>(null);
+  // invisible bot check (signed ticket + hidden field)
+  const guard = useFormGuard();
   // « How did you hear about us? »: only when the shop asks it and her visit says nothing
   const [heardFrom, setHeardFrom] = useState("");
   const [untracked, setUntracked] = useState(false);
@@ -153,7 +156,8 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
     setSubmitting(true);
     try {
       const params = new URLSearchParams(location.search);
-      const order = await apiPost<CreatedOrderDTO>("/orders", {
+      const order = await guard.send((g) => apiPost<CreatedOrderDTO>("/orders", {
+        guard: g,
         idempotencyKey: idem.current,
         cartId: normalizedPhone ? cartId(channel) : undefined,
         name: name.trim(),
@@ -176,7 +180,7 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
         utm: params.get("utm_source")
           ? { source: params.get("utm_source") ?? undefined, medium: params.get("utm_medium") ?? undefined, campaign: params.get("utm_campaign") ?? undefined, landing: location.pathname }
           : visitAttribution(),
-      });
+      }));
       saveOrder({ code: order.code, token: order.token, total: order.total, createdAt: Date.now() });
       if (coupon) pendingCoupon.set(null); // used: not offered again
       try {
@@ -227,6 +231,7 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
 
   return (
     <form onSubmit={submit} noValidate className={compact ? "space-y-4" : "grid gap-8 pb-20 md:pb-0 lg:grid-cols-[1fr_22rem]"}>
+      <guard.Trap />
       <div className="space-y-4">
         <div>
           {label(L.name, "name")}

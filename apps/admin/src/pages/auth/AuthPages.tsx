@@ -2,6 +2,7 @@
  * Login (email + password → emailed 6-digit code), invitation acceptance, password reset.
  */
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { RecoveryCodesBox } from "../../lib/recoveryCodes";
 import { auth, errorMessage } from "../../api";
 import { Wordmark } from "../../brand";
 import { derivePasswordKey, passwordProblems } from "../../lib/password";
@@ -76,6 +77,8 @@ function nextUrl(): string {
 /* ───────── Login ───────── */
 
 export function LoginPage() {
+  const [useRecovery, setUseRecovery] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState("");
   const [step, setStep] = useState<"password" | "code">("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -127,8 +130,28 @@ export function LoginPage() {
         }
       >
         <DevCode code={challenge.dev} />
-        <CodeInput onComplete={submitCode} disabled={busy} />
+        {useRecovery ? (
+          <form
+            className="space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void submitCode(recoveryCode.trim());
+            }}
+          >
+            <TextField label={tr("Code de secours")} placeholder="K7Q2M-9XW4H" dir="ltr" autoComplete="off" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value.toUpperCase())} />
+            <Button type="submit" variant="primary" loading={busy} className="w-full" disabled={recoveryCode.replace(/[^0-9A-Z]/gi, "").length !== 10}>
+              {tr("Se connecter")}
+            </Button>
+          </form>
+        ) : (
+          <CodeInput onComplete={submitCode} disabled={busy} />
+        )}
         {error && <p className="mt-3 text-sm text-red-700">{error}</p>}
+        {challenge.totp && (
+          <button type="button" className="mt-3 text-sm font-semibold text-plum-600" onClick={() => { setUseRecovery((v) => !v); setError(null); }}>
+            {useRecovery ? tr("← Utiliser le code de l'application") : tr("Téléphone perdu ? Utiliser un code de secours")}
+          </button>
+        )}
         <div className="mt-4 flex justify-between text-sm">
           <button type="button" className="font-semibold text-plum-600" onClick={() => { setStep("password"); setError(null); }}>
             {tr("← Retour")}
@@ -198,6 +221,7 @@ function NewPasswordForm({ email, submitLabel, onKey }: { email: string; submitL
 
 export function InvitationPage() {
   const token = new URLSearchParams(location.search).get("token") ?? "";
+  const [recovery, setRecovery] = useState<string[] | null>(null);
   const [info, setInfo] = useState<{ email: string; name: string; role: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [challenge, setChallenge] = useState<{ id: string; dev?: string; totp?: { secret: string; uri: string } } | null>(null);
@@ -209,6 +233,13 @@ export function InvitationPage() {
 
   if (error && !info) return <AuthLayout title={tr("Invitation")}>{<p className="text-sm text-red-700">{error}</p>}</AuthLayout>;
   if (!info) return <AuthLayout title={tr("Invitation")}><div className="skeleton h-24" /></AuthLayout>;
+  if (recovery) {
+    return (
+      <AuthLayout title={tr("Vos codes de secours")} subtitle={tr("Votre compte est activé. Une dernière chose avant d'entrer :")}>
+        <RecoveryCodesBox codes={recovery} onDone={() => (location.href = "/admin/")} doneLabel={tr("Entrer dans l'administration")} />
+      </AuthLayout>
+    );
+  }
   if (challenge?.totp) {
     const { secret, uri } = challenge.totp;
     return (
@@ -247,8 +278,9 @@ export function InvitationPage() {
               setBusy(true);
               setError(null);
               try {
-                await auth("/invite/verify", { token, challenge: challenge.id, code });
-                location.href = "/admin/";
+                const r = await auth<{ recoveryCodes?: string[] | null }>("/invite/verify", { token, challenge: challenge.id, code });
+                if (r.recoveryCodes?.length) setRecovery(r.recoveryCodes);
+                else location.href = "/admin/";
               } catch (err) {
                 setError(errorMessage(err));
                 setBusy(false);
