@@ -7,6 +7,7 @@
  * "🔊 Activer les sons" button is shown; the visual notification always works.
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { alertText } from "./alertText";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { api } from "../api";
@@ -458,7 +459,7 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
     async (items: AlertItem[]) => {
       void qc.invalidateQueries({ queryKey: ["alerts"] });
       for (const a of items) {
-        pushCard({ key: `a${a.id}-${a.at}`, kind: "alert", title: a.priority === "high" ? tr("🔴 Alerte") : tr("⚠️ Alerte"), text: a.message, priority: a.priority, orderId: a.entity === "order" && a.entityId ? Number(a.entityId) : undefined });
+        pushCard({ key: `a${a.id}-${a.at}`, kind: "alert", title: a.priority === "high" ? tr("🔴 Alerte") : tr("⚠️ Alerte"), text: alertText(a.message), priority: a.priority, orderId: a.entity === "order" && a.entityId ? Number(a.entityId) : undefined });
       }
       const urgent = items.find((a) => a.priority === "high");
       if (urgent && (await claim(`a${urgent.id}-${urgent.at}`))) {

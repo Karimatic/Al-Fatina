@@ -16,6 +16,7 @@
     "build": "npm run build --workspace @henine/web && npm run build --workspace @henine/admin && node scripts/assemble-dist.mjs",
     "deploy": "npm run build && npm run deploy --workspace @henine/worker",
     "db:generate": "npm run generate --workspace @henine/db",
+    "db:sql:local": "npm run sql:local --workspace @henine/worker --",
     "db:migrate:local": "npm run migrate:local --workspace @henine/worker",
     "db:seed:local": "npm run seed:local --workspace @henine/worker",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -28,7 +29,7 @@
     "esbuild@0.25.12": true,
     "esbuild@0.28.2": true,
     "esbuild@0.28.1": true,
-    "workerd@1.20260930.2": true,
-    "unrs-resolver@1.12.2": true
+    "unrs-resolver@1.12.2": true,
+    "workerd@1.20261006.1": true
   }
 }

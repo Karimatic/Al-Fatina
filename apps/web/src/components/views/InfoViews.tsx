@@ -55,7 +55,7 @@ export function ContactView() {
       </div>
       <aside className="h-fit space-y-4 rounded-card border border-line bg-surface/60 p-5 text-sm">
         {wa && (
-          <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" className="grid h-12 place-items-center rounded-full bg-[#25D366] font-semibold text-white">
+          <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" className="grid h-12 place-items-center rounded-full bg-[#25D366] font-semibold text-[#062a1d]">
             {t.contact.whatsapp}
           </a>
         )}

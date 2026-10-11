@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
+    "sql:local": "wrangler d1 execute DB --local --command",
     "migrate:local": "wrangler d1 migrations apply DB --local",
     "migrate:remote": "wrangler d1 migrations apply DB --remote",
     "seed:local": "wrangler d1 execute DB --local --file ../../packages/db/seed/geo.sql && wrangler d1 execute DB --local --file ../../packages/db/seed/base.sql && wrangler d1 execute DB --local --file ../../packages/db/seed/demo.sql",

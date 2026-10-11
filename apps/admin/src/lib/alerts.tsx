@@ -3,6 +3,7 @@
  * problems, exchange requests). Refreshed live by the WebSocket (see live.tsx).
  */
 import { useEffect, useRef, useState } from "react";
+import { alertText } from "./alertText";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Bell } from "lucide-react";
@@ -24,6 +25,7 @@ export interface AlertRow {
 }
 
 const ICON: Record<string, string> = {
+  no_photo: "📷",
   late_order: "⏰",
   unconfirmed: "📞",
   ready_to_ship: "📦",
@@ -67,6 +69,7 @@ export function AlertsBell() {
     if (a.entity === "order" && a.entity_id) void navigate({ to: "/commandes", search: { o: Number(a.entity_id) } as never });
     else if (a.entity === "orders") void navigate({ to: "/commandes", search: (a.kind === "unconfirmed" ? { attention: "late" } : { status: a.entity_id ?? "active" }) as never });
     else if (a.entity === "variant") void navigate({ to: "/stock" });
+    else if (a.entity === "products") void navigate({ to: "/produits" });
   }
 
   const unread = q.data?.unread ?? 0;
@@ -114,7 +117,7 @@ export function AlertsBell() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <button type="button" onClick={() => go(a)} className="text-start text-sm leading-snug hover:text-plum-700">
-                    {a.message}
+                    {alertText(a.message)}
                   </button>
                   <p className="mt-0.5 text-xs text-ink-soft">{ago(a.created_at)}</p>
                 </div>

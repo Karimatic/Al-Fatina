@@ -78,7 +78,7 @@ export function BoutiqueView() {
               </a>
             )}
             {wa && (
-              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#25D366] px-5 text-sm font-semibold text-white">
+              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#25D366] px-5 text-sm font-semibold text-[#062a1d]">
                 <WhatsAppIcon size={18} /> {B.whatsapp}
               </a>
             )}

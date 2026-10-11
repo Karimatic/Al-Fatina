@@ -40,7 +40,7 @@ export function ThankYouView() {
         <a href={href(`/suivi?c=${params.code}&t=${encodeURIComponent(params.token)}`)} className="grid h-12 place-items-center rounded-full bg-plum-600 font-semibold text-white">
           {t.thanks.trackLink}
         </a>
-        <a href={wa} target="_blank" rel="noopener noreferrer" className="grid h-12 place-items-center rounded-full bg-[#25D366] font-semibold text-white">
+        <a href={wa} target="_blank" rel="noopener noreferrer" className="grid h-12 place-items-center rounded-full bg-[#25D366] font-semibold text-[#062a1d]">
           {t.thanks.whatsapp}
         </a>
         <button

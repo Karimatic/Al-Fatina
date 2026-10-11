@@ -155,7 +155,7 @@ export function SiteMenu() {
                     </a>
                   )}
                   {wa && (
-                    <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" className="flex h-11 flex-1 items-center justify-center rounded-full bg-[#25D366] text-sm font-semibold text-white">
+                    <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" className="flex h-11 flex-1 items-center justify-center rounded-full bg-[#25D366] text-sm font-semibold text-[#062a1d]">
                       WhatsApp
                     </a>
                   )}

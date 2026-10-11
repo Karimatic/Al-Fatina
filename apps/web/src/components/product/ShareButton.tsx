@@ -70,7 +70,7 @@ export function ShareButton({ slug, name, price, className = "" }: { slug: strin
                 href={`https://wa.me/?text=${encodeURIComponent(`${text}\n${url()}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="grid h-12 place-items-center rounded-full bg-[#25D366] font-semibold text-white"
+                className="grid h-12 place-items-center rounded-full bg-[#25D366] font-semibold text-[#062a1d]"
               >
                 WhatsApp
               </a>

@@ -77,7 +77,7 @@ export async function scanAlerts(env: Env): Promise<void> {
   const { operations } = await getSettings(env, ["operations"]);
   const sla = operations.sla;
   const now = Date.now();
-  const [late, ready, low, callbacks] = await env.DB.batch([
+  const [late, ready, low, callbacks, noPhoto] = await env.DB.batch([
     env.DB.prepare(
       `SELECT o.id, o.public_code, o.status, ${SINCE_SQL} AS since FROM orders o WHERE ${lateOrdersSql(now, sla)} ORDER BY since LIMIT 50`,
     ),
@@ -94,10 +94,12 @@ export async function scanAlerts(env: Env): Promise<void> {
       `SELECT f.id, o.public_code, f.next_action_at FROM delivery_followups f JOIN orders o ON o.id = f.order_id
         WHERE f.status IN ('needs_contact','contacted','callback','retry_requested','unreachable') AND f.next_action_at <= ? ORDER BY f.next_action_at LIMIT 30`,
     ).bind(now),
+    // products on sale without a single photo (customers don't buy them, Meta's catalogue skips them)
+    env.DB.prepare("SELECT COUNT(*) AS n FROM products p WHERE p.status = 'published' AND NOT EXISTS (SELECT 1 FROM product_images i WHERE i.product_id = p.id)"),
   ]);
 
   const raise: AlertInput[] = [];
-  const open: Record<string, string[]> = { late_order: [], unconfirmed: [], ready_to_ship: [], low_stock: [], followup_due: [] };
+  const open: Record<string, string[]> = { late_order: [], unconfirmed: [], ready_to_ship: [], low_stock: [], followup_due: [], no_photo: [] };
   const add = (a: AlertInput) => {
     raise.push(a);
     open[a.kind]!.push(a.dedupeKey);
@@ -139,6 +141,14 @@ export async function scanAlerts(env: Env): Promise<void> {
     add({
       kind: "low_stock", priority: v.available <= 0 ? "medium" : "low", entity: "variant", entityId: v.id, dedupeKey: `stock:${v.id}`,
       message: v.available <= 0 ? `Rupture : ${v.name_fr} (${v.sku}) est épuisé.` : `Stock critique : ${v.name_fr} (${v.sku}), plus qu'une pièce.`,
+    });
+  }
+
+  const noPhotoN = (noPhoto!.results[0] as { n: number }).n;
+  if (noPhotoN > 0) {
+    add({
+      kind: "no_photo", priority: "medium", entity: "products", entityId: "published", dedupeKey: "no_photo",
+      message: `${noPhotoN} produit${noPhotoN > 1 ? "s publiés n'ont" : " publié n'a"} aucune photo : ajoutez-en (les clientes et le catalogue Facebook / Instagram les ignorent).`,
     });
   }
 

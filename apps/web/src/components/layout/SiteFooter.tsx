@@ -64,7 +64,6 @@ export function SiteFooter() {
                 href={s.href}
                 rel="noopener noreferrer"
                 target="_blank"
-                aria-label={s.label}
                 className="inline-flex h-10 items-center gap-2 rounded-full bg-white/10 px-4 text-sm font-medium transition hover:bg-white/20"
               >
                 {s.icon}

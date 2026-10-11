@@ -240,7 +240,7 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
                     </div>
                   )}
                   {turn.reply.products.length === 0 && !turn.reply.reply && wa && (
-                    <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-2 rounded-full bg-[#25D366] px-4 text-sm font-semibold text-white">
+                    <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-2 rounded-full bg-[#25D366] px-4 text-sm font-semibold text-[#062a1d]">
                       <WhatsAppIcon size={18} /> WhatsApp
                     </a>
                   )}

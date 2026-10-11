@@ -47,7 +47,7 @@ export function LanguageSwitch({ className = "", tone = "light" }: { className?:
               {text}
             </span>
           ) : (
-            <a key={o.code} href={href} hrefLang={o.code} lang={o.code} aria-label={o.name} className={`${cell} transition-colors ${dark ? "text-white/60 hover:text-white" : "text-ink-soft hover:text-plum-700"}`}>
+            <a key={o.code} href={href} hrefLang={o.code} lang={o.code} aria-label={`${o.label} · ${o.name}`} className={`${cell} transition-colors ${dark ? "text-white/60 hover:text-white" : "text-ink-soft hover:text-plum-700"}`}>
               {text}
             </a>
           );
