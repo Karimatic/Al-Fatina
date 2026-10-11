@@ -48,7 +48,7 @@ export function HomePage() {
       /* Hero: the shop's photo, the promise centred on it */
       <section className="px-3 pt-3 md:px-4">
         <div className="relative mx-auto flex min-h-[58svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
-          <img src={design.heroImage ?? "/ig/pyjamas-rayures.jpg"} alt="" fetchPriority="high" className="hero-zoom-img absolute inset-0 size-full object-cover" />
+          <img src={design.heroImage ?? "/ig/pantalons-pyjama.jpg"} alt="" fetchPriority="high" className="hero-zoom-img absolute inset-0 size-full object-cover" />
           {design.heroVideo && <LoopVideo src={design.heroVideo} />}
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-noir/95 via-noir/45 to-noir/10 md:bg-noir/45" />
           <div className="relative flex w-full max-w-2xl flex-col items-center p-6 pb-8 text-white md:p-12">
