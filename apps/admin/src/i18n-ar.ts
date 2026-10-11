@@ -2210,13 +2210,4 @@ export const AR: Record<string, string> = {
   "Supprimer ce comptage ? Le stock déjà corrigé ne change pas.": "حذف عملية العدّ هذه؟ المخزون الذي تم تصحيحه لا يتغير.",
   "Comptage supprimé": "تم حذف عملية العدّ",
   "Supprimer {0}": "حذف {0}",
-  "Bannières, sections et apparence de la boutique.": "البانرات والأقسام ومظهر المتجر.",
-  "Les avis des clientes, à publier ou masquer.": "آراء الزبونات، للنشر أو الإخفاء.",
-  "Prévenir les clientes : retour en stock, nouveautés.": "إعلام الزبونات: عودة المخزون، الجديد.",
-  "Page « lien en bio » Instagram et liens courts.": "صفحة «رابط البايو» لإنستغرام والروابط القصيرة.",
-  "Les messages reçus des clientes.": "الرسائل التي أرسلتها الزبونات.",
-  "Ventes, commandes, retours et rentabilité.": "المبيعات والطلبات والمرتجعات والربح.",
-  "Bénéfice réel, argent du livreur, dépenses.": "الربح الحقيقي، أموال عامل التوصيل، المصاريف.",
-  "D'où viennent vos clientes et ce que chaque source rapporte.": "من أين تأتي زبوناتك وما يجلبه كل مصدر.",
-  "Tout ce qui se trouve dans cette rubrique, en un coup d'œil.": "كل ما في هذا القسم، في لمحة واحدة.",
 };

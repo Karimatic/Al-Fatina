@@ -13,34 +13,45 @@ export function useLocaleHref(target: Locale): string {
   return href;
 }
 
+/** The Arabic letter sits low in its line box: drawn in a system font, nudged up a pixel. */
+const arabicLetter = { fontFamily: "system-ui, 'Segoe UI', Tahoma, sans-serif" };
+
 /**
- * One small button with a globe and the other language ("FR" on the Arabic site, "عربي" on the
- * French one), like the header's other icons: one tap opens the same page in that language.
+ * A globe, then both languages ("ع | FR") in one rounded box, like the header's other icons:
+ * the current language highlighted, the other one a link to the same page in that language.
  */
 export function LanguageSwitch({ className = "", tone = "light" }: { className?: string; tone?: "light" | "dark" }) {
   const { locale } = useLocale();
   const other = locale === "ar" ? "fr" : "ar";
   const href = useLocaleHref(other);
-  const look =
-    tone === "dark"
-      ? "border-white/25 text-white hover:border-white/60 hover:bg-white/10"
-      : "border-line text-ink hover:border-plum-600/50 hover:bg-rose-100/60";
+  const dark = tone === "dark";
+  const box = dark ? "border-white/25 text-white/70" : "border-line text-ink-soft";
+  const link = dark ? "hover:text-white" : "hover:text-plum-700";
+  const options = [
+    { code: "ar" as const, label: "ع", name: "العربية" },
+    { code: "fr" as const, label: "FR", name: "Français" },
+  ];
   return (
-    <a
-      href={href}
-      hrefLang={other}
-      lang={other}
-      aria-label={other === "ar" ? "العربية" : "Français"}
-      className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold leading-none transition ${look} ${className}`}
-    >
-      <GlobeIcon size={16} />
-      {other === "ar" ? (
-        <span className="-translate-y-px" style={{ fontFamily: "system-ui, 'Segoe UI', Tahoma, sans-serif" }}>
-          عربي
-        </span>
-      ) : (
-        <span className="tracking-wider">FR</span>
-      )}
-    </a>
+    <span dir="ltr" className={`inline-flex h-9 items-center gap-1 rounded-full border p-0.5 text-[13px] font-semibold leading-none sm:ps-2 ${box} ${className}`}>
+      {/* the globe only where there is room: on small phones the shop's name comes first */}
+      <GlobeIcon size={15} className="hidden shrink-0 sm:block" />
+      {options.map((o, i) => {
+        const text = o.code === "ar" ? <span className="-translate-y-px text-[15px]" style={arabicLetter}>{o.label}</span> : <span className="tracking-wider">{o.label}</span>;
+        return (
+          <span key={o.code} className="flex items-center">
+            {i > 0 && <span aria-hidden="true" className={`mx-0.5 h-3.5 w-px ${dark ? "bg-white/25" : "bg-line"}`} />}
+            {o.code === locale ? (
+              <span aria-current="true" className="grid h-7 min-w-7 place-items-center rounded-full bg-gradient-to-br from-rose-500 to-plum-600 px-1.5 text-white shadow-[0_2px_8px_-2px_rgb(224_72_127/0.6)]">
+                {text}
+              </span>
+            ) : (
+              <a href={href} hrefLang={o.code} lang={o.code} aria-label={o.name} className={`grid h-7 min-w-7 place-items-center rounded-full px-1.5 transition-colors ${link}`}>
+                {text}
+              </a>
+            )}
+          </span>
+        );
+      })}
+    </span>
   );
 }
