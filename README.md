@@ -1,5 +1,7 @@
 # Henine Boutique
 
+[![CI](https://github.com/Karimatic/Henine-Boutique/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Karimatic/Henine-Boutique/actions/workflows/ci.yml)
+
 Storefront + admin panel for **Henine Boutique** (Boumerdès), running entirely on the Cloudflare free tier.
 The full product/architecture plan is in [`PLAN.md`](PLAN.md).
 
@@ -10,6 +12,32 @@ apps/worker   Cloudflare Worker: Hono API (/api), cron jobs, serves both static 
 packages/db   Drizzle schema, D1 migrations, seeds (69 wilayas, 1541 communes, roles)
 packages/shared  phone/money/i18n utils, order state machine, zod schemas, permissions
 ```
+
+## Verify a clean checkout
+
+Every push to `main` runs, on a fresh GitHub machine: `npm ci` → `npm run typecheck` →
+`npm test` → `npm run build` (the badge above). To check it yourself:
+
+```sh
+git clone https://github.com/Karimatic/Henine-Boutique && cd Henine-Boutique
+npm ci              # once, at the root (never `npm install` inside apps/… or packages/…)
+npm run typecheck   # 5 workspaces, 0 errors
+npm test            # 28 test files: worker, db, shared
+npm run build       # storefront (38 pre-rendered pages) + admin → dist/
+```
+
+`npm test` and `npm run build` first run `scripts/doctor.mjs`, which stops with a clear message if
+the install is broken (Node < 22, or a second copy of Preact / Vite / Vitest left in a sub-folder by
+an `npm install` run inside a workspace: that is what makes the store build fail with
+"Cannot read properties of undefined (reading 'context')").
+
+On Windows, stop `npm run dev` before `npm run build`: rebuilding while the local server reloads
+can make the local runtime stop with `SQLITE_IOERR_TRUNCATE` (local SQLite file only, never the
+deployed D1).
+
+Local database: `npm run db:migrate:local`, `npm run db:seed:local`, then query it with
+`npm run db:sql:local -- "SELECT …"`. The demo catalogue has no photos, so the Meta / Google
+feed (`/feeds/meta.csv`) stays empty until real products with photos are added.
 
 ## Local development
 

@@ -77,6 +77,9 @@ export default defineConfig(({ isSsrBuild }) => {
         { find: /^react\/jsx-dev-runtime$/, replacement: "preact/jsx-dev-runtime" },
         { find: /^react$/, replacement: "preact/compat" },
       ],
+      // one Preact only, even if a stray install left a second copy in a sub-folder: two copies
+      // break the hooks ("Cannot read properties of undefined (reading 'context')")
+      dedupe: ["preact", "preact-render-to-string"],
     },
     plugins,
     // the build-time renderer carries its own copy of everything (no node_modules lookups)

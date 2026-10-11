@@ -13,6 +13,7 @@
     "dev": "npm run dev --workspace @henine/worker",
     "dev:web": "npm run dev --workspace @henine/web",
     "dev:admin": "npm run dev --workspace @henine/admin",
+    "prebuild": "node scripts/doctor.mjs",
     "build": "npm run build --workspace @henine/web && npm run build --workspace @henine/admin && node scripts/assemble-dist.mjs",
     "deploy": "npm run build && npm run deploy --workspace @henine/worker",
     "db:generate": "npm run generate --workspace @henine/db",
@@ -21,6 +22,7 @@
     "db:seed:local": "npm run seed:local --workspace @henine/worker",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
+    "pretest": "node scripts/doctor.mjs",
     "test": "npm run test --workspaces --if-present",
     "admin:invite": "node scripts/admin-invite.mjs"
   },
