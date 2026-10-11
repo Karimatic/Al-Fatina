@@ -239,6 +239,74 @@
   to { transform: scale(1); }
 }
 
+/* ── Home banner, cinematic: the photos drift and cross-fade slowly under a warm grade, a
+   vignette, a little film grain, a soft light sweep and a thin gold frame ── */
+.hero-cine-img {
+  position: absolute;
+  inset: -4%;
+  width: 108%;
+  height: 108%;
+  object-fit: cover;
+  /* the shop's photos are small: a hint of softness reads as film, not as blur */
+  filter: blur(0.6px) saturate(1.08) contrast(1.06);
+  will-change: transform, opacity;
+}
+/* one photo: a slow push-in and back, forever */
+.hero-cine-solo { animation: hero-drift 22s ease-in-out infinite alternate; }
+/* two photos: each shows 10 s of a 20 s loop, with a 3 s cross-fade */
+.hero-cine-a { animation: hero-drift 20s ease-in-out infinite, hero-fade-a 20s ease-in-out infinite; }
+.hero-cine-b { animation: hero-drift-b 20s ease-in-out infinite, hero-fade-b 20s ease-in-out infinite; }
+@keyframes hero-drift {
+  from { transform: scale(1.02) translate3d(0, 0, 0); }
+  to { transform: scale(1.12) translate3d(-1.5%, -1%, 0); }
+}
+@keyframes hero-drift-b {
+  from { transform: scale(1.12) translate3d(1.5%, 0, 0); }
+  to { transform: scale(1.02) translate3d(0, -1%, 0); }
+}
+@keyframes hero-fade-a { 0%, 42% { opacity: 1; } 57%, 92% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes hero-fade-b { 0%, 42% { opacity: 0; } 57%, 92% { opacity: 1; } 100% { opacity: 0; } }
+/* warm rose-gold grade + deep vignette, like a film still */
+.hero-grade {
+  background:
+    radial-gradient(115% 85% at 50% 42%, transparent 30%, rgb(11 6 9 / 0.85) 100%),
+    linear-gradient(to top, rgb(11 6 9 / 0.94), rgb(11 6 9 / 0.5) 45%, rgb(43 10 26 / 0.4)),
+    linear-gradient(120deg, rgb(233 201 143 / 0.16), rgb(224 72 127 / 0.12) 60%, rgb(11 6 9 / 0));
+}
+/* film grain (tiny SVG noise), shivering a little */
+.hero-grain {
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: hero-grain 1.2s steps(4) infinite;
+}
+@keyframes hero-grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -3%); }
+  75% { transform: translate(-2%, -1%); }
+  100% { transform: translate(0, 0); }
+}
+/* a soft light passing over the silk every few seconds */
+.hero-sweep {
+  background: linear-gradient(105deg, transparent 35%, rgb(255 236 214 / 0.13) 50%, transparent 65%);
+  background-size: 250% 100%;
+  animation: hero-sweep 9s ease-in-out infinite;
+}
+@keyframes hero-sweep {
+  0%, 30% { background-position: 120% 0; }
+  70%, 100% { background-position: -20% 0; }
+}
+/* thin gold frame inside the card */
+.hero-frame {
+  inset: 0.75rem;
+  border: 1px solid rgb(233 201 143 / 0.35);
+  border-radius: calc(1.75rem - 0.5rem);
+}
+@media (min-width: 768px) {
+  .hero-frame { inset: 1rem; border-radius: calc(2.25rem - 0.75rem); }
+}
+
 /* ── Story bubbles (Instagram highlights): turning gold-rose-plum ring, pop in ── */
 @property --story-angle {
   syntax: "<angle>";
@@ -361,13 +429,15 @@
 .faq-item[open] .faq-plus { transform: rotate(45deg); background: var(--color-plum-600); color: #fff; }
 
 @media (prefers-reduced-motion: reduce) {
-  .announce, .announce-track, .announce-sparkle, .announce-fade, .announce-slide, .ig-card, .ig-btn::after, .hero-zoom-img, .story-ring, .toast-in { animation: none; }
+  .announce, .announce-track, .announce-sparkle, .announce-fade, .announce-slide, .ig-card, .ig-btn::after, .hero-zoom-img, .hero-cine-solo, .hero-cine-a, .hero-cine-b, .hero-grain, .hero-sweep, .story-ring, .toast-in { animation: none; }
   .brand-mark { opacity: 1; transform: none; animation: none; color: var(--color-accent-text); background: none; }
   .story { opacity: 1; animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .menu-panel, .nudge { animation: none; }
   /* reduced motion: skip the splash entirely rather than leaving it stuck on screen */
   .henine-splash { animation: none; display: none; }
+  /* still banner: the first photo only */
+  .hero-cine-b { display: none; }
 }
 
 /* sheet / drawer entrance */

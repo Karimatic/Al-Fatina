@@ -48,12 +48,24 @@ export function HomePage() {
       /* Hero: the shop's photo, the promise centred on it */
       <section className="px-3 pt-3 md:px-4">
         <div className="relative mx-auto flex min-h-[58svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
-          <img src={design.heroImage ?? "/ig/pantalons-pyjama.jpg"} alt="" fetchPriority="high" className="hero-zoom-img absolute inset-0 size-full object-cover" />
+          {/* cinematic: the shop's photo drifting slowly (or, by default, two of its photos
+              cross-fading), under a warm grade, a vignette, film grain and a light sweep */}
+          {design.heroImage ? (
+            <img src={design.heroImage} alt="" fetchPriority="high" className="hero-cine-img hero-cine-solo" />
+          ) : (
+            <>
+              <img src="/ig/pantalons-pyjama.jpg" alt="" fetchPriority="high" className="hero-cine-img hero-cine-a" />
+              <img src="/ig/pyjamas-rayures.jpg" alt="" loading="lazy" className="hero-cine-img hero-cine-b" />
+            </>
+          )}
           {design.heroVideo && <LoopVideo src={design.heroVideo} />}
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-noir/95 via-noir/45 to-noir/10 md:bg-noir/45" />
+          <div aria-hidden="true" className="hero-grade absolute inset-0" />
+          <div aria-hidden="true" className="hero-sweep pointer-events-none absolute inset-0" />
+          <div aria-hidden="true" className="hero-grain pointer-events-none absolute -inset-[10%]" />
+          <div aria-hidden="true" className="hero-frame pointer-events-none absolute" />
           <div className="relative flex w-full max-w-2xl flex-col items-center p-6 pb-8 text-white md:p-12">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] backdrop-blur">
-              <span className="size-1.5 animate-pulse rounded-full bg-rose-300" aria-hidden="true" />
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#e9c98f]/40 bg-black/20 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#f3dcb0] backdrop-blur">
+              <span className="size-1.5 animate-pulse rounded-full bg-[#e9c98f]" aria-hidden="true" />
               {eyebrow}
             </p>
             <AnimatedTagline key={title} text={title} tone="light" className="text-[2.35rem] leading-[1.1] md:text-6xl" />
