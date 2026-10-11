@@ -48,15 +48,18 @@ export function HomePage() {
       /* Hero: the shop's photo, the promise centred on it */
       <section className="px-3 pt-3 md:px-4">
         <div className="relative mx-auto flex min-h-[58svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
-          {/* cinematic: the shop's photo drifting slowly (or, by default, two of its photos
-              cross-fading), under a warm grade, a vignette, film grain and a light sweep */}
+          {/* cinematic: the shop's photo drifting slowly (or, by default, moving silk), under a
+              warm grade, a vignette, film grain and a light sweep */}
           {design.heroImage ? (
             <img src={design.heroImage} alt="" fetchPriority="high" className="hero-cine-img hero-cine-solo" />
           ) : (
-            <>
-              <img src="/ig/pantalons-pyjama.jpg" alt="" fetchPriority="high" className="hero-cine-img hero-cine-a" />
-              <img src="/ig/pyjamas-rayures.jpg" alt="" loading="lazy" className="hero-cine-img hero-cine-b" />
-            </>
+            // no photo uploaded yet: silk drawn in CSS, sharp at any size
+            <div aria-hidden="true" className="hero-silk absolute inset-0">
+              <span className="silk-glow silk-glow-1" />
+              <span className="silk-glow silk-glow-2" />
+              <span className="silk-glow silk-glow-3" />
+              <span className="silk-folds" />
+            </div>
           )}
           {design.heroVideo && <LoopVideo src={design.heroVideo} />}
           <div aria-hidden="true" className="hero-grade absolute inset-0" />
