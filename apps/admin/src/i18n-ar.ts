@@ -2210,4 +2210,5 @@ export const AR: Record<string, string> = {
   "Supprimer ce comptage ? Le stock déjà corrigé ne change pas.": "حذف عملية العدّ هذه؟ المخزون الذي تم تصحيحه لا يتغير.",
   "Comptage supprimé": "تم حذف عملية العدّ",
   "Supprimer {0}": "حذف {0}",
+  "Quelqu'un vient de modifier cette commande : rouvrez-la pour voir ses changements, puis recommencez.": "قام شخص آخر بتعديل هذه الطلبية للتو: أعيدي فتحها لرؤية التغييرات ثم حاولي مجددًا.",
 };

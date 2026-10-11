@@ -469,9 +469,13 @@ systemRoutes.post("/team", requirePermission("team.manage"), async (c) => {
 
 systemRoutes.post("/team/:id/invite", requirePermission("team.manage"), async (c) => {
   const id = intParam(c, "id");
-  const m = await c.env.DB.prepare("SELECT email, name FROM team_members WHERE id = ?").bind(id).first<{ email: string; name: string }>();
+  const m = await c.env.DB.prepare("SELECT m.email, m.name, r.permissions FROM team_members m JOIN roles r ON r.id = m.role_id WHERE m.id = ?")
+    .bind(id)
+    .first<{ email: string; name: string; permissions: string }>();
   if (!m) throw new HttpError(404, "not_found");
-  await assertCanManage(c, id);
+  // a new invitation resets the password and the authenticator: only for an account whose every
+  // right the inviter has too (else it would be a way to take over a more powerful account)
+  await assertCanManage(c, id, { permissions: JSON.parse(m.permissions) as string[] });
   return c.json(await sendInvite(c, id, m.email, m.name));
 });
 
@@ -920,12 +924,14 @@ systemRoutes.put("/content/store", requirePermission("content.edit"), async (c) 
 
 systemRoutes.get("/errors", requirePermission("errors.view"), async (c) => {
   const status = c.req.query("status") ?? "open";
+  // the team's activity log is its own permission (who did what, with the changes)
+  const seeAudit = hasPermission(c.get("member").permissions, "audit.view");
   const [errors, outbox, audit] = await c.env.DB.batch([
     c.env.DB.prepare(`SELECT * FROM error_events ${status === "all" ? "" : "WHERE status = ?"} ORDER BY last_seen DESC LIMIT 100`).bind(...(status === "all" ? [] : [status])),
     c.env.DB.prepare("SELECT id, kind, payload, attempts, last_error, next_attempt_at, created_at FROM outbox WHERE done_at IS NULL ORDER BY id DESC LIMIT 50"),
-    c.env.DB.prepare("SELECT * FROM audit_log ORDER BY id DESC LIMIT 100"),
+    c.env.DB.prepare(`SELECT * FROM audit_log ${seeAudit ? "" : "WHERE 0"} ORDER BY id DESC LIMIT 100`),
   ]);
-  return c.json({ errors: errors!.results, outbox: outbox!.results, audit: audit!.results });
+  return c.json({ errors: errors!.results, outbox: outbox!.results, audit: seeAudit ? audit!.results : null });
 });
 
 systemRoutes.patch("/errors/:id", requirePermission("errors.view"), async (c) => {
@@ -934,7 +940,8 @@ systemRoutes.patch("/errors/:id", requirePermission("errors.view"), async (c) =>
   return c.json({ ok: true });
 });
 
-systemRoutes.post("/outbox/:id/retry", requirePermission("errors.view"), async (c) => {
+// re-sending messages (Telegram…) is managing the connections, not just reading errors
+systemRoutes.post("/outbox/:id/retry", requirePermission("integrations.manage"), async (c) => {
   await c.env.DB.prepare("UPDATE outbox SET next_attempt_at = 0, attempts = MIN(attempts, 7) WHERE id = ? AND done_at IS NULL").bind(intParam(c, "id")).run();
   const sent = await processOutbox(c.env, 5);
   return c.json({ sent });

@@ -880,10 +880,12 @@ function SizeGuideSheet({ guide, onClose }: { guide: SizeGuide; onClose: () => v
 interface ErrorsData {
   errors: { id: number; source: string; message: string; url: string | null; count: number; status: string; first_seen: number; last_seen: number; stack: string | null }[];
   outbox: { id: number; kind: string; payload: string; attempts: number; last_error: string | null; created_at: number }[];
-  audit: { id: number; actor: string; action: string; entity: string; entity_id: string | null; created_at: number }[];
+  /** null without the activity-log permission */
+  audit: { id: number; actor: string; action: string; entity: string; entity_id: string | null; created_at: number }[] | null;
 }
 
 export function ErrorsPage() {
+  const can = useCan();
   const [tab, setTab] = useState<"errors" | "outbox" | "audit">("errors");
   const [status, setStatus] = useState("open");
   const q = useQuery({ queryKey: ["errors", status], queryFn: () => api<ErrorsData>(`/errors?status=${status}`), refetchInterval: 30_000 });
@@ -899,7 +901,7 @@ export function ErrorsPage() {
         options={[
           { value: "errors", label: tr("Erreurs{0}", { 0: q.data ? ` (${q.data.errors.length})` : "" }) },
           { value: "outbox", label: tr("Envois en attente{0}", { 0: q.data ? ` (${q.data.outbox.length})` : "" }) },
-          { value: "audit", label: tr("Journal d'audit") },
+          ...(q.data?.audit ? [{ value: "audit" as const, label: tr("Journal d'audit") }] : []),
         ]}
       />
       {q.error ? <ErrorState error={q.error} onRetry={q.refetch} /> : !q.data ? <ListSkeleton /> : tab === "errors" ? (
@@ -937,14 +939,14 @@ export function ErrorsPage() {
                   <span className="text-xs text-ink-soft">{o.attempts} {tr("essai(s) ·")} {dateTime(o.created_at)}</span>
                 </div>
                 {o.last_error && <p className="mt-1 text-xs text-red-700">{o.last_error === "telegram_not_configured" ? tr("Telegram n'est pas encore configuré (Système → Comptes).") : o.last_error}</p>}
-                <Button size="sm" className="mt-2" onClick={() => retry.mutate(o.id)}>{tr("Réessayer maintenant")}</Button>
+                {can("integrations.manage") && <Button size="sm" className="mt-2" onClick={() => retry.mutate(o.id)}>{tr("Réessayer maintenant")}</Button>}
               </li>
             ))}
           </ul>
         )
       ) : (
         <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface text-sm">
-          {q.data.audit.map((a) => (
+          {(q.data.audit ?? []).map((a) => (
             <li key={a.id} className="flex items-center justify-between gap-2 px-4 py-2.5">
               <span className="min-w-0 truncate"><b>{a.actor.split(":").slice(2).join(":") || a.actor}</b> · {a.action} · {a.entity}{a.entity_id ? ` #${a.entity_id}` : ""}</span>
               <span className="shrink-0 text-xs text-ink-soft">{dateTime(a.created_at)}</span>

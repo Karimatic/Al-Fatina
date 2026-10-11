@@ -42,8 +42,18 @@ export const orderLine = z.object({
 });
 
 /** What the storefront sends. Prices are NEVER accepted from the client. */
+/**
+ * Loyalty points are personal: they show and apply only when this phone holds the private link
+ * (code + token) of an earlier order of the same number. A phone number alone proves nothing.
+ */
+const orderProofs = z
+  .array(z.object({ code: z.string().trim().toUpperCase().max(12), token: z.string().trim().max(100) }))
+  .max(5)
+  .optional();
+
 export const createOrderInput = z
   .object({
+    proofs: orderProofs,
     idempotencyKey: z.string().uuid(),
     /** checkout autosave id: the saved abandoned checkout is marked recovered */
     cartId: z.string().uuid().optional(),
@@ -118,6 +128,8 @@ export const quoteInput = z.object({
   /** loyalty: the customer's number (her points) and whether she spends them */
   phone: dzPhone.optional(),
   usePoints: z.boolean().optional(),
+  /** proof the number is hers: the private links of her earlier orders kept on this phone */
+  proofs: orderProofs,
 });
 export type QuoteInput = z.infer<typeof quoteInput>;
 

@@ -42,7 +42,14 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || "/";
+  // only ever a page of this shop, whatever the notification carries
+  let url = (event.notification.data && event.notification.data.url) || "/";
+  try {
+    const u = new URL(url, self.location.origin);
+    url = u.origin === self.location.origin ? u.href : "/";
+  } catch {
+    url = "/";
+  }
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
       for (const client of list) {

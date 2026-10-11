@@ -190,7 +190,7 @@
 
 /* ── Animated brand tagline ──
  * 1) the words rise in one after another;
- * 2) then a golden light travels through the letters themselves (gradient clipped to the
+ * 2) then a soft rose light travels through the letters themselves (gradient clipped to the
  *    text, each word starting slightly after the previous one), so the sweep reads as one
  *    wave along the line and nothing is drawn on the background. Animation delays are set
  *    per word in AnimatedTagline.tsx. */
@@ -204,7 +204,7 @@
   transform: translateY(0.55em);
   filter: blur(6px);
   color: transparent;
-  background: linear-gradient(100deg, var(--color-ink) 0%, var(--color-ink) 42%, var(--color-gold) 50%, var(--color-rose-500) 56%, var(--color-ink) 64%, var(--color-ink) 100%);
+  background: linear-gradient(100deg, var(--color-ink) 0%, var(--color-ink) 42%, var(--color-rose-300) 50%, var(--color-rose-500) 56%, var(--color-ink) 64%, var(--color-ink) 100%);
   background-size: 300% 100%;
   background-position: 100% 0;
   -webkit-background-clip: text;
@@ -223,54 +223,13 @@
   22% { background-position: 0% 0; }
   100% { background-position: 0% 0; }
 }
-/* on a photo: white letters, the light passing through in gold and pink */
+/* on a photo: white letters, a soft pearl-and-rose light passing through them (no gold) */
 .tagline-light .tagline-word {
-  background-image: linear-gradient(100deg, #fff 0%, #fff 42%, #f3d9a4 50%, var(--color-rose-300) 56%, #fff 64%, #fff 100%);
+  background-image: linear-gradient(100deg, #fff 0%, #fff 40%, #ffe4ee 47%, var(--color-rose-300) 52%, #fde8f0 57%, #fff 64%, #fff 100%);
 }
 @media (prefers-reduced-motion: reduce) {
   .tagline-word { opacity: 1; transform: none; filter: none; animation: none; color: var(--color-ink); background: none; }
   .tagline-light .tagline-word { color: #fff; }
-}
-
-/* ── Home banner title, cinema style: the line opens from the centre like a curtain while it
-   comes into focus, a fine gold line draws itself under it, then a slow gold glint passes
-   over the whole line every few seconds (whole-line effects: Arabic letters stay joined) ── */
-.tagline-cinema { display: flex; flex-direction: column; align-items: center; }
-.tagline-cinema-text {
-  display: block;
-  padding-block: 0.1em 0.2em;
-  color: transparent;
-  background: linear-gradient(100deg, #fff 0%, #fff 40%, #f6e2b8 48%, #fff3f7 52%, #fff 60%, #fff 100%);
-  background-size: 260% 100%;
-  background-position: 100% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  clip-path: inset(0 50% 0 50%);
-  filter: blur(10px);
-  transform: scale(1.06);
-  animation: cinema-open 1.6s cubic-bezier(0.22, 0.8, 0.2, 1) 0.25s forwards, cinema-glint 7s ease-in-out 2.4s infinite;
-}
-.tagline-cinema-line {
-  display: block;
-  margin-top: 0.35rem;
-  height: 1px;
-  width: min(9rem, 40%);
-  background: linear-gradient(90deg, transparent, #e9c98f, transparent);
-  transform: scaleX(0);
-  animation: cinema-line 1.2s cubic-bezier(0.22, 0.8, 0.2, 1) 1.5s forwards;
-}
-@keyframes cinema-open {
-  60% { filter: blur(0); }
-  to { clip-path: inset(0 0 0 0); filter: blur(0); transform: none; }
-}
-@keyframes cinema-glint {
-  0% { background-position: 100% 0; }
-  35%, 100% { background-position: 0% 0; }
-}
-@keyframes cinema-line { to { transform: scaleX(1); } }
-@media (prefers-reduced-motion: reduce) {
-  .tagline-cinema-text { clip-path: none; filter: none; transform: none; animation: none; color: #fff; background: none; }
-  .tagline-cinema-line { transform: none; animation: none; }
 }
 
 /* ── Home hero: the photo slowly settles in ── */

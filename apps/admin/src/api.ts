@@ -62,6 +62,7 @@ export interface Me {
 }
 
 const MESSAGES: Record<string, string> = {
+  order_changed: "Quelqu'un vient de modifier cette commande : rouvrez-la pour voir ses changements, puis recommencez.",
   network: "Connexion impossible. Vérifiez votre internet.",
   forbidden: "Votre rôle ne permet pas cette action.",
   validation_failed: "Certains champs sont invalides.",

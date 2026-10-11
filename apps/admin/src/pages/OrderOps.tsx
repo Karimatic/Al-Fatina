@@ -216,10 +216,13 @@ interface EditLine {
 
 export function ItemsEditor({
   orderId,
+  version,
   items,
   onDone,
 }: {
   orderId: number;
+  /** the order's updated_at when loaded: the server refuses if someone changed it since */
+  version?: number;
   items: { id: number; variant_id: number | null; name_fr: string; options_label: string | null; qty: number; unit_price: number }[];
   onDone: () => void;
 }) {
@@ -241,7 +244,7 @@ export function ItemsEditor({
     [stock.data, q],
   );
   const save = useMutation({
-    mutationFn: () => put(`/orders/${orderId}/items`, { lines: lines.map((l) => ({ itemId: l.itemId, variantId: l.variantId, qty: l.qty })), reason: reason.trim() }),
+    mutationFn: () => put(`/orders/${orderId}/items`, { lines: lines.map((l) => ({ itemId: l.itemId, variantId: l.variantId, qty: l.qty })), reason: reason.trim(), version }),
     onSuccess: () => {
       toast(tr("Articles mis à jour"));
       onDone();
@@ -322,14 +325,14 @@ export function ItemsEditor({
 
 /* ───────────── Manual discount ───────────── */
 
-export function DiscountBox({ orderId, subtotal, otherDiscount, current, onDone }: { orderId: number; subtotal: number; otherDiscount: number; current: number; onDone: () => void }) {
+export function DiscountBox({ orderId, version, subtotal, otherDiscount, current, onDone }: { orderId: number; version?: number; subtotal: number; otherDiscount: number; current: number; onDone: () => void }) {
   const toast = useToast();
   const [kind, setKind] = useState<"fixed" | "percent">("fixed");
   const [value, setValue] = useState(current ? String(current) : "");
   const [reason, setReason] = useState("");
   const amount = Math.min(manualDiscountAmount(subtotal, kind, Number(value) || 0), Math.max(subtotal - otherDiscount, 0));
   const save = useMutation({
-    mutationFn: (v: number) => post<{ amount: number; total: number }>(`/orders/${orderId}/discount`, { kind, value: v, reason: reason.trim() }),
+    mutationFn: (v: number) => post<{ amount: number; total: number }>(`/orders/${orderId}/discount`, { kind, value: v, reason: reason.trim(), version }),
     onSuccess: (r) => {
       toast(r.amount ? tr("Remise de {0} appliquée · nouveau total {1}", { 0: da(r.amount), 1: da(r.total) }) : tr("Remise retirée"));
       onDone();

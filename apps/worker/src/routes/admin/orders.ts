@@ -28,6 +28,7 @@ import {
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { variantLabels } from "../../lib/catalog";
+import { csvCell } from "../../lib/csv";
 import { body, HttpError, intParam } from "../../lib/http";
 import { applyStatusChange, CANCELLED_SQL, createOrder, deleteOrder, noRecordCustomerStmt } from "../../lib/orders";
 import { getSetting, getSettings, setSetting } from "../../lib/settings";
@@ -472,11 +473,6 @@ orderRoutes.get("/orders.csv", requirePermission("orders.export"), async (c) => 
   )
     .bind(...binds)
     .all<Record<string, string | number | null>>();
-  const cell = (v: unknown) => {
-    let s = v == null ? "" : String(v);
-    if (/^[=+\-@]/.test(s)) s = `'${s}`; // spreadsheet formula injection
-    return `"${s.replace(/"/g, '""')}"`;
-  };
   const algiers = (ts: number) => new Date(ts + 3600_000).toISOString();
   const lines = results.map((r) => {
     const at = algiers(Number(r.created_at));
@@ -501,13 +497,13 @@ orderRoutes.get("/orders.csv", requirePermission("orders.export"), async (c) => 
       r.coupon_code,
       sourceLabel(String(r.source ?? "direct"), sources, lang).name,
       r.tracking_number,
-    ].map(cell).join(";");
+    ].map(csvCell).join(";");
   });
   const sum = (k: string) => results.reduce((t, r) => t + Number(r[k] ?? 0), 0);
   const totalLine = [lang === "ar" ? `المجموع: ${results.length} طلب` : `Total : ${results.length} commandes`, "", "", "", "", "", "", "", "", "", "", sum("pieces"), sum("subtotal"), sum("discount_total"), sum("shipping_price"), sum("total"), "", "", ""]
-    .map(cell)
+    .map(csvCell)
     .join(";");
-  const csv = [CSV_COLUMNS[lang].map(cell).join(";"), ...lines, totalLine].join("\r\n");
+  const csv = [CSV_COLUMNS[lang].map(csvCell).join(";"), ...lines, totalLine].join("\r\n");
   await c.env.DB.batch([auditStmt(c.env, actorOf(c.get("member")), "export", "orders", null, { days, rows: results.length })]);
   const name = `commandes-${algiers(Date.now()).slice(0, 10)}.csv`;
   // the BOM makes Excel read the Arabic and the accents correctly

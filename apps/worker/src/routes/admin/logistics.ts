@@ -28,6 +28,7 @@ import {
 import type { AppEnv } from "../../env";
 import { raiseAlert, resolveAlertStmt } from "../../lib/alerts";
 import { auditStmt } from "../../lib/audit";
+import { csvCell } from "../../lib/csv";
 import { body, HttpError, intParam } from "../../lib/http";
 import { algiersDate, applyStatusChange } from "../../lib/orders";
 import { syncOrderMessage } from "../../lib/telegram";
@@ -371,9 +372,8 @@ logisticsRoutes.post("/manifests/:id/status", requirePermission("orders.ship"), 
 /** The sheet as CSV (Excel), for the courier or the accounts. */
 logisticsRoutes.get("/manifests/:id/csv", requirePermission("orders.view"), async (c) => {
   const { manifest, orders } = await loadManifest(c.env, intParam(c, "id"));
-  const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const rows = (orders as unknown as Record<string, unknown>[]).map((o) =>
-    [o.public_code, o.tracking_number, o.name, o.phone, o.wilaya, o.commune, o.delivery_type === "bureau" ? "Bureau" : "Domicile", o.address, o.items, o.cod_amount].map(esc).join(","),
+    [o.public_code, o.tracking_number, o.name, o.phone, o.wilaya, o.commune, o.delivery_type === "bureau" ? "Bureau" : "Domicile", o.address, o.items, o.cod_amount].map(csvCell).join(","),
   );
   const csv = ["﻿Commande,Suivi,Cliente,Téléphone,Wilaya,Commune,Livraison,Adresse,Articles,Montant à encaisser (DA)", ...rows].join("\r\n");
   return new Response(csv, {

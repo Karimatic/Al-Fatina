@@ -29,13 +29,15 @@ export interface ItemLine {
   qty: number;
 }
 
-export async function replaceOrderItems(env: Env, id: number, lines: ItemLine[], actor: string, reason: string): Promise<{ changed: number }> {
+export async function replaceOrderItems(env: Env, id: number, lines: ItemLine[], actor: string, reason: string, version?: number): Promise<{ changed: number }> {
   const o = await env.DB.prepare(
-    "SELECT id, status, wilaya_code, commune_id, delivery_type, subtotal, discount_total, shipping_price, manual_discount FROM orders WHERE id = ?",
+    "SELECT id, status, wilaya_code, commune_id, delivery_type, subtotal, discount_total, shipping_price, manual_discount, updated_at FROM orders WHERE id = ?",
   )
     .bind(id)
-    .first<{ id: number; status: OrderStatus; wilaya_code: number; commune_id: number | null; delivery_type: "domicile" | "bureau"; subtotal: number; discount_total: number; shipping_price: number; manual_discount: number }>();
+    .first<{ id: number; status: OrderStatus; wilaya_code: number; commune_id: number | null; delivery_type: "domicile" | "bureau"; subtotal: number; discount_total: number; shipping_price: number; manual_discount: number; updated_at: number }>();
   if (!o) throw new HttpError(404, "not_found");
+  // someone else changed the order since this screen loaded it: never overwrite their change
+  if (version != null && o.updated_at !== version) throw new HttpError(409, "order_changed");
   if (!isEditable(o.status)) throw new HttpError(409, "order_locked");
   const { results: current } = await env.DB.prepare(
     "SELECT id, variant_id, product_id, name_fr, sku, options_label, unit_price, qty, line_discount FROM order_items WHERE order_id = ?",

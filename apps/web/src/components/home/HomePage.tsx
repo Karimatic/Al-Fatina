@@ -69,7 +69,7 @@ export function HomePage() {
               <span className="size-1.5 animate-pulse rounded-full bg-[#e9c98f]" aria-hidden="true" />
               {eyebrow}
             </p>
-            <AnimatedTagline key={title} text={title} tone="light" variant="cinema" className="text-[2.35rem] leading-[1.1] md:text-6xl" />
+            <AnimatedTagline key={title} text={title} tone="light" className="text-[2.35rem] leading-[1.1] md:text-6xl" />
             <p className="mt-3 max-w-md text-base leading-relaxed text-white/85 md:text-lg">{subtitle}</p>
             <div className="mt-6 flex flex-col items-center gap-2">
               <a href="#nouveautes" className="lift inline-flex h-12 items-center justify-center rounded-full bg-white px-8 font-semibold text-noir">

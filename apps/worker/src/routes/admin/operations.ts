@@ -128,9 +128,11 @@ operationRoutes.put("/orders/:id/items", requirePermission("orders.edit"), async
         .min(1)
         .max(30),
       reason: cleanText(300).pipe(z.string().min(2)),
+      /** the order's updated_at this screen loaded (two people editing at once) */
+      version: z.number().int().optional(),
     }),
   );
-  const r = await replaceOrderItems(c.env, id, input.lines, actorOf(c.get("member")), input.reason);
+  const r = await replaceOrderItems(c.env, id, input.lines, actorOf(c.get("member")), input.reason, input.version);
   if (r.changed) c.executionCtx.waitUntil(syncOrderMessage(c.env, id).catch(() => undefined));
   return c.json({ ok: true, changed: r.changed });
 });
@@ -141,12 +143,13 @@ operationRoutes.post("/orders/:id/discount", requirePermission("orders.discount"
   const id = intParam(c, "id");
   const input = await body(
     c,
-    z.object({ kind: z.enum(["fixed", "percent"]), value: z.number().min(0).max(1_000_000), reason: cleanText(300).pipe(z.string().min(2)) }),
+    z.object({ kind: z.enum(["fixed", "percent"]), value: z.number().min(0).max(1_000_000), reason: cleanText(300).pipe(z.string().min(2)), version: z.number().int().optional() }),
   );
-  const o = await c.env.DB.prepare("SELECT status, subtotal, discount_total, shipping_price, manual_discount, public_code FROM orders WHERE id = ?")
+  const o = await c.env.DB.prepare("SELECT status, subtotal, discount_total, shipping_price, manual_discount, public_code, updated_at FROM orders WHERE id = ?")
     .bind(id)
-    .first<{ status: OrderStatus; subtotal: number; discount_total: number; shipping_price: number; manual_discount: number; public_code: string }>();
+    .first<{ status: OrderStatus; subtotal: number; discount_total: number; shipping_price: number; manual_discount: number; public_code: string; updated_at: number }>();
   if (!o) throw new HttpError(404, "not_found");
+  if (input.version != null && o.updated_at !== input.version) throw new HttpError(409, "order_changed");
   if (!isEditable(o.status)) throw new HttpError(409, "order_locked");
   const other = o.discount_total - o.manual_discount; // coupon + loyalty points
   // never more than what's left of the items: the total can't go negative

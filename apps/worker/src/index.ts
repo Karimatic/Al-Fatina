@@ -17,6 +17,19 @@ import { scheduled } from "./scheduled";
 export { AdminHub } from "./hub";
 
 const app = new Hono<AppEnv>();
+/**
+ * The hashing secrets must exist: without them the code would hash with the text "undefined"
+ * (anyone could recompute order tokens or admin keys). Fail closed instead, loudly.
+ */
+const REQUIRED_SECRETS = ["AUTH_PEPPER", "TRACK_TOKEN_PEPPER", "IP_HASH_SALT", "SETTINGS_KEY"] as const;
+app.use("*", async (c, next) => {
+  const missing = REQUIRED_SECRETS.filter((k) => !c.env[k]);
+  if (missing.length) {
+    console.error(`missing secrets: ${missing.join(", ")}`);
+    return c.text("Service temporarily unavailable", 503);
+  }
+  await next();
+});
 app.use("*", httpsOnly);
 // PUBLIC_ORIGIN builds every absolute link (canonical, previews, sitemap): if it is missing or not a
 // valid address (a placeholder left in the config), use the address the site is reached at
@@ -61,6 +74,8 @@ app.get("/media/*", async (c) => {
   const key = decodeURIComponent(new URL(c.req.url).pathname.slice("/media/".length));
   // receipts and other private files: only through the admin API
   if (key.startsWith("private/")) return c.notFound();
+  // parcel photos taken before they moved to private/: never public either
+  if (key.startsWith("packing/")) return c.notFound();
   // the home video: streamed with byte ranges (phones seek and buffer, Safari requires it)
   if (/^[a-z0-9/_-]+\.(mp4|webm)$/i.test(key)) {
     const range = c.req.header("Range");

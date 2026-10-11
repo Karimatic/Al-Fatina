@@ -641,8 +641,11 @@ publicRoutes.post("/reviews", async (c) => {
   if (!item) throw new HttpError(422, "product_not_in_order");
 
   const { reviews: cfg, notifications: notif } = await getSettings(c.env, ["reviews", "notifications"]);
-  // photos are always checked by the team first: a review with photos waits for approval
-  const status = cfg.auto_approve_verified && !photos.length ? "approved" : "pending";
+  // photos are always checked by the team first: a review with photos waits for approval.
+  // A phone number alone proves little (anyone may know it, and order tracking by phone shows
+  // the code): such a review always waits too; only the private order link may publish at once.
+  const byLink = !!input.token;
+  const status = cfg.auto_approve_verified && byLink && !photos.length ? "approved" : "pending";
   const name = reviewerName(o.name);
   const keys: string[] = [];
   for (const [i, f] of photos.entries()) keys.push(await putImage(c.env, `reviews/${o.id}-${input.productId}-${i}`, f));
@@ -659,7 +662,7 @@ publicRoutes.post("/reviews", async (c) => {
     throw err;
   }
   if (notif.telegram_review) {
-    const what = status === "approved" ? "publié (vous pouvez le masquer dans Admin → Avis)" : "à valider dans Admin → Avis";
+    const what = status === "approved" ? "publié (vous pouvez le masquer dans Admin → Avis)" : byLink ? "à valider dans Admin → Avis" : "envoyé avec le numéro de téléphone : vérifiez qu'il vient bien de la cliente, Admin → Avis";
     const withPhotos = keys.length ? ` avec ${keys.length} photo(s)` : "";
     c.executionCtx.waitUntil(sendTelegramText(c.env, `⭐ Avis vérifié (${input.rating}/5)${withPhotos} de ${name.replace(/[<>&]/g, "")}, ${what}.`));
   }

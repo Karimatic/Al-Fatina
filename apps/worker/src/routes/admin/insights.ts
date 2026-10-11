@@ -20,6 +20,16 @@ export const insightRoutes = new Hono<AppEnv>();
 
 /* ───────────── Packing mode: pick → verify → pack → label → ship ───────────── */
 
+/** The parcel photo of an order, for the team only (never on the public /media path). */
+insightRoutes.get("/orders/:id/pack-photo", requirePermission("orders.view"), async (c) => {
+  const o = await c.env.DB.prepare("SELECT pack_photo FROM orders WHERE id = ?").bind(intParam(c, "id")).first<{ pack_photo: string | null }>();
+  const obj = o?.pack_photo ? await c.env.MEDIA.get(o.pack_photo) : null;
+  if (!obj) throw new HttpError(404, "not_found");
+  return new Response(obj.body, {
+    headers: { "Content-Type": obj.httpMetadata?.contentType ?? "image/jpeg", "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" },
+  });
+});
+
 /** Orders to prepare (confirmed or being prepared), oldest first, with everything to check. */
 insightRoutes.get("/packing", requirePermission("orders.ship"), async (c) => {
   const { results: orders } = await c.env.DB.prepare(
@@ -40,7 +50,8 @@ insightRoutes.get("/packing", requirePermission("orders.ship"), async (c) => {
   return c.json(
     orders.map((o) => ({
       ...o,
-      pack_photo_url: o.pack_photo ? mediaUrl(c.env, o.pack_photo) : null,
+      // a photo of the parcel (its label shows the address): private, through the admin only
+      pack_photo_url: o.pack_photo ? `/api/admin/orders/${o.id}/pack-photo?v=${encodeURIComponent(o.pack_photo.slice(-8))}` : null,
       items: items.filter((i) => i.order_id === o.id).map((i) => ({ ...i, options: (i.variant_id != null ? labels.get(i.variant_id)?.fr : null) ?? i.options_label })),
     })),
   );
@@ -86,7 +97,7 @@ insightRoutes.post("/orders/:id/packing", requirePermission("orders.ship"), asyn
     return c.json({ ok: true });
   }
   if (step === "packed") {
-    const key = photo ? await putImage(c.env, `packing/${id}`, photo, 3_000_000) : null;
+    const key = photo ? await putImage(c.env, `private/packing/${id}`, photo, 3_000_000) : null;
     await c.env.DB.batch([
       c.env.DB.prepare("UPDATE orders SET packed_at = ?, pack_photo = COALESCE(?, pack_photo), updated_at = ? WHERE id = ?").bind(now, key, now, id),
       c.env.DB.prepare("INSERT INTO order_events (order_id, kind, actor, source, note, created_at) VALUES (?, 'note', ?, 'admin', ?, ?)").bind(
@@ -94,7 +105,7 @@ insightRoutes.post("/orders/:id/packing", requirePermission("orders.ship"), asyn
       ),
     ]);
     if (key && o.pack_photo) c.executionCtx.waitUntil(c.env.MEDIA.delete(o.pack_photo).catch(() => undefined));
-    return c.json({ ok: true, photo: key ? mediaUrl(c.env, key) : null });
+    return c.json({ ok: true, photo: key ? `/api/admin/orders/${id}/pack-photo?v=${encodeURIComponent(key.slice(-8))}` : null });
   }
   throw new HttpError(422, "validation_failed");
 });

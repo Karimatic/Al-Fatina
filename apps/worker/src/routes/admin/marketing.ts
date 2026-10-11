@@ -579,7 +579,8 @@ marketingRoutes.post("/notifier/broadcast", requirePermission("marketing.edit"),
       bodyFr: cleanText(160).pipe(z.string().min(2)),
       bodyAr: cleanText(160).pipe(z.string().min(2)),
       /** page of the store it opens ("/c/robes", "/produit/…") */
-      path: z.string().trim().max(200).regex(/^\/[^\s]*$/).default("/"),
+      // a page of this shop only: "//other.site" or "/\other.site" would open another website
+      path: z.string().trim().max(200).regex(/^\/(?![/\\])[^\s]*$/).default("/"),
     }),
   );
   const running = await c.env.DB.prepare("SELECT id FROM campaigns WHERE kind = 'push' AND status = 'sending'").first();

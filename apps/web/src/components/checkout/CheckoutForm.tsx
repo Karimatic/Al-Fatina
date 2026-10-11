@@ -4,7 +4,7 @@ import { inputCls, ProductImage, Spinner } from "@/components/ui/kit";
 import { ApiError, apiGet, apiPost, useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { useStoreTexts } from "@/lib/storeTexts";
-import { cart, checkoutMemory, pendingCoupon, saveOrder, takePendingCoupon } from "@/lib/stores";
+import { cart, checkoutMemory, pendingCoupon, saveOrder, takePendingCoupon, useSavedOrders } from "@/lib/stores";
 import { newIdempotencyKey } from "@/lib/api";
 import { Picker } from "./Picker";
 import { visitAttribution } from "@/lib/attribution";
@@ -85,8 +85,12 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
   const [quoting, setQuoting] = useState(false);
   const linesKey = JSON.stringify(lines);
   const quotePhone = normalizeDzPhone(phone) ?? undefined; // a full number shows her loyalty points
+  // her points show only on a phone that holds the private link of one of her orders
+  const saved = useSavedOrders();
+  const proofs = saved.slice(0, 5).map((o) => ({ code: o.code, token: o.token }));
   const quoteBody = () => ({
     lines, wilaya, communeId: typeof communeId === "number" ? communeId : null, deliveryType, coupon: coupon || undefined, phone: quotePhone, usePoints,
+    proofs: proofs.length ? proofs : undefined,
   });
   useEffect(() => {
     if (!lines.length) return;
@@ -164,6 +168,7 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
         heardFrom: heardFrom || undefined,
         coupon: coupon || undefined,
         usePoints: !!quote?.points?.applied,
+        proofs: proofs.length ? proofs : undefined,
         lines,
         channel,
         locale,

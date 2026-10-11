@@ -373,10 +373,12 @@ async function answer(token: string, callbackId: string, text: string, alert = f
  */
 async function resolveActor(env: Env, from: TgUser, chat: number | undefined, chatId: string | null, permission: Permission | null) {
   const member = await env.DB.prepare(
-    "SELECT m.id, m.name, r.permissions FROM team_members m JOIN roles r ON r.id = m.role_id WHERE m.telegram_user_id = ? AND m.is_active = 1",
+    "SELECT m.id, m.name, m.is_active, r.permissions FROM team_members m JOIN roles r ON r.id = m.role_id WHERE m.telegram_user_id = ?",
   )
     .bind(from.id)
-    .first<{ id: number; name: string; permissions: string }>();
+    .first<{ id: number; name: string; is_active: number; permissions: string }>();
+  // a deactivated member stays out, even inside the team group
+  if (member && !member.is_active) return { error: "⛔ Ce compte de l'équipe est désactivé." };
   if (member) {
     if (permission && !hasPermission(JSON.parse(member.permissions) as string[], permission)) return { error: "⛔ Votre rôle ne permet pas cette action." };
     return { actor: `member:${member.id}:${member.name}` };
@@ -489,12 +491,30 @@ function statsMessage(title: string, s: PeriodStats): string {
   ].join("\n");
 }
 
-async function handleCommand(env: Env, token: string, msg: TgMessage) {
+/** What each data command needs (the others, /start /id /aide, are open: they reveal nothing). */
+const COMMAND_PERMISSION: Record<string, Permission> = {
+  "/jour": "stats.view",
+  "/semaine": "stats.view",
+  "/attente": "orders.view",
+  "/stock": "stock.view",
+  "/chercher": "customers.view",
+  "/cmd": "orders.view",
+};
+
+async function handleCommand(env: Env, token: string, msg: TgMessage, chatId: string | null) {
   const text = (msg.text ?? "").trim();
   const reply = (html: string, extra: Record<string, unknown> = {}) =>
     tgCall(token, "sendMessage", { chat_id: msg.chat.id, text: html, parse_mode: "HTML", link_preview_options: { is_disabled: true }, ...extra });
   const cmd = text.split(/[\s@]/)[0]?.toLowerCase();
   const arg = text.split(/\s+/).slice(1).join(" ").trim();
+  // customer data and figures: only a linked team member with the right permission (or the
+  // team group, when the shop trusts its members) — never any Telegram user writing to the bot
+  const needed = cmd ? COMMAND_PERMISSION[cmd] : undefined;
+  if (needed) {
+    if (!msg.from) return;
+    const who = await resolveActor(env, msg.from, msg.chat.id, chatId, needed);
+    if (who.error) return reply(esc(who.error));
+  }
 
   switch (cmd) {
     case "/start":
@@ -634,7 +654,7 @@ export async function handleUpdate(env: Env, update: TgUpdate): Promise<void> {
   await ensureCommands(cfg.token);
   if (update.callback_query) await handleCallback(env, cfg.token, update.callback_query, cfg.chat_id);
   else if (update.message?.reply_to_message && (await handleReply(env, cfg.token, update.message, cfg.chat_id))) return;
-  else if (update.message?.text?.startsWith("/")) await handleCommand(env, cfg.token, update.message);
+  else if (update.message?.text?.startsWith("/")) await handleCommand(env, cfg.token, update.message, cfg.chat_id);
 }
 
 export async function verifyWebhookSecret(env: Env, header: string | undefined): Promise<boolean> {

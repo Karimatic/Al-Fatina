@@ -3,7 +3,7 @@
  * status changes (stock effects, customer counters, loyalty). Used by the storefront,
  * the admin (manual sales, status buttons) and the Telegram bot.
  */
-import { askableSources, classifySource, sourceOfChannel,
+import { askableSources, classifySource, sourceOfChannel, timingSafeEqual,
   assessRisk,
   canTransition,
   computeTotals,
@@ -38,6 +38,8 @@ export interface QuoteRequest {
   phone?: string;
   /** spend the customer's loyalty points on this order */
   usePoints?: boolean;
+  /** private links of earlier orders kept on her phone: the proof the number is hers */
+  proofs?: { code: string; token: string }[];
   /** admin manual sales may sell drafts / ignore desk setting */
   admin?: boolean;
 }
@@ -69,6 +71,21 @@ export interface QuoteResult extends QuoteDTO {
 
 function couponLabel(c: CouponRule): string {
   return c.type === "percent" ? `-${c.value} %` : c.type === "fixed" ? `-${c.value} DA` : "Livraison offerte";
+}
+
+/** True when one of the private order links (code + token) belongs to an order of this number. */
+export async function ownsPhone(env: Env, phone: string, proofs: { code: string; token: string }[] | undefined): Promise<boolean> {
+  if (!proofs?.length) return false;
+  const { results } = await env.DB.prepare(
+    `SELECT public_code, track_token_hash FROM orders WHERE phone = ? AND public_code IN (${proofs.map(() => "?").join(",")})`,
+  )
+    .bind(phone, ...proofs.map((p) => p.code))
+    .all<{ public_code: string; track_token_hash: string }>();
+  for (const r of results) {
+    const p = proofs.find((x) => x.code === r.public_code);
+    if (p && timingSafeEqual(await sha256Hex(p.token, env.TRACK_TOKEN_PEPPER), r.track_token_hash)) return true;
+  }
+  return false;
 }
 
 export async function quote(env: Env, req: QuoteRequest): Promise<QuoteResult> {
@@ -195,7 +212,8 @@ export async function quote(env: Env, req: QuoteRequest): Promise<QuoteResult> {
   let points: QuoteDTO["points"] = null;
   let pointsUsed = 0;
   let pointsDiscount = 0;
-  if (loyalty.enabled && req.phone && loyalty.redeem_value_da > 0) {
+  // points are personal: the team (in the admin), or a phone holding one of her order links
+  if (loyalty.enabled && req.phone && loyalty.redeem_value_da > 0 && (req.admin || (await ownsPhone(env, req.phone, req.proofs)))) {
     const cust = await env.DB.prepare("SELECT points_balance FROM customers WHERE phone = ?").bind(req.phone).first<{ points_balance: number }>();
     const balance = cust?.points_balance ?? 0;
     if (balance >= loyalty.min_redeem) {
@@ -230,8 +248,14 @@ export async function quote(env: Env, req: QuoteRequest): Promise<QuoteResult> {
 
 /* ───────────── Create ───────────── */
 
+/** Store orders (not the team's): pieces per order, unconfirmed orders per connection per day. */
+export const MAX_WEB_PIECES = 10;
+const MAX_PENDING_PER_IP_PER_DAY = 12;
+
 export interface NewOrder {
   idempotencyKey: string;
+  /** private links of her earlier orders (loyalty points: proof the number is hers) */
+  proofs?: { code: string; token: string }[];
   name: string;
   phone: string;
   wilaya: number;
@@ -280,6 +304,7 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
     coupon: input.coupon,
     phone: input.phone,
     usePoints: input.usePoints,
+    proofs: input.proofs,
     admin: isAdmin,
   });
   const bad = q.lines.filter((l) => l.problem);
@@ -310,15 +335,21 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
               (SELECT COUNT(*) FROM orders WHERE phone = ?1 AND created_at > ?3 AND status NOT IN ${CANCELLED_SQL}) AS last_day,
               (SELECT COUNT(*) FROM orders WHERE phone = ?1 AND created_at > ?4 AND status IN ('annulee','fausse')) AS recent_cancel,
               (SELECT COUNT(DISTINCT phone) FROM orders WHERE ip_hash = ?5 AND created_at > ?6 AND phone != ?1) AS ip_phones,
+              (SELECT COUNT(*) FROM orders WHERE ip_hash = ?5 AND ?5 != '' AND created_at > ?3 AND status IN ('nouvelle','injoignable')) AS ip_pending,
               c.delivered_count, c.returned_count, c.cancelled_count, c.fake_count, c.is_blacklisted
          FROM (SELECT 1) LEFT JOIN customers c ON c.phone = ?1`,
     )
       .bind(input.phone, t - 3600_000, t - 86400_000, t - 7 * 86400_000, input.ipHash ?? "", t - 2 * 3600_000)
       .first<{
-        last_hour: number; last_day: number; recent_cancel: number; ip_phones: number;
+        last_hour: number; last_day: number; recent_cancel: number; ip_phones: number; ip_pending: number;
         delivered_count: number | null; returned_count: number | null; cancelled_count: number | null; fake_count: number | null; is_blacklisted: number | null;
       }>();
     if ((r?.last_hour ?? 0) >= checkout.max_orders_per_phone_per_hour) throw new HttpError(429, "too_many_orders");
+    // unconfirmed orders hold stock: one connection can't pile them up (generous: mobile
+    // operators put many customers behind one address)
+    if ((r?.ip_pending ?? 0) >= MAX_PENDING_PER_IP_PER_DAY) throw new HttpError(429, "too_many_orders");
+    // nor can one order hold a whole shelf: bigger orders go through the team
+    if (q.lines.reduce((n, l) => n + l.qty, 0) > MAX_WEB_PIECES) throw new HttpError(422, "too_many_pieces");
     riskFlags = [];
     if (r?.recent_cancel) riskFlags.push("recent_cancel");
     if (r?.last_day) riskFlags.push("repeat_24h");
@@ -711,9 +742,9 @@ const LEFT_SHOP: readonly string[] = ["expediee", "en_livraison", "livree", "ret
  * order had never existed. The deletion stays in the audit log.
  */
 export async function deleteOrder(env: Env, id: number, actor: string, restock: boolean): Promise<{ code: string }> {
-  const o = await env.DB.prepare("SELECT id, public_code, status, customer_id, coupon_code FROM orders WHERE id = ?")
+  const o = await env.DB.prepare("SELECT id, public_code, status, customer_id, coupon_code, pack_photo FROM orders WHERE id = ?")
     .bind(id)
-    .first<{ id: number; public_code: string; status: string; customer_id: number | null; coupon_code: string | null }>();
+    .first<{ id: number; public_code: string; status: string; customer_id: number | null; coupon_code: string | null; pack_photo: string | null }>();
   if (!o) throw new HttpError(404, "not_found");
   const { results: items } = await env.DB.prepare("SELECT variant_id, qty FROM order_items WHERE order_id = ? AND variant_id IS NOT NULL").bind(id).all<{ variant_id: number; qty: number }>();
   const now = Date.now();
@@ -788,5 +819,7 @@ export async function deleteOrder(env: Env, id: number, actor: string, restock: 
     bumpCatalogStmt(env),
   );
   await env.DB.batch(stmts);
+  // its parcel photo goes with it
+  if (o.pack_photo) await env.MEDIA.delete(o.pack_photo).catch(() => undefined);
   return { code: o.public_code };
 }

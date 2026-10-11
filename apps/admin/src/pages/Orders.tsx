@@ -615,7 +615,7 @@ function OrderSheet({ id, onClose }: { id: number | null; onClose: () => void })
           </Card>
 
           {editingItems ? (
-            <ItemsEditor orderId={o.id} items={d.items} onDone={() => { setEditingItems(false); refresh(); }} />
+            <ItemsEditor orderId={o.id} version={o.updated_at as number | undefined} items={d.items} onDone={() => { setEditingItems(false); refresh(); }} />
           ) : (
             <Card
               title={tr("Articles ({0})", { 0: d.items.reduce((s, i) => s + i.qty, 0) })}
@@ -662,6 +662,7 @@ function OrderSheet({ id, onClose }: { id: number | null; onClose: () => void })
               {discounting && d.editable && (
                 <DiscountBox
                   orderId={o.id}
+                  version={o.updated_at as number | undefined}
                   subtotal={o.subtotal}
                   otherDiscount={o.discount_total - o.manual_discount}
                   current={o.manual_discount}

@@ -3,7 +3,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { salePrice, slugify } from "@henine/shared";
+import { hasPermission, salePrice, slugify } from "@henine/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { imageRef, mediaUrl, variantLabels, type ImageRow } from "../../lib/catalog";
@@ -79,7 +79,7 @@ catalogRoutes.get("/products", requirePermission("products.view"), async (c) => 
   );
 });
 
-async function loadProduct(c: { env: AppEnv["Bindings"] }, id: number) {
+async function loadProduct(c: { env: AppEnv["Bindings"]; get: (k: "member") => { permissions: string[] } }, id: number) {
   const p = await c.env.DB.prepare("SELECT * FROM products WHERE id = ?").bind(id).first<Record<string, unknown>>();
   if (!p) throw new HttpError(404, "not_found");
   const [options, values, variants, images] = await c.env.DB.batch([
@@ -101,7 +101,8 @@ async function loadProduct(c: { env: AppEnv["Bindings"] }, id: number) {
     tags: JSON.parse((p.tags as string) || "[]"),
     price: p.price,
     compareAtPrice: p.compare_at_price,
-    costPrice: p.cost_price,
+    // the purchase price is private: only for those allowed to see costs
+    costPrice: canSeeCost(c) ? p.cost_price : null,
     seoTitle: p.seo_title,
     seoDescription: p.seo_description,
     instagramUrl: p.instagram_url,
@@ -223,6 +224,11 @@ async function translateOptionLabels(env: AppEnv["Bindings"], input: ProductInpu
   await Promise.all(jobs);
 }
 
+/** The purchase price (and so the margin) is shown and changed only with the cost permission. */
+function canSeeCost(c: { get: (k: "member") => { permissions: string[] } }): boolean {
+  return hasPermission(c.get("member").permissions, "cost.view");
+}
+
 async function saveProduct(c: Parameters<typeof body>[0], existingId: number | null, input: ProductInput) {
   const env = c.env;
   const actor = actorOf(c.get("member"));
@@ -236,6 +242,12 @@ async function saveProduct(c: Parameters<typeof body>[0], existingId: number | n
   if (dup) throw new HttpError(409, "slug_taken");
 
   const current = existingId ? await loadProduct(c, existingId) : null;
+  const canStock = hasPermission(c.get("member").permissions, "stock.edit");
+  // without the cost permission the purchase price is neither shown nor changed: keep the stored one
+  if (!canSeeCost(c)) {
+    const kept = existingId ? await env.DB.prepare("SELECT cost_price FROM products WHERE id = ?").bind(existingId).first<{ cost_price: number | null }>() : null;
+    input = { ...input, costPrice: kept?.cost_price ?? null };
+  }
   const stmts: D1PreparedStatement[] = [];
 
   if (existingId) {
@@ -321,6 +333,9 @@ async function saveProduct(c: Parameters<typeof body>[0], existingId: number | n
     const isExisting = v.id != null && currentVariants.has(v.id);
     const variantId = isExisting ? v.id! : nextVariant++;
     keptVariantIds.add(variantId);
+    // quantities belong to the Stock permission: without it, the product page keeps them as they
+    // are (a new size starts at 0, to be counted in Stock)
+    if (!canStock) v.stockOnHand = isExisting ? currentVariants.get(v.id!)!.stockOnHand : 0;
     const valueLabels = v.refs.map((r) => input.options.flatMap((o) => o.values).find((x) => x.ref === r)?.labelFr ?? "");
     let sku = (v.sku || `${labelPrefix}-${valueLabels.map((l) => slugify(l).toUpperCase()).join("-")}` || `${labelPrefix}-${variantId}`).toUpperCase();
     if (seenSku.has(sku)) sku = `${sku}-${variantId}`;
@@ -825,10 +840,10 @@ catalogRoutes.get("/stock", requirePermission("stock.view"), async (c) => {
             SUM(CASE WHEN v.stock_on_hand - v.stock_reserved > 0 AND v.stock_on_hand - v.stock_reserved <= v.low_stock_threshold THEN 1 ELSE 0 END) AS low_count
        FROM variants v JOIN products p ON p.id = v.product_id WHERE v.is_active = 1 AND p.status != 'archived'`,
   ).first();
-  const canSeeCost = c.get("member").permissions.includes("*") || c.get("member").permissions.includes("cost.view");
+  const seeCost = canSeeCost(c);
   return c.json({
-    totals: canSeeCost ? totals : { ...totals, cost_value: null },
-    rows: results.map((r) => ({ ...r, cost_price: canSeeCost ? r.cost_price : null, options: labels.get(r.id)?.fr ?? "" })),
+    totals: seeCost ? totals : { ...totals, cost_value: null },
+    rows: results.map((r) => ({ ...r, cost_price: seeCost ? r.cost_price : null, options: labels.get(r.id)?.fr ?? "" })),
   });
 });
 

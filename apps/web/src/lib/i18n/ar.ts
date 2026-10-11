@@ -194,6 +194,7 @@ export const ar: Dictionary = {
       coupon_invalid: "رمز التخفيض غير صالح.",
       delivery_unavailable: "التوصيل غير متوفر لهذا الاختيار.",
       too_many_orders: "طلبات كثيرة بهذا الرقم. حاولي لاحقا أو تواصلي معنا.",
+      too_many_pieces: "10 قطع كحد أقصى في الطلب الواحد. للطلبات الكبيرة تواصلي معنا على واتساب.",
       rate_limited: "محاولات كثيرة، انتظري دقيقة.",
       maintenance: STORE_TEXTS.ar.pause,
       network: "تعذر الاتصال. تحققي من الإنترنت.",
