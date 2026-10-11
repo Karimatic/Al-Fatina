@@ -48,21 +48,19 @@ export function HomePage() {
       /* Hero: the shop's photo, the promise centred on it */
       <section className="px-3 pt-3 md:px-4">
         <div className="relative mx-auto flex min-h-[58svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
-          {/* cinematic: the shop's photo drifting slowly (or, by default, moving silk), under a
-              warm grade, a vignette, film grain and a light sweep */}
+          {/* cinematic: the shop's photo drifting slowly (or, by default, two silks
+              cross-fading), under a warm grade, a vignette, film grain and a light sweep */}
           {design.heroImage ? (
             <img src={design.heroImage} alt="" fetchPriority="high" className="hero-cine-img hero-cine-solo" />
           ) : (
-            // no photo uploaded yet: silk drawn in CSS, sharp at any size
-            <div aria-hidden="true" className="hero-silk absolute inset-0">
-              <span className="silk-glow silk-glow-1" />
-              <span className="silk-glow silk-glow-2" />
-              <span className="silk-glow silk-glow-3" />
-              <span className="silk-folds" />
-            </div>
+            // no photo uploaded yet: rose and pearl silk (Unsplash licence), cross-fading slowly
+            <>
+              <img src="/hero/silk-rose.webp" alt="" fetchPriority="high" className="hero-cine-img hero-cine-a" />
+              <img src="/hero/silk-pearl.webp" alt="" loading="lazy" className="hero-cine-img hero-cine-b" />
+            </>
           )}
           {design.heroVideo && <LoopVideo src={design.heroVideo} />}
-          <div aria-hidden="true" className="hero-grade absolute inset-0" />
+          <div aria-hidden="true" className={`hero-grade absolute inset-0 ${design.heroImage ? "" : "opacity-75"}`} />
           <div aria-hidden="true" className="hero-sweep pointer-events-none absolute inset-0" />
           <div aria-hidden="true" className="hero-grain pointer-events-none absolute -inset-[10%]" />
           <div aria-hidden="true" className="hero-frame pointer-events-none absolute" />
@@ -71,7 +69,7 @@ export function HomePage() {
               <span className="size-1.5 animate-pulse rounded-full bg-[#e9c98f]" aria-hidden="true" />
               {eyebrow}
             </p>
-            <AnimatedTagline key={title} text={title} tone="light" className="text-[2.35rem] leading-[1.1] md:text-6xl" />
+            <AnimatedTagline key={title} text={title} tone="light" variant="cinema" className="text-[2.35rem] leading-[1.1] md:text-6xl" />
             <p className="mt-3 max-w-md text-base leading-relaxed text-white/85 md:text-lg">{subtitle}</p>
             <div className="mt-6 flex flex-col items-center gap-2">
               <a href="#nouveautes" className="lift inline-flex h-12 items-center justify-center rounded-full bg-white px-8 font-semibold text-noir">

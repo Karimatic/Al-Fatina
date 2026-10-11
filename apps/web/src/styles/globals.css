@@ -232,6 +232,47 @@
   .tagline-light .tagline-word { color: #fff; }
 }
 
+/* ── Home banner title, cinema style: the line opens from the centre like a curtain while it
+   comes into focus, a fine gold line draws itself under it, then a slow gold glint passes
+   over the whole line every few seconds (whole-line effects: Arabic letters stay joined) ── */
+.tagline-cinema { display: flex; flex-direction: column; align-items: center; }
+.tagline-cinema-text {
+  display: block;
+  padding-block: 0.1em 0.2em;
+  color: transparent;
+  background: linear-gradient(100deg, #fff 0%, #fff 40%, #f6e2b8 48%, #fff3f7 52%, #fff 60%, #fff 100%);
+  background-size: 260% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  clip-path: inset(0 50% 0 50%);
+  filter: blur(10px);
+  transform: scale(1.06);
+  animation: cinema-open 1.6s cubic-bezier(0.22, 0.8, 0.2, 1) 0.25s forwards, cinema-glint 7s ease-in-out 2.4s infinite;
+}
+.tagline-cinema-line {
+  display: block;
+  margin-top: 0.35rem;
+  height: 1px;
+  width: min(9rem, 40%);
+  background: linear-gradient(90deg, transparent, #e9c98f, transparent);
+  transform: scaleX(0);
+  animation: cinema-line 1.2s cubic-bezier(0.22, 0.8, 0.2, 1) 1.5s forwards;
+}
+@keyframes cinema-open {
+  60% { filter: blur(0); }
+  to { clip-path: inset(0 0 0 0); filter: blur(0); transform: none; }
+}
+@keyframes cinema-glint {
+  0% { background-position: 100% 0; }
+  35%, 100% { background-position: 0% 0; }
+}
+@keyframes cinema-line { to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .tagline-cinema-text { clip-path: none; filter: none; transform: none; animation: none; color: #fff; background: none; }
+  .tagline-cinema-line { transform: none; animation: none; }
+}
+
 /* ── Home hero: the photo slowly settles in ── */
 .hero-zoom-img { animation: hero-zoom 14s ease-out both; }
 @keyframes hero-zoom {
@@ -243,12 +284,17 @@
    vignette, a little film grain, a soft light sweep and a thin gold frame ── */
 .hero-cine-img {
   position: absolute;
-  inset: -4%;
-  width: 108%;
-  height: 108%;
+  /* generous margin all round: the slow drift never shows an edge (left/top, not inset: in
+     Arabic the right side would win) */
+  left: -8%;
+  top: -8%;
+  width: 116%;
+  height: 116%;
+  /* the base style caps images at 100 % of their box: this one must overflow it */
+  max-width: none;
   object-fit: cover;
   /* the shop's photos are small: a hint of softness reads as film, not as blur */
-  filter: blur(0.6px) saturate(1.08) contrast(1.06);
+  filter: saturate(1.05) contrast(1.05);
   will-change: transform, opacity;
 }
 /* one photo: a slow push-in and back, forever */
@@ -266,41 +312,6 @@
 }
 @keyframes hero-fade-a { 0%, 42% { opacity: 1; } 57%, 92% { opacity: 0; } 100% { opacity: 1; } }
 @keyframes hero-fade-b { 0%, 42% { opacity: 0; } 57%, 92% { opacity: 1; } 100% { opacity: 0; } }
-/* default banner: silk drawn in CSS (sharp on every screen), slow folds of plum, rose and
-   champagne light drifting like satin moving under a lamp */
-.hero-silk {
-  background: radial-gradient(140% 120% at 70% 20%, #5a1233 0%, #2a0817 45%, #12060c 100%);
-  overflow: hidden;
-}
-.silk-glow {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(70px);
-  mix-blend-mode: screen;
-  will-change: transform;
-}
-.silk-glow-1 { width: 70%; height: 80%; left: -10%; top: -20%; background: radial-gradient(closest-side, rgb(224 72 127 / 0.7), transparent); animation: silk-a 18s ease-in-out infinite alternate; }
-.silk-glow-2 { width: 60%; height: 70%; right: -15%; top: 10%; background: radial-gradient(closest-side, rgb(233 201 143 / 0.5), transparent); animation: silk-b 22s ease-in-out infinite alternate; }
-.silk-glow-3 { width: 80%; height: 60%; left: 15%; bottom: -30%; background: radial-gradient(closest-side, rgb(142 16 72 / 0.6), transparent); animation: silk-c 26s ease-in-out infinite alternate; }
-/* the folds: soft diagonal sheens that slide, blurred into satin */
-.silk-folds {
-  position: absolute;
-  inset: -30%;
-  background:
-    repeating-linear-gradient(118deg, rgb(255 226 236 / 0) 0 70px, rgb(255 226 236 / 0.26) 105px, rgb(255 226 236 / 0) 150px, rgb(255 226 236 / 0) 230px),
-    repeating-linear-gradient(64deg, rgb(233 201 143 / 0) 0 120px, rgb(233 201 143 / 0.14) 160px, rgb(233 201 143 / 0) 210px);
-  filter: blur(11px);
-  animation: silk-folds 30s ease-in-out infinite alternate;
-  will-change: transform;
-}
-@keyframes silk-a { to { transform: translate3d(18%, 12%, 0) scale(1.15); } }
-@keyframes silk-b { to { transform: translate3d(-20%, 8%, 0) scale(0.9); } }
-@keyframes silk-c { to { transform: translate3d(-10%, -15%, 0) scale(1.2); } }
-@keyframes silk-folds {
-  from { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-  to { transform: translate3d(-6%, 4%, 0) rotate(4deg) scale(1.08); }
-}
-
 /* warm rose-gold grade + deep vignette, like a film still */
 .hero-grade {
   background:
@@ -332,9 +343,6 @@
   0%, 30% { background-position: 120% 0; }
   70%, 100% { background-position: -20% 0; }
 }
-/* over the silk the photo grade is lighter: the sheen must show */
-.hero-silk ~ .hero-grade { opacity: 0.7; }
-
 /* thin gold frame inside the card */
 .hero-frame {
   inset: 0.75rem;
@@ -467,7 +475,7 @@
 .faq-item[open] .faq-plus { transform: rotate(45deg); background: var(--color-plum-600); color: #fff; }
 
 @media (prefers-reduced-motion: reduce) {
-  .announce, .announce-track, .announce-sparkle, .announce-fade, .announce-slide, .ig-card, .ig-btn::after, .hero-zoom-img, .hero-cine-solo, .hero-cine-a, .hero-cine-b, .hero-grain, .hero-sweep, .silk-glow, .silk-folds, .story-ring, .toast-in { animation: none; }
+  .announce, .announce-track, .announce-sparkle, .announce-fade, .announce-slide, .ig-card, .ig-btn::after, .hero-zoom-img, .hero-cine-solo, .hero-cine-a, .hero-cine-b, .hero-grain, .hero-sweep, .story-ring, .toast-in { animation: none; }
   .brand-mark { opacity: 1; transform: none; animation: none; color: var(--color-accent-text); background: none; }
   .story { opacity: 1; animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
