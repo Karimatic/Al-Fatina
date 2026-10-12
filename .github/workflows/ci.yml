@@ -32,12 +32,42 @@ jobs:
           path: dist
           retention-days: 3
 
+  e2e:
+    # The built shop in a real browser (Google Chrome, preinstalled on the runner) against a
+    # throwaway database: ordering in Arabic and French on phone and computer, the bot check,
+    # security headers, and the accessibility gate (axe, WCAG 2.1 AA: any violation fails).
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist
+      - run: npm run test:e2e
+        env:
+          CI: "1"
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
   deploy:
     # Production deploy from main. Needs repo secrets CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID.
     # Switched off until Cloudflare is set up: create the repository variable DEPLOY_ENABLED = true
     # (GitHub → Settings → Secrets and variables → Actions → Variables) to turn it on.
     if: vars.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: check
+    needs: [check, e2e]
     runs-on: ubuntu-latest
     environment: production
     steps:

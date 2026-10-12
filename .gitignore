@@ -28,3 +28,8 @@ brand/originals/
 # misc
 .DS_Store
 npm-debug.log*
+
+# browser tests
+apps/worker/wrangler.e2e.jsonc
+test-results/
+playwright-report/

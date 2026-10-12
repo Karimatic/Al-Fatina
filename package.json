@@ -16,6 +16,7 @@
     "prebuild": "node scripts/doctor.mjs",
     "build": "npm run build --workspace @henine/web && npm run build --workspace @henine/admin && node scripts/assemble-dist.mjs",
     "deploy": "npm run build && npm run deploy --workspace @henine/worker",
+    "test:e2e": "playwright test",
     "db:generate": "npm run generate --workspace @henine/db",
     "db:sql:local": "npm run sql:local --workspace @henine/worker --",
     "db:migrate:local": "npm run migrate:local --workspace @henine/worker",
@@ -33,5 +34,9 @@
     "esbuild@0.28.1": true,
     "unrs-resolver@1.12.2": true,
     "workerd@1.20261006.1": true
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0"
   }
 }
