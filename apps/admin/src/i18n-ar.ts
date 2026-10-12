@@ -2233,4 +2233,5 @@ export const AR: Record<string, string> = {
   "Créer les codes": "إنشاء الرموز",
   "Créer de nouveaux codes": "إنشاء رموز جديدة",
   "Créer mes codes de secours": "إنشاء رموز الطوارئ الخاصة بي",
+  "Seulement Confirmer / Injoignable. Annuler, expédier, livrer, le suivi et les commandes restent réservés aux comptes reliés dans Équipe (selon leur rôle).": "فقط «تأكيد» و«لا يرد». الإلغاء والشحن والتسليم ورقم التتبع والأوامر تبقى للحسابات المربوطة في الفريق (حسب الدور).",
 };

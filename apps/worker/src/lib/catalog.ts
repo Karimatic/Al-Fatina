@@ -164,7 +164,7 @@ export async function activeFlash(env: Env, now = Date.now()): Promise<{ byProdu
     sales.map((r) =>
       env.DB.prepare(
         `SELECT oi.product_id, SUM(oi.qty) AS n FROM order_items oi JOIN orders o ON o.id = oi.order_id
-          WHERE o.created_at >= ? AND o.status NOT IN ${CANCELLED} AND oi.product_id IN (${r.cfg.productIds.join(",")})
+          WHERE o.created_at >= ? AND o.status NOT IN ${CANCELLED} AND oi.product_id IN (${r.cfg.productIds.map(Number).join(",")})
           GROUP BY oi.product_id`,
       ).bind(r.starts_at),
     ),

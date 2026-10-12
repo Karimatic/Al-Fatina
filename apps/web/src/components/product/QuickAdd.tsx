@@ -6,6 +6,7 @@ import { Price, ProductImage, Spinner } from "@/components/ui/kit";
 import { apiGet } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { cart } from "@/lib/stores";
+import { useDialogFocus } from "@/lib/dialogFocus";
 
 /**
  * "+" on a product card: pick size / colour in a sheet and add to the cart without leaving
@@ -33,6 +34,7 @@ export function QuickAddButton({ p }: { p: ProductCardDTO }) {
 function QuickAddSheet({ slug, onClose }: { slug: string; onClose: () => void }) {
   const { t, ar, href, locale } = useLocale();
   const [p, setP] = useState<ProductDetailDTO | null>(null);
+  const dialogRef = useDialogFocus<HTMLDivElement>();
   const [failed, setFailed] = useState(false);
   const [selected, setSelected] = useState<Record<number, number>>({});
   const [added, setAdded] = useState(false);
@@ -94,7 +96,7 @@ function QuickAddSheet({ slug, onClose }: { slug: string; onClose: () => void })
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-noir/45 md:items-center" onClick={onClose}>
       <div
-        role="dialog"
+        ref={dialogRef} role="dialog"
         aria-modal="true"
         aria-label={t.quickAdd.open}
         dir={ar ? "rtl" : "ltr"}

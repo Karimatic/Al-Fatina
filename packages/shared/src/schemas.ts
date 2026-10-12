@@ -27,6 +27,7 @@ export const cleanText = (max: number) =>
     .trim()
     .max(max)
     // strip control chars; React escapes the rest on output
+    // eslint-disable-next-line no-control-regex -- matching control characters is the point
     .transform((v) => v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ""));
 
 export const wilayaCode = z.number().int().min(1).max(69);

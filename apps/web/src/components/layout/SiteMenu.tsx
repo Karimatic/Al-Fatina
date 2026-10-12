@@ -7,6 +7,7 @@ import { useLocale } from "@/lib/locale";
 import { StoryArt } from "@/components/home/Showcase";
 import { ColorModeSwitch } from "./ColorModeSwitch";
 import { useLocaleHref } from "./LanguageSwitch";
+import { useDialogFocus } from "@/lib/dialogFocus";
 
 /**
  * The ☰ menu: everything a visitor may look for in one place (language, categories,
@@ -20,6 +21,8 @@ export function SiteMenu() {
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
+  // Tab stays inside the open menu (its own code moves the focus in and back)
+  useDialogFocus(open, panel);
   const { data: categories } = useApi<CategoryDTO[]>("/categories");
   const site = useApi<SiteConfigDTO>("/site");
   const arHref = useLocaleHref("ar");

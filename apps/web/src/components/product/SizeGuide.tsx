@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { SizeGuideDTO } from "@henine/shared";
 import { useLocale } from "@/lib/locale";
+import { useDialogFocus } from "@/lib/dialogFocus";
 
 /** "📏 Guide des tailles" link next to the size choice, opening the product's size chart. */
 export function SizeGuideButton({ guide, selectedSize }: { guide: SizeGuideDTO; selectedSize?: string | null }) {
   const { t, locale } = useLocale();
   const ar = locale === "ar";
   const [open, setOpen] = useState(false);
+  const dialogRef = useDialogFocus<HTMLDivElement>(open);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
@@ -31,7 +33,7 @@ export function SizeGuideButton({ guide, selectedSize }: { guide: SizeGuideDTO; 
         createPortal(
           <div className="fixed inset-0 z-[60] flex items-end justify-center bg-noir/40 md:items-center" onClick={() => setOpen(false)}>
             <div
-              role="dialog"
+              ref={dialogRef} role="dialog"
               aria-modal="true"
               aria-label={t.product.sizeGuide}
               dir={ar ? "rtl" : "ltr"}

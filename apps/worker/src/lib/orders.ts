@@ -374,7 +374,8 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
 
   for (let attempt = 0; attempt < 2; attempt++) {
     const code = newOrderCode();
-    const orderRef = `(SELECT id FROM orders WHERE public_code = '${code}')`; // code is [0-9A-Z-] only
+    // the new order's id, by its code (bound like every other value: `code` goes where orderRef is)
+    const orderRef = "(SELECT id FROM orders WHERE public_code = ?)";
     // a walk-in boutique sale without a phone number goes to the shared "no record" customer (phone "")
     const stmts: D1PreparedStatement[] = [
       env.DB.prepare(
@@ -409,7 +410,7 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
         env.DB.prepare(
           `INSERT INTO order_items (order_id, variant_id, product_id, name_fr, name_ar, sku, options_label, image, unit_price, qty)
            VALUES (${orderRef}, ?, ?, ?, ?, (SELECT sku FROM variants WHERE id = ?), ?, ?, ?, ?)`,
-        ).bind(l.variantId, l.productId, l.nameFr, l.nameAr, l.variantId, l.optionsFr || null, img, l.unitPrice, l.qty),
+        ).bind(code, l.variantId, l.productId, l.nameFr, l.nameAr, l.variantId, l.optionsFr || null, img, l.unitPrice, l.qty),
       );
       if (status === "livree") {
         // sold on the spot (boutique): stock leaves immediately
@@ -417,7 +418,7 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
           env.DB.prepare("UPDATE variants SET stock_on_hand = stock_on_hand - ?, updated_at = ? WHERE id = ?").bind(l.qty, now, l.variantId),
           env.DB.prepare(
             `INSERT INTO stock_movements (variant_id, delta, reason, order_id, actor, created_at) VALUES (?, ?, 'vente', ${orderRef}, ?, ?)`,
-          ).bind(l.variantId, -l.qty, actor, now),
+          ).bind(l.variantId, -l.qty, code, actor, now),
         );
       } else {
         // the CHECK constraint on variants aborts the whole batch if this would oversell
@@ -425,14 +426,14 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
           env.DB.prepare("UPDATE variants SET stock_reserved = stock_reserved + ?, updated_at = ? WHERE id = ?").bind(l.qty, now, l.variantId),
           env.DB.prepare(
             `INSERT INTO stock_movements (variant_id, delta, reason, order_id, actor, created_at) VALUES (?, ?, 'reservation', ${orderRef}, ?, ?)`,
-          ).bind(l.variantId, -l.qty, actor, now),
+          ).bind(l.variantId, -l.qty, code, actor, now),
         );
       }
     }
     stmts.push(
       env.DB.prepare(
         `INSERT INTO order_events (order_id, from_status, to_status, kind, actor, source, note, created_at) VALUES (${orderRef}, NULL, ?, 'status', ?, ?, ?, ?)`,
-      ).bind(status, actor, isAdmin ? "admin" : "customer", input.channel === "express" ? "Commande express" : null, now),
+      ).bind(code, status, actor, isAdmin ? "admin" : "customer", input.channel === "express" ? "Commande express" : null, now),
     );
     if (q.couponRow) stmts.push(env.DB.prepare("UPDATE coupons SET used_count = used_count + 1 WHERE id = ?").bind(q.couponRow.id));
     if (q.pointsUsed > 0) {
@@ -440,13 +441,13 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
         env.DB.prepare("UPDATE customers SET points_balance = MAX(points_balance - ?, 0) WHERE phone = ?").bind(q.pointsUsed, input.phone),
         env.DB.prepare(
           `INSERT INTO loyalty_ledger (customer_id, delta, reason, order_id, actor, note, created_at) VALUES ((SELECT id FROM customers WHERE phone = ?), ?, 'redeem', ${orderRef}, ?, ?, ?)`,
-        ).bind(input.phone, -q.pointsUsed, actor, `−${q.pointsDiscount} DA`, now),
+        ).bind(input.phone, -q.pointsUsed, code, actor, `−${q.pointsDiscount} DA`, now),
       );
     }
     if (input.cartId) {
       stmts.push(
         env.DB.prepare(`UPDATE carts SET recovered_order_id = ${orderRef}, step = 'ready', updated_at = ? WHERE id = ? AND recovered_order_id IS NULL`).bind(
-          now, input.cartId,
+          code, now, input.cartId,
         ),
       );
     }
@@ -608,7 +609,9 @@ export async function applyStatusChange(
   const now = Date.now();
   // every follow-up statement only applies if *this* request won the status update
   const nonce = [...crypto.getRandomValues(new Uint8Array(12))].map((b) => b.toString(16).padStart(2, "0")).join("");
-  const guard = `(SELECT op_nonce FROM orders WHERE id = ${orderId}) = '${nonce}'`;
+  // the guard ends each statement below; its two values are bound last (`...g`)
+  const guard = "(SELECT op_nonce FROM orders WHERE id = ?) = ?";
+  const g = [orderId, nonce] as const;
   const tsCol = TIMESTAMP_COL[to];
   // outcome reason: set when cancelled / returned, kept through "retour reçu", cleared when reopened
   const outcome = OUTCOME_STATUSES.includes(to) ? (reason ?? (to === "doublon" ? "duplicate" : null)) : to === "nouvelle" ? null : undefined;
@@ -625,25 +628,23 @@ export async function applyStatusChange(
   const effect = stockEffect(from, to);
   for (const it of items) {
     if (effect === "reserve") {
-      stmts.push(env.DB.prepare(`UPDATE variants SET stock_reserved = stock_reserved + ? WHERE id = ? AND ${guard}`).bind(it.qty, it.variant_id));
+      stmts.push(env.DB.prepare(`UPDATE variants SET stock_reserved = stock_reserved + ? WHERE id = ? AND ${guard}`).bind(it.qty, it.variant_id, ...g));
     } else if (effect === "release") {
-      stmts.push(env.DB.prepare(`UPDATE variants SET stock_reserved = MAX(stock_reserved - ?, 0) WHERE id = ? AND ${guard}`).bind(it.qty, it.variant_id));
+      stmts.push(env.DB.prepare(`UPDATE variants SET stock_reserved = MAX(stock_reserved - ?, 0) WHERE id = ? AND ${guard}`).bind(it.qty, it.variant_id, ...g));
     } else if (effect === "commit") {
       stmts.push(
         env.DB.prepare(`UPDATE variants SET stock_on_hand = stock_on_hand - ?, stock_reserved = MAX(stock_reserved - ?, 0) WHERE id = ? AND ${guard}`).bind(
-          it.qty, it.qty, it.variant_id,
-        ),
+          it.qty, it.qty, it.variant_id, ...g),
       );
     } else if (effect === "restock") {
-      stmts.push(env.DB.prepare(`UPDATE variants SET stock_on_hand = stock_on_hand + ? WHERE id = ? AND ${guard}`).bind(it.qty, it.variant_id));
+      stmts.push(env.DB.prepare(`UPDATE variants SET stock_on_hand = stock_on_hand + ? WHERE id = ? AND ${guard}`).bind(it.qty, it.variant_id, ...g));
     }
     if (effect) {
       const reason = { reserve: "reservation", release: "liberation", commit: "vente", restock: "retour" }[effect];
       const delta = effect === "reserve" || effect === "commit" ? -it.qty : it.qty;
       stmts.push(
         env.DB.prepare(`INSERT INTO stock_movements (variant_id, delta, reason, order_id, actor, created_at) SELECT ?, ?, ?, ?, ?, ? WHERE ${guard}`).bind(
-          it.variant_id, delta, reason, orderId, actor, now,
-        ),
+          it.variant_id, delta, reason, orderId, actor, now, ...g),
       );
     }
   }
@@ -652,26 +653,26 @@ export async function applyStatusChange(
   stmts.push(
     env.DB.prepare(
       `INSERT INTO order_events (order_id, from_status, to_status, kind, actor, source, note, created_at) SELECT ?, ?, ?, 'status', ?, ?, ?, ? WHERE ${guard}`,
-    ).bind(orderId, from, to, actor, source, note ?? null, now),
+    ).bind(orderId, from, to, actor, source, note ?? null, now, ...g),
   );
 
   if (to === "livree") {
     stmts.push(
-      env.DB.prepare(`UPDATE customers SET delivered_count = delivered_count + 1, total_spent = total_spent + ? WHERE id = ? AND ${guard}`).bind(order.total, order.customer_id),
+      env.DB.prepare(`UPDATE customers SET delivered_count = delivered_count + 1, total_spent = total_spent + ? WHERE id = ? AND ${guard}`).bind(order.total, order.customer_id, ...g),
     );
   } else if (to === "retour") {
-    stmts.push(env.DB.prepare(`UPDATE customers SET returned_count = returned_count + 1 WHERE id = ? AND ${guard}`).bind(order.customer_id));
+    stmts.push(env.DB.prepare(`UPDATE customers SET returned_count = returned_count + 1 WHERE id = ? AND ${guard}`).bind(order.customer_id, ...g));
   } else if (to === "annulee" || to === "doublon" || to === "fausse") {
     // cancelled orders don't count as orders (history, loyalty, "first order" coupons, Telegram badges)
     stmts.push(
       env.DB.prepare(
         `UPDATE customers SET cancelled_count = cancelled_count + 1, orders_count = MAX(orders_count - 1, 0)${to === "fausse" ? ", fake_count = fake_count + 1" : ""} WHERE id = ? AND ${guard}`,
-      ).bind(order.customer_id),
+      ).bind(order.customer_id, ...g),
 
     );
   } else if (from === "annulee" && to === "nouvelle") {
     stmts.push(
-      env.DB.prepare(`UPDATE customers SET cancelled_count = MAX(cancelled_count - 1, 0), orders_count = orders_count + 1 WHERE id = ? AND ${guard}`).bind(order.customer_id),
+      env.DB.prepare(`UPDATE customers SET cancelled_count = MAX(cancelled_count - 1, 0), orders_count = orders_count + 1 WHERE id = ? AND ${guard}`).bind(order.customer_id, ...g),
     );
   }
 
@@ -680,10 +681,10 @@ export async function applyStatusChange(
   if (order.points_used > 0 && undone(to) !== undone(from)) {
     const delta = undone(to) ? order.points_used : -order.points_used;
     stmts.push(
-      env.DB.prepare(`UPDATE customers SET points_balance = MAX(points_balance + ?, 0) WHERE id = ? AND ${guard}`).bind(delta, order.customer_id),
+      env.DB.prepare(`UPDATE customers SET points_balance = MAX(points_balance + ?, 0) WHERE id = ? AND ${guard}`).bind(delta, order.customer_id, ...g),
       env.DB.prepare(
         `INSERT INTO loyalty_ledger (customer_id, delta, reason, order_id, actor, note, created_at) SELECT ?, ?, ?, ?, ?, ?, ? WHERE ${guard}`,
-      ).bind(order.customer_id, delta, delta > 0 ? "reversal" : "redeem", orderId, actor, delta > 0 ? "points rendus (commande annulée / retour)" : "points de nouveau utilisés", now),
+      ).bind(order.customer_id, delta, delta > 0 ? "reversal" : "redeem", orderId, actor, delta > 0 ? "points rendus (commande annulée / retour)" : "points de nouveau utilisés", now, ...g),
     );
   }
 
@@ -694,11 +695,11 @@ export async function applyStatusChange(
       pointsEarned = pointsFor(order.total, loyalty.points_per_100da);
       if (pointsEarned > 0) {
         stmts.push(
-          env.DB.prepare(`UPDATE customers SET points_balance = points_balance + ? WHERE id = ? AND ${guard}`).bind(pointsEarned, order.customer_id),
-          env.DB.prepare(`UPDATE orders SET points_earned = ? WHERE id = ? AND ${guard}`).bind(pointsEarned, orderId),
+          env.DB.prepare(`UPDATE customers SET points_balance = points_balance + ? WHERE id = ? AND ${guard}`).bind(pointsEarned, order.customer_id, ...g),
+          env.DB.prepare(`UPDATE orders SET points_earned = ? WHERE id = ? AND ${guard}`).bind(pointsEarned, orderId, ...g),
           env.DB.prepare(
             `INSERT INTO loyalty_ledger (customer_id, delta, reason, order_id, actor, created_at) SELECT ?, ?, 'order', ?, ?, ? WHERE ${guard}`,
-          ).bind(order.customer_id, pointsEarned, orderId, actor, now),
+          ).bind(order.customer_id, pointsEarned, orderId, actor, now, ...g),
         );
       }
     }

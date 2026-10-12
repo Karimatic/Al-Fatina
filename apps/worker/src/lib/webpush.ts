@@ -177,7 +177,7 @@ export async function sendRestockPushes(env: Env, variantIds?: number[], max = 4
   const productIds = [...new Set(results.map((r) => r.product_id))];
   const [labels, images] = await Promise.all([
     variantLabels(env, [...new Set(results.map((r) => r.variant_id))]),
-    env.DB.prepare(`SELECT * FROM product_images WHERE product_id IN (${productIds.join(",")}) ORDER BY product_id, sort, id`).all<ImageRow>(),
+    env.DB.prepare(`SELECT * FROM product_images WHERE product_id IN (${productIds.map(Number).join(",")}) ORDER BY product_id, sort, id`).all<ImageRow>(),
   ]);
   const firstImage = new Map<number, ImageRef>();
   for (const r of images.results) if (!firstImage.has(r.product_id)) firstImage.set(r.product_id, imageRef(env, r));
@@ -249,8 +249,8 @@ export async function sendCampaignBatch(env: Env, max = 35): Promise<number> {
     env.DB.prepare("UPDATE campaigns SET stats = ?, status = ? WHERE id = ?").bind(JSON.stringify(stats), done ? "sent" : "sending", campaign.id),
     ...(gone.length
       ? [
-          env.DB.prepare(`DELETE FROM stock_alerts WHERE notified_at IS NULL AND push_subscription_id IN (${gone.join(",")})`),
-          env.DB.prepare(`DELETE FROM push_subscriptions WHERE id IN (${gone.join(",")})`),
+          env.DB.prepare(`DELETE FROM stock_alerts WHERE notified_at IS NULL AND push_subscription_id IN (${gone.map(Number).join(",")})`),
+          env.DB.prepare(`DELETE FROM push_subscriptions WHERE id IN (${gone.map(Number).join(",")})`),
         ]
       : []),
   ]);

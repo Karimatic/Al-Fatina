@@ -89,7 +89,7 @@ export const DEFAULTS: Settings = {
   sources: DEFAULT_SOURCE_SETTINGS,
   notifications: {
     telegram_new_order: true, telegram_status_change: true, telegram_low_stock: true,
-    telegram_review: true, telegram_contact: true, trust_group_members: true,
+    telegram_review: true, telegram_contact: true, trust_group_members: false,
   },
   telegram: { token_enc: null, chat_id: null, chat_title: null, bot_username: null, webhook_secret_enc: null, webhook_url: null, last_update_id: 0 },
   integrations: { zr_id_enc: null, zr_token_enc: null, meta_pixel_id: null, tiktok_pixel_id: null },

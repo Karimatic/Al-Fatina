@@ -345,12 +345,17 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
   const navigate = useNavigate();
   const [connected, setConnected] = useState(false);
   const connectedRef = useRef(false);
-  connectedRef.current = connected;
+  useEffect(() => {
+    connectedRef.current = connected;
+  }, [connected]);
   const [cards, setCards] = useState<Card[]>([]);
   const [prefs, setPrefs] = useState(loadPrefs);
   const [needsUnlock, setNeedsUnlock] = useState(false);
+  // the latest preferences for the sound callbacks (kept in a ref: no reconnection on change)
   const prefsRef = useRef(prefs);
-  prefsRef.current = prefs;
+  useEffect(() => {
+    prefsRef.current = prefs;
+  }, [prefs]);
 
   const unseen = useQuery({
     queryKey: ["unseen"],
@@ -429,7 +434,8 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
     const original = document.title;
     let on = false;
     const id = setInterval(() => {
-      document.title = (on = !on) ? text : original;
+      on = !on;
+      document.title = on ? text : original;
     }, 1000);
     const stop = () => {
       clearInterval(id);

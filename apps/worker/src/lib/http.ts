@@ -1,7 +1,6 @@
 import type { Context } from "hono";
 import type { z } from "zod";
-import type { AppEnv, Env } from "../env";
-import { isDev } from "../env";
+import type { AppEnv } from "../env";
 import { sha256Hex } from "./crypto";
 
 export class HttpError extends Error {

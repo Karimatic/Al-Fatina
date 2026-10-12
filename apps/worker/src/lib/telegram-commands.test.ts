@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Env } from "../env";
-import { seedShop, testDb } from "../test/db";
+import { addOrder, seedShop, testDb } from "../test/db";
 import { encryptSecret } from "./crypto";
 import { handleUpdate } from "./telegram";
 
@@ -51,5 +51,34 @@ describe("Telegram bot commands", () => {
     db.sqlite.exec("UPDATE team_members SET is_active = 0 WHERE id = 50");
     await handleUpdate(env, command("/stock", 42, GROUP) as never);
     expect(sent.at(-1)).toContain("désactivé");
+  });
+
+  it("an unlinked member of the team group never bypasses roles (audit SEC-001)", async () => {
+    const { db, env } = await shop();
+    const answers: string[] = [];
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith("/answerCallbackQuery")) answers.push(String(JSON.parse(String(init?.body)).text));
+      return new Response(JSON.stringify({ ok: true, result: {} }), { headers: { "Content-Type": "application/json" } });
+    });
+    const id = addOrder(db, { status: "nouvelle" });
+    const press = (to: string) =>
+      handleUpdate(env, { update_id: 1, callback_query: { id: "cb", from: { id: 777, first_name: "Livreur" }, data: `s:${id}:${to}`, message: { chat: { id: GROUP }, message_id: 5 } } } as never);
+    const status = () => (db.sqlite.prepare("SELECT status FROM orders WHERE id = ?").get(id) as { status: string }).status;
+
+    // default: the group is not trusted, nothing goes through
+    await press("confirmee");
+    expect(answers.at(-1)).toContain("⛔");
+    expect(status()).toBe("nouvelle");
+
+    // trusted group: cancelling / fake / shipping still refused, only the reversible first step
+    db.sqlite.exec(`INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('notifications', '{"trust_group_members":true}', 0)`);
+    for (const to of ["annulee", "fausse", "doublon", "expediee", "livree"]) {
+      await press(to);
+      expect(answers.at(-1)).toContain("⛔");
+    }
+    expect(status()).toBe("nouvelle");
+    await press("confirmee");
+    expect(status()).toBe("confirmee");
+    expect((db.sqlite.prepare("SELECT actor FROM order_events WHERE order_id = ? ORDER BY id DESC LIMIT 1").get(id) as { actor: string }).actor).toMatch(/^telegram:777:/);
   });
 });

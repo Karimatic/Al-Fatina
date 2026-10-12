@@ -24,7 +24,6 @@ import { body, HttpError, intParam } from "../../lib/http";
 import { LIVE_TAG, liveConnect } from "../../lib/live";
 import { replaceOrderItems } from "../../lib/order-items";
 import { putAudio } from "../../lib/media";
-import { quote } from "../../lib/orders";
 import { dailyReport, dayOf, dayStartOf } from "../../lib/reports";
 import { getSettings, setSettingStmt } from "../../lib/settings";
 import { syncOrderMessage } from "../../lib/telegram";

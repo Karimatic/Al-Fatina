@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { imageSrcSet, imageUrl, type ImageRef } from "@henine/shared";
 import { useLocale } from "@/lib/locale";
+import { useDialogFocus } from "@/lib/dialogFocus";
 
 /**
  * Full-screen gallery: swipe between photos, pinch or double-tap to zoom,
@@ -9,6 +10,7 @@ import { useLocale } from "@/lib/locale";
 export function Lightbox({ images, start, name, onClose }: { images: ImageRef[]; start: number; name: string; onClose: () => void }) {
   const { t, ar } = useLocale();
   const G = t.plus.gallery;
+  const dialogRef = useDialogFocus<HTMLDivElement>();
   const count = images.length;
   const [index, setIndex] = useState(start);
   const track = useRef<HTMLDivElement>(null);
@@ -37,7 +39,7 @@ export function Lightbox({ images, start, name, onClose }: { images: ImageRef[];
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-black text-white" role="dialog" aria-modal="true" aria-label={name}>
+    <div className="fixed inset-0 z-[60] flex flex-col bg-black text-white" ref={dialogRef} role="dialog" aria-modal="true" aria-label={name}>
       <div className="flex items-center justify-between px-4 pb-2 pt-[calc(0.75rem+env(safe-area-inset-top))]">
         <span className="text-sm tabular-nums text-white/80" dir="ltr">
           {index + 1} / {count}

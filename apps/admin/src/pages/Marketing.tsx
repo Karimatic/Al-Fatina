@@ -672,7 +672,7 @@ export function NotifierPage() {
         <div className="mt-2 border-t border-line pt-2">
           <Toggle
             label={tr("Tous les membres du groupe peuvent utiliser les boutons")}
-            hint={tr("Sinon, seules les personnes dont l'ID Telegram est renseigné dans Équipe (et selon leur rôle).")}
+            hint={tr("Seulement Confirmer / Injoignable. Annuler, expédier, livrer, le suivi et les commandes restent réservés aux comptes reliés dans Équipe (selon leur rôle).")}
             checked={n.trust_group_members}
             onChange={toggle("trust_group_members")}
           />

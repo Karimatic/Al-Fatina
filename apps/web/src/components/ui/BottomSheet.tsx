@@ -1,10 +1,13 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useId, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useLocale } from "@/lib/locale";
+import { useDialogFocus } from "@/lib/dialogFocus";
 
 /** Panel from the bottom on phones, centred on computers; Esc / tap outside closes it. */
 export function BottomSheet({ title, onClose, children, wide = false }: { title: ReactNode; onClose: () => void; children: ReactNode; wide?: boolean }) {
   const { t, ar } = useLocale();
+  const dialogRef = useDialogFocus<HTMLDivElement>();
+  const titleId = useId();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
@@ -18,14 +21,15 @@ export function BottomSheet({ title, onClose, children, wide = false }: { title:
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-noir/45 md:items-center" onClick={onClose}>
       <div
-        role="dialog"
+        ref={dialogRef} role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
         dir={ar ? "rtl" : "ltr"}
         onClick={(e) => e.stopPropagation()}
         className={`toast-in flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-[1.75rem] bg-ivory shadow-2xl md:rounded-[1.75rem] ${wide ? "max-w-3xl" : "max-w-lg"}`}
       >
         <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-          <h2 className="heading-display text-xl">{title}</h2>
+          <h2 id={titleId} className="heading-display text-xl">{title}</h2>
           <button type="button" onClick={onClose} className="grid size-10 place-items-center rounded-full bg-ivory-deep text-lg" aria-label={t.common.close}>
             ✕
           </button>

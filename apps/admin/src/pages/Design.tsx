@@ -18,7 +18,7 @@ import { api, errorMessage, put, upload } from "../api";
 import { tr } from "../i18n";
 import { processImage } from "../lib/images";
 import { ProductPicker } from "../lib/pickers";
-import { Button, Card, ErrorState, inputCls, ListSkeleton, TextArea, TextField, useToast } from "../ui";
+import { Button, Card, ErrorState, ListSkeleton, TextArea, TextField, useToast } from "../ui";
 
 /** Picture made in the browser (WebP, ≤ 1440 px), then stored; returns its key. */
 /** The big home page video: MP4 / WebM straight from the phone, 40 MB at most. */

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { formatDA } from "@henine/shared";
 import { useLocale } from "@/lib/locale";
+import { useDialogFocus } from "@/lib/dialogFocus";
 
 /**
  * Share a product: the phone's own share sheet (Web Share API: WhatsApp, Instagram DMs…)
@@ -11,6 +12,7 @@ import { useLocale } from "@/lib/locale";
 export function ShareButton({ slug, name, price, className = "" }: { slug: string; name: string; price: number; className?: string }) {
   const { t, href, locale } = useLocale();
   const [open, setOpen] = useState(false);
+  const dialogRef = useDialogFocus<HTMLDivElement>(open);
   const [copied, setCopied] = useState(false);
 
   const url = () => `${location.origin}${href(`/produit/${slug}`)}?utm_source=share&utm_medium=social`;
@@ -58,7 +60,7 @@ export function ShareButton({ slug, name, price, className = "" }: { slug: strin
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-noir/40 md:items-center" onClick={() => setOpen(false)}>
-          <div role="dialog" aria-modal="true" aria-label={t.share.title} onClick={(e) => e.stopPropagation()} className="w-full rounded-t-3xl bg-ivory p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-soft md:max-w-sm md:rounded-3xl">
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t.share.title} onClick={(e) => e.stopPropagation()} className="w-full rounded-t-3xl bg-ivory p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-soft md:max-w-sm md:rounded-3xl">
             <div className="mb-4 flex items-center justify-between">
               <p className="font-semibold">{t.share.title}</p>
               <button type="button" onClick={() => setOpen(false)} aria-label={t.common.close} className="grid size-10 place-items-center rounded-full text-xl text-ink-soft hover:bg-rose-100">

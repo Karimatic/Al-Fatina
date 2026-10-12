@@ -681,3 +681,6 @@
 @media (prefers-reduced-motion: reduce) {
   .sheet-in, .sheet-backdrop { animation: none; }
 }
+
+/* a pop-up panel receives the focus itself when it opens (lib/dialogFocus.ts): no ring around the whole panel */
+[role="dialog"]:focus { outline: none; }

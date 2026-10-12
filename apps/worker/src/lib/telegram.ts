@@ -368,10 +368,13 @@ async function answer(token: string, callbackId: string, text: string, alert = f
 }
 
 /**
- * Who is acting? A team member whose Telegram ID is set in Admin → Équipe (their role applies),
- * or — if allowed in Notifier — anyone in the team group.
+ * Who is acting? A team member whose Telegram ID is set in Admin → Équipe: their role applies,
+ * always. Someone in the team group without a linked account only when the shop allows it in
+ * Notifier (off by default), and then only for `groupSafe` actions: the first, reversible step
+ * of a new order (Confirmer / Injoignable). Cancelling, fake / duplicate, shipping, delivery,
+ * tracking numbers, notes and data commands always need a linked account with the permission.
  */
-async function resolveActor(env: Env, from: TgUser, chat: number | undefined, chatId: string | null, permission: Permission | null) {
+async function resolveActor(env: Env, from: TgUser, chat: number | undefined, chatId: string | null, permission: Permission | null, groupSafe = false) {
   const member = await env.DB.prepare(
     "SELECT m.id, m.name, m.is_active, r.permissions FROM team_members m JOIN roles r ON r.id = m.role_id WHERE m.telegram_user_id = ?",
   )
@@ -386,6 +389,7 @@ async function resolveActor(env: Env, from: TgUser, chat: number | undefined, ch
   const notif = await getSetting(env, "notifications");
   const inTeamGroup = chatId != null && String(chat) === chatId;
   if (!notif.trust_group_members || !inTeamGroup) return { error: "⛔ Compte Telegram non relié à l'équipe (Admin → Équipe)." };
+  if (!groupSafe) return { error: "⛔ Action réservée aux comptes reliés à l'équipe (Admin → Équipe → Telegram)." };
   return { actor: `telegram:${from.id}:${from.first_name ?? from.username ?? "Telegram"}` };
 }
 
@@ -437,7 +441,8 @@ async function handleCallback(env: Env, token: string, cq: NonNullable<TgUpdate[
   if (!m) return answer(token, cq.id, "Action inconnue");
   const orderId = Number(m[1]);
   const to = m[2] as OrderStatus;
-  const who = await resolveActor(env, cq.from, chat, chatId, permissionFor(to));
+  // the group may only take the reversible first step (if the shop trusts its members)
+  const who = await resolveActor(env, cq.from, chat, chatId, permissionFor(to), to === "confirmee" || to === "injoignable");
   if (who.error) return answer(token, cq.id, who.error, true);
   const actor = who.actor!;
 
@@ -507,8 +512,8 @@ async function handleCommand(env: Env, token: string, msg: TgMessage, chatId: st
     tgCall(token, "sendMessage", { chat_id: msg.chat.id, text: html, parse_mode: "HTML", link_preview_options: { is_disabled: true }, ...extra });
   const cmd = text.split(/[\s@]/)[0]?.toLowerCase();
   const arg = text.split(/\s+/).slice(1).join(" ").trim();
-  // customer data and figures: only a linked team member with the right permission (or the
-  // team group, when the shop trusts its members) — never any Telegram user writing to the bot
+  // customer data and figures: only a linked team member with the right permission, never
+  // any Telegram user writing to the bot, nor an unlinked member of the team group
   const needed = cmd ? COMMAND_PERMISSION[cmd] : undefined;
   if (needed) {
     if (!msg.from) return;

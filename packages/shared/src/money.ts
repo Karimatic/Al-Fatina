@@ -5,7 +5,6 @@ export type DA = number;
 
 const NBSP = " "; // narrow no-break space, used as thousands separator
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function formatDA(amount: DA, _locale: Locale = "ar"): string {
   const n = Math.round(amount);
   const sign = n < 0 ? "-" : "";

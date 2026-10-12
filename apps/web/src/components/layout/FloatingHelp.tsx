@@ -5,6 +5,7 @@ import { apiPost } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { useSite, whatsappLink } from "@/lib/site";
 import { cartStore, favoritesStore, ordersStore, recentStore } from "@/lib/stores";
+import { useDialogFocus } from "@/lib/dialogFocus";
 
 export function WhatsAppIcon({ size = 26 }: { size?: number }) {
   return (
@@ -110,9 +111,8 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
   const lastSearch = useRef<string | null>(null);
   const list = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
+  const dialogRef = useDialogFocus<HTMLDivElement>();
   useEffect(() => {
-    // a computer: ready to type; a phone: no keyboard jumping up over the panel before she asks
-    if (matchMedia("(hover: hover) and (pointer: fine)").matches) input.current?.focus();
     const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", esc);
     // the page behind stays still, and keeps its width (the scrollbar's room is kept)
@@ -175,7 +175,7 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
   const wa = whatsappLink(site.data?.contact.whatsapp, t.plus.whatsapp.hello);
 
   return (
-    <div className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-noir/50 md:items-center" role="dialog" aria-modal="true" aria-label={A.title} onClick={onClose}>
+    <div className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-noir/50 md:items-center" ref={dialogRef} role="dialog" aria-modal="true" aria-label={A.title} onClick={onClose}>
       <div className="sheet-in flex max-h-[88dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-[1.75rem] bg-ivory shadow-2xl md:rounded-[1.75rem]" onClick={(e) => e.stopPropagation()}>
         <header className="flex items-center justify-between gap-3 bg-gradient-to-br from-plum-600 to-plum-700 px-5 py-4 text-white">
           <div>
@@ -284,6 +284,8 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
         >
           <input
             ref={input}
+            // a computer: ready to type; a phone: no keyboard jumping up before she asks (lib/dialogFocus)
+            data-autofocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
             maxLength={300}

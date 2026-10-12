@@ -3,7 +3,7 @@ import { useState } from "react";
 import { api } from "../api";
 import { OUTCOME_REASON_LABEL, type OutcomeReason } from "@henine/shared";
 import { da, ltr } from "../lib/format";
-import { Card, ErrorState, ListSkeleton, PageHeader, Pills, Stat, TextField } from "../ui";
+import { Card, ErrorState, ListSkeleton, PageHeader, Pills, Stat } from "../ui";
 import { isAr, tr } from "../i18n";
 import { usePeriod } from "../lib/period";
 import { DailyReportCard } from "./DailyReport";
@@ -49,11 +49,13 @@ function fillDays(data: StatsData["daily"], since: number, days: number) {
 
 /** Revenue adding up day after day over the period. */
 function CumulativeChart({ data, since, days }: { data: StatsData["daily"]; since: number; days: number }) {
-  let run = 0;
-  const points = fillDays(data, since, days).map((d) => {
-    run += d.revenue;
-    return { label: d.label, value: run, sub: d.revenue ? tr("+ {0} ce jour-là", { 0: da(d.revenue) }) : undefined };
-  });
+  const filled = fillDays(data, since, days);
+  // running total: each day adds its own revenue to the days before it
+  const points = filled.map((d, i) => ({
+    label: d.label,
+    value: filled.slice(0, i + 1).reduce((sum, x) => sum + x.revenue, 0),
+    sub: d.revenue ? tr("+ {0} ce jour-là", { 0: da(d.revenue) }) : undefined,
+  }));
   return (
     <Card title={tr("Chiffre d'affaires cumulé")}>
       <TrendChart points={points} format={(v) => da(v)} axisFormat={shortDA} label={tr("Chiffre d'affaires cumulé")} />

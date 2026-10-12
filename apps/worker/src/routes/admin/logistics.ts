@@ -181,7 +181,10 @@ logisticsRoutes.patch("/followups/:id", requirePermission("orders.edit"), async 
     vals.push(input.note);
   }
   const closing = followupClosed(to) && !followupClosed(f.status);
-  if (closing) sets.push("closed_at = ?", "closed_by = ?"), vals.push(now, actor);
+  if (closing) {
+    sets.push("closed_at = ?", "closed_by = ?");
+    vals.push(now, actor);
+  }
   if (!followupClosed(to) && followupClosed(f.status)) sets.push("closed_at = NULL", "closed_by = NULL");
 
   const stmts: D1PreparedStatement[] = [c.env.DB.prepare(`UPDATE delivery_followups SET ${sets.join(", ")} WHERE id = ?`).bind(...vals, id)];

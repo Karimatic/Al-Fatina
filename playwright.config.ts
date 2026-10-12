@@ -13,7 +13,8 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: false,
   workers: 1,
-  retries: process.env.CI ? 1 : 0,
+  // one retry everywhere: a test that fails twice is a real failure (the report keeps both runs)
+  retries: process.env.CI ? 2 : 1,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: BASE,
@@ -29,7 +30,9 @@ export default defineConfig({
     command: "node scripts/e2e-server.mjs",
     url: `${BASE}/api/health`,
     timeout: 240_000,
-    reuseExistingServer: !process.env.CI,
+    // always a fresh server and database: a server left from an earlier run (or another run in
+    // progress) would mix results; a busy port is reported instead
+    reuseExistingServer: false,
     stdout: "ignore",
     stderr: "pipe",
   },

@@ -23,6 +23,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - run: npm run lint
       - run: npm test
       - run: npm run build
       - name: Upload build
@@ -34,10 +35,16 @@ jobs:
 
   e2e:
     # The built shop in a real browser (Google Chrome, preinstalled on the runner) against a
-    # throwaway database: ordering in Arabic and French on phone and computer, the bot check,
-    # security headers, and the accessibility gate (axe, WCAG 2.1 AA: any violation fails).
+    # throwaway database: ordering in Arabic and French, the bot check, security headers,
+    # keyboard behaviour of the pop-ups and the accessibility gate (axe, WCAG 2.1 AA: any
+    # violation fails). Phone and computer run side by side, each with its own server.
     needs: check
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [phone, desktop]
+    name: e2e (${{ matrix.project }})
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -49,14 +56,14 @@ jobs:
         with:
           name: dist
           path: dist
-      - run: npm run test:e2e
+      - run: npm run test:e2e -- --project=${{ matrix.project }}
         env:
           CI: "1"
       - name: Upload report on failure
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: |
             playwright-report
             test-results

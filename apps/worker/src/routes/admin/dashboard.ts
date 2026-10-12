@@ -184,7 +184,6 @@ dashboardRoutes.get("/stats", requirePermission("stats.view"), async (c) => {
   const { since, until, label, days } = statsRange((k) => c.req.query(k));
   const inRange = "o.created_at >= ?1 AND o.created_at < ?2";
   const valid = `o.status NOT IN ${CANCELLED_SQL}`;
-  const day = (ts: number) => new Date(ts + 3600_000).toISOString().slice(0, 10);
   const [totals, daily, statusRows, wilayas, channels, hours, top, reasons, durations, byType, weekdays] = await c.env.DB.batch([
     c.env.DB.prepare(
       `SELECT COUNT(*) AS placed,

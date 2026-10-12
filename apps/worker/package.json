@@ -13,7 +13,8 @@
     "seed:remote": "wrangler d1 execute DB --remote --file ../../packages/db/seed/geo.sql && wrangler d1 execute DB --remote --file ../../packages/db/seed/base.sql",
     "types": "wrangler types --env-interface CloudflareBindings src/worker-configuration.d.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@henine/db": "*",
@@ -25,7 +26,11 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260930.2",
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^16.4.0",
     "typescript": "^6.0.0",
+    "typescript-eslint": "^8.71.0",
     "vitest": "^5.0.3",
     "wrangler": "^4.149.0"
   }

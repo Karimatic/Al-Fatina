@@ -330,7 +330,6 @@ function OrderCostsCard() {
 function SlaCard() {
   const qc = useQueryClient();
   const toast = useToast();
-  const can = useCan();
   const q = useQuery({
     queryKey: ["operations-settings"],
     queryFn: () => api<OpsSettings>("/operations/settings"),

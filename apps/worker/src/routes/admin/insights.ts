@@ -44,7 +44,7 @@ insightRoutes.get("/packing", requirePermission("orders.ship"), async (c) => {
   const ids = orders.map((o) => o.id);
   const { results: items } = await c.env.DB.prepare(
     `SELECT oi.id, oi.order_id, oi.variant_id, oi.product_id, oi.name_fr, oi.sku, oi.options_label, oi.qty, oi.unit_price, oi.image
-       FROM order_items oi WHERE oi.order_id IN (${ids.join(",")}) ORDER BY oi.id`,
+       FROM order_items oi WHERE oi.order_id IN (${ids.map(Number).join(",")}) ORDER BY oi.id`,
   ).all<{ order_id: number; variant_id: number | null } & Record<string, unknown>>();
   const labels = await variantLabels(c.env, [...new Set(items.map((i) => i.variant_id).filter((v): v is number => v != null))]);
   return c.json(

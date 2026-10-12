@@ -47,12 +47,75 @@ for (const args of steps) {
   if (r.status !== 0) process.exit(r.status ?? 1);
 }
 
-const dev = spawn(
-  "npx",
-  ["wrangler", "dev", "--config", CONFIG, "--persist-to", PERSIST, "--env-file", "../../e2e/e2e.vars", "--ip", "127.0.0.1", "--port", String(PORT), "--show-interactive-dev-session=false"],
-  { cwd: worker, stdio: "inherit", shell: process.platform === "win32" },
-);
-const stop = () => dev.kill();
+/*
+ * The dev server, watched: its engine (workerd) can die while wrangler itself keeps running, so
+ * the server just stops answering and every following test fails with "connection refused"
+ * although nothing is wrong with the shop. Health is checked every 5 s once it is up; after 3
+ * misses in a row (or if wrangler exits) the whole process tree is replaced, on the same
+ * database. Stopped for good when the tests end.
+ */
+const MAX_RESTARTS = 3;
+const HEALTH = `http://127.0.0.1:${PORT}/api/health`;
+let dev;
+let restarts = 0;
+let stopping = false;
+let up = false;
+let misses = 0;
+
+const killTree = (child) => {
+  if (!child?.pid) return;
+  if (process.platform === "win32") spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+  else {
+    try {
+      process.kill(-child.pid, "SIGKILL"); // the whole group (spawned detached)
+    } catch {
+      child.kill("SIGKILL");
+    }
+  }
+};
+
+const restart = (why) => {
+  if (stopping) return;
+  if (restarts >= MAX_RESTARTS) {
+    console.error(`✗ e2e server: ${why}, ${restarts} restarts already: giving up.`);
+    stopping = true;
+    killTree(dev);
+    process.exit(1);
+  }
+  restarts++;
+  console.error(`⚠ e2e server: ${why}: restarting (${restarts}/${MAX_RESTARTS}).`);
+  const old = dev;
+  dev = null;
+  old?.removeAllListeners("exit");
+  killTree(old);
+  up = false;
+  misses = 0;
+  setTimeout(start, 1500);
+};
+
+const start = () => {
+  dev = spawn(
+    "npx",
+    ["wrangler", "dev", "--config", CONFIG, "--persist-to", PERSIST, "--env-file", "../../e2e/e2e.vars", "--ip", "127.0.0.1", "--port", String(PORT), "--show-interactive-dev-session=false"],
+    { cwd: worker, stdio: "inherit", shell: process.platform === "win32", detached: process.platform !== "win32" },
+  );
+  dev.on("exit", (code) => (stopping ? process.exit(0) : restart(`wrangler exited (code ${code})`)));
+};
+
+setInterval(async () => {
+  if (stopping || !dev) return;
+  const ok = await fetch(HEALTH, { signal: AbortSignal.timeout(4000) }).then((r) => r.ok, () => false);
+  if (ok) {
+    up = true;
+    misses = 0;
+  } else if (up && ++misses >= 3) restart("not answering");
+}, 5000).unref();
+
+start();
+const stop = () => {
+  stopping = true;
+  killTree(dev);
+  process.exit(0);
+};
 process.on("SIGINT", stop);
 process.on("SIGTERM", stop);
-dev.on("exit", (code) => process.exit(code ?? 0));

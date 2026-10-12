@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { normalizeSearch } from "@henine/shared";
 import { inputCls, Spinner } from "@/components/ui/kit";
 import { useLocale } from "@/lib/locale";
+import { useDialogFocus } from "@/lib/dialogFocus";
 
 export interface PickerOption<V> {
   value: V;
@@ -42,6 +43,7 @@ export function Picker<V extends string | number>({
 }) {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
+  const dialogRef = useDialogFocus<HTMLDivElement>(open);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -99,7 +101,7 @@ export function Picker<V extends string | number>({
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-noir/40 md:items-center" onClick={close}>
           <div
-            role="dialog"
+            ref={dialogRef} role="dialog"
             aria-modal="true"
             aria-label={title}
             onClick={(e) => e.stopPropagation()}

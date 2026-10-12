@@ -14,7 +14,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { api, del, errorMessage, patch, post } from "../api";
 import { pickableSources, sourceText, useSourceSettings } from "../lib/sources";
-import { ago, CHANNEL_LABEL, da, daMinus, dateTime, statusLabel, telLink, waLink } from "../lib/format";
+import { ago, CHANNEL_LABEL, da, daMinus, dateTime, statusLabel } from "../lib/format";
 import { RiskBadge, RiskPanel, SegmentBadge } from "../lib/risk";
 import { useLive } from "../lib/live";
 import {

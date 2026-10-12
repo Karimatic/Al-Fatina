@@ -39,10 +39,22 @@ contentRoutes.put("/content/wilayas", requirePermission("delivery.edit"), async 
   );
   const sets: string[] = [];
   const vals: unknown[] = [];
-  if ("homePrice" in input) (sets.push("home_price = ?"), vals.push(input.homePrice));
-  if ("deskPrice" in input) (sets.push("desk_price = ?"), vals.push(input.deskPrice));
-  if ("delayDays" in input) (sets.push("delay_days = ?"), vals.push(input.delayDays));
-  if ("isActive" in input) (sets.push("is_active = ?"), vals.push(input.isActive ? 1 : 0));
+  if ("homePrice" in input) {
+    sets.push("home_price = ?");
+    vals.push(input.homePrice);
+  }
+  if ("deskPrice" in input) {
+    sets.push("desk_price = ?");
+    vals.push(input.deskPrice);
+  }
+  if ("delayDays" in input) {
+    sets.push("delay_days = ?");
+    vals.push(input.delayDays);
+  }
+  if ("isActive" in input) {
+    sets.push("is_active = ?");
+    vals.push(input.isActive ? 1 : 0);
+  }
   const stmts: D1PreparedStatement[] = [];
   if (sets.length) {
     stmts.push(c.env.DB.prepare(`UPDATE wilayas SET ${sets.join(", ")}, updated_at = ? WHERE code IN (${input.codes.map(() => "?").join(",")})`).bind(...vals, Date.now(), ...input.codes));
@@ -79,9 +91,18 @@ contentRoutes.put("/content/communes", requirePermission("delivery.edit"), async
   );
   const sets: string[] = [];
   const vals: unknown[] = [];
-  if ("homePrice" in input) (sets.push("home_price = ?"), vals.push(input.homePrice));
-  if ("homeSupported" in input) (sets.push("home_supported = ?"), vals.push(input.homeSupported ? 1 : 0));
-  if ("isActive" in input) (sets.push("is_active = ?"), vals.push(input.isActive ? 1 : 0));
+  if ("homePrice" in input) {
+    sets.push("home_price = ?");
+    vals.push(input.homePrice);
+  }
+  if ("homeSupported" in input) {
+    sets.push("home_supported = ?");
+    vals.push(input.homeSupported ? 1 : 0);
+  }
+  if ("isActive" in input) {
+    sets.push("is_active = ?");
+    vals.push(input.isActive ? 1 : 0);
+  }
   if (!sets.length) throw new HttpError(400, "nothing_to_update");
   await c.env.DB.batch([
     c.env.DB.prepare(`UPDATE communes SET ${sets.join(", ")} WHERE id IN (${input.ids.map(() => "?").join(",")})`).bind(...vals, ...input.ids),
