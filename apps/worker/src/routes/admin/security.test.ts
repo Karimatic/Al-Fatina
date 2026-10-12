@@ -4,8 +4,9 @@ import { csvCell } from "../../lib/csv";
 import { createOrder, quote } from "../../lib/orders";
 import { member, seedShop, testApp, testDb, type TestDb } from "../../test/db";
 import { catalogRoutes } from "./catalog";
-import { marketingRoutes } from "./marketing";
+import { notifierRoutes } from "./notifier";
 import { systemRoutes } from "./system";
+import { teamRoutes } from "./team";
 
 const envOf = (db: TestDb) => ({ DB: db, ENVIRONMENT: "development", PUBLIC_ORIGIN: "http://localhost:8787", MEDIA_ORIGIN: "" }) as unknown as Env;
 let n = 10;
@@ -61,7 +62,7 @@ describe("security", () => {
     const db = shop();
     db.sqlite.exec(`INSERT INTO roles (key, name, permissions) VALUES ('custom-77', 'Comptable', '["finance.view","finance.edit","orders.view"]');
       INSERT INTO team_members (id, email, name, role_id, is_active, created_at) VALUES (77, 'compta@shop.dz', 'Compta', (SELECT id FROM roles WHERE key = 'custom-77'), 1, 0)`);
-    const manager = testApp(systemRoutes, db, member(["team.manage", "orders.view"]));
+    const manager = testApp(teamRoutes, db, member(["team.manage", "orders.view"]));
     expect((await manager.call("POST", "/team/77/invite")).status).toBe(403);
   });
 
@@ -72,7 +73,7 @@ describe("security", () => {
   });
 
   it("a push notification can only open a page of the shop", async () => {
-    const app = testApp(marketingRoutes, shop());
+    const app = testApp(notifierRoutes, shop());
     const send = (path: string) => app.call("POST", "/notifier/broadcast", { titleFr: "Nouveau", titleAr: "جديد", bodyFr: "Venez voir", bodyAr: "تعالي", path });
     expect((await send("//evil.com")).status).toBe(422);
     expect((await send("/\\evil.com")).status).toBe(422);

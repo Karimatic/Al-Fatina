@@ -12,7 +12,7 @@ import { codInTransit, codRows, profitAndLoss } from "../../lib/finance";
 import { body, HttpError, intParam } from "../../lib/http";
 import { putImage } from "../../lib/media";
 import { actorOf, requireOwner, requirePermission } from "../../middleware/access";
-import { statsRange } from "./system";
+import { statsRange } from "./dashboard";
 
 export const financeRoutes = new Hono<AppEnv>();
 

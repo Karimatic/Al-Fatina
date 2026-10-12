@@ -14,7 +14,7 @@ import { applyStatusChange } from "../../lib/orders";
 import { bumpCatalogStmt, getSetting, setSettingStmt } from "../../lib/settings";
 import { syncOrderMessage } from "../../lib/telegram";
 import { actorOf, requirePermission } from "../../middleware/access";
-import { statsRange } from "./system";
+import { statsRange } from "./dashboard";
 
 export const insightRoutes = new Hono<AppEnv>();
 

@@ -12,7 +12,7 @@ import { body, HttpError, intParam } from "../../lib/http";
 import { CANCELLED_SQL } from "../../lib/orders";
 import { bumpCatalogStmt, getSettings, setSettingStmt } from "../../lib/settings";
 import { actorOf, requirePermission } from "../../middleware/access";
-import { statsRange } from "./system";
+import { statsRange } from "./dashboard";
 
 export const sourceRoutes = new Hono<AppEnv>();
 

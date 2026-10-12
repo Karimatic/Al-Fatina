@@ -134,8 +134,11 @@
     // "off" = assistant without AI
     "ASSISTANT_MODEL": "@cf/google/gemma-4-26b-a4b-it"
   },
+  // Workers Logs: every request is kept (3 days), so a customer's failed order can always be
+  // found. The free plan includes 200,000 log lines a day, far above this shop's traffic; past
+  // that, logs are dropped for the day, never billed.
   "observability": {
     "enabled": true,
-    "head_sampling_rate": 0.1
+    "head_sampling_rate": 1
   }
 }

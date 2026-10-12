@@ -7,16 +7,46 @@
 
 ---
 
+## Current state (2026-10-12): read this first
+
+The sections below are the **original plan (2026-09-30)** followed by a dated log of what was built. Where they
+differ, **this section is the truth**. Superseded statements further down are marked *(superseded, see Current state)*.
+
+**Live:** https://henine-boutique.karimmaticmz.workers.dev (Worker `henine-boutique`, D1 `henine-boutique-db`,
+R2 `henine-media`). Repo: `Karimatic/Henine-Boutique`, CI on every push (typecheck, unit tests, build, browser tests).
+
+| Area | What runs today | Replaced from the original plan |
+|---|---|---|
+| Storefront | **Vite + Preact**, every page pre-rendered at build (`apps/web`), small client scripts per page; **Arabic at `/`, French at `/fr`** | Next.js static export (§0 #2, §15); FR at `/`, AR at `/ar` (§4.1) |
+| Admin | Vite + React SPA at `/admin` (`apps/admin`) | — |
+| Admin sign-in | Email + password (PBKDF2 in the browser, peppered SHA-256 on the server) **+ a 6-digit code** from an authenticator app (TOTP, while no email service is set) or by email; **8 one-time recovery codes** for a lost phone; HttpOnly SameSite=Strict session cookie (hash stored); lockout after failed attempts; RBAC permissions on every route; owner-only deletions; audit log | **Cloudflare Access** as the main wall (§0 #6, §2, §6.4, §7). Access is still supported as an optional second wall (`ACCESS_AUD` / `ACCESS_TEAM_DOMAIN`), not configured |
+| Bot protection (public forms) | **No captcha.** Invisible check on order, contact, review and "notify me": a signed form ticket (≥ 3 s, ≤ 6 h old, a few sends per ticket) + a hidden field (`lib/form-guard.ts`, `apps/web/src/lib/formGuard.tsx`); behind it per-IP / per-phone rate limits, ≤ 10 pieces per web order, ≤ 12 unconfirmed orders per connection per day, idempotency keys | **Turnstile** (§1, §2, §4.3, §6.1, §6.2, §7) — removed 2026-10-09 at the owner's request |
+| API | Hono on the Worker; public routes in `routes/public.ts`; admin API split **one file per admin tab** in `routes/admin/` (all mounted in `index.ts`, checked by `mounted.test.ts`) | — |
+| Data | D1 via Drizzle migrations (`packages/db/migrations`, 0000–0007); R2 for photos (private parcel photos under `private/`) | — |
+| Live admin | Durable Object `AdminHub` (hibernatable WebSockets): new-order ring + cards, alerts; 15 s ping, dead connections replaced at once | — |
+| Notifications | Telegram bot (orders with buttons, commands for linked members only, outbox + cron retry); web push for customers | — |
+| AI | Workers AI (Gemma 4) words the shop assistant's answers inside a 6 s budget, else the rules answer; FR ↔ AR auto-translation in the admin; Cloudflare Images for "studio" product photos | — |
+| Security headers | Storefront CSP per page: `script-src 'self'` + SHA-256 of each inline boot script (never `'unsafe-inline'` for scripts), images/media only from the shop (+ `MEDIA_ORIGIN` if set), `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'`. `style-src` keeps `'unsafe-inline'`: the shop's colours and fonts chosen in the admin are injected as a `<style>` block at runtime, so they can't be hashed at build time; no script can run from a style | Hashes "of Next's inline scripts" (§7) |
+| Observability | Workers Logs on **every request** (`head_sampling_rate: 1`, 3 days, free up to 200k lines/day) + the admin's Erreurs page (`error_events`, outbox) | "Workers Logs (sampled)" (§9) |
+| Tests | Vitest (`npm test`): worker 90, shared 105, database 3; Playwright + axe (`npm run test:e2e`, CI job `e2e`): order in Arabic and French on phone and computer, bot check, CSP, **accessibility WCAG 2.1 AA = 0 violations** on 13 pages × 2 languages × 2 screen sizes, against a throwaway database (`scripts/e2e-server.mjs`) | — |
+| Install safety | `scripts/doctor.mjs` before build / test (Node ≥ 22, one copy of Preact / Vite / Vitest / React) | — |
+
+**Still with the owner:** real products with photos (the 18 live products are demo data without photos),
+a custom domain (the site is on `workers.dev`), whether the GitHub repository stays public, linking the
+Telegram group, ZR Express API credentials, one real test order, the team list.
+
+---
+
 ## 0. TL;DR — the key decisions
 
 | # | Decision | Why |
 |---|----------|-----|
 | 1 | **Drop Bagisto entirely.** Keep the Next.js UI shell, replace the Laravel/GraphQL backend with a Cloudflare-native backend (Worker + D1 + R2). | Bagisto is PHP/MySQL and cannot run on Cloudflare. |
-| 2 | **Storefront = Next.js static export** (`output: 'export'`), pre-rendered at build time, with small client "islands" for live data (stock, price, cart, tracking). | Workers Free gives **10 ms CPU per request**. React SSR regularly exceeds that. Static assets are **free and unlimited** and never touch the CPU limit. |
+| 2 | *(superseded, see Current state: Vite + Preact)* **Storefront = Next.js static export** (`output: 'export'`), pre-rendered at build time, with small client "islands" for live data (stock, price, cart, tracking). | Workers Free gives **10 ms CPU per request**. React SSR regularly exceeds that. Static assets are **free and unlimited** and never touch the CPU limit. |
 | 3 | **One Worker with Static Assets** (not classic Pages) serves storefront + admin + API + cron. | Same free static hosting as Pages, **plus** cron triggers, Durable Objects and one deploy unit. Pages Functions can't run crons. *(If you insist on Pages: same code, plus a tiny separate cron Worker.)* |
 | 4 | **API = Hono on the Worker**, **D1** (SQLite) via **Drizzle ORM**, **R2** for media. | Tiny, fast, ~1–3 ms CPU per API call; fits the free tier comfortably. |
 | 5 | **Images are optimised in the admin's browser before upload** (AVIF + WebP, 5 widths, blur placeholder, EXIF stripped), then stored in R2 and served from a cached custom domain. | Cloudflare Images free = only 5,000 transformations/month. Client-side encoding = **zero** cost and zero Worker CPU. |
-| 6 | **Admin = separate Vite + React SPA** at `/admin`, protected by **Cloudflare Access** (Zero Trust, free ≤ 50 users) **and** JWT verification + role checks in the API. | No passwords to store/hash (hashing blows the 10 ms CPU budget), SSO/OTP + 2FA for free, defence in depth. |
+| 6 | *(superseded, see Current state: own sign-in with password + code)* **Admin = separate Vite + React SPA** at `/admin`, protected by **Cloudflare Access** (Zero Trust, free ≤ 50 users) **and** JWT verification + role checks in the API. | No passwords to store/hash (hashing blows the 10 ms CPU budget), SSO/OTP + 2FA for free, defence in depth. |
 | 7 | **No customer passwords.** Guest checkout by phone; tracking & loyalty by phone number + order code. | How Algerian shoppers actually buy (COD, phone-first); removes a whole attack surface. |
 | 8 | **Orders → Telegram group** via bot, with inline buttons (✅ Confirmer / 📵 Injoignable / ❌ Annuler) that update the order in D1. | The team works from the phone; one tap confirms. |
 | 9 | **New products appear instantly** (client-rendered fallback page) and become fully SEO-static on the next automatic rebuild (debounced, via GitHub Actions). | Best of static speed + instant publishing. |
@@ -39,7 +69,7 @@
 | Durable Objects | SQLite-backed only | Optional: per-phone/IP rate limiter + stock-lock if ever needed. |
 | Queues | **Paid only** | Replaced by a D1 **outbox table** + `ctx.waitUntil()` + cron retry. |
 | Images transformations | 5,000 unique / month | Not needed (client-side encoding). Kept as emergency fallback only. |
-| Turnstile, WAF managed rules, Bot Fight Mode, Web Analytics, 1 rate-limit rule, Access (≤50 users) | Free | All used. |
+| Turnstile, WAF managed rules, Bot Fight Mode, Web Analytics, 1 rate-limit rule, Access (≤50 users) | Free | *(superseded: Turnstile and Access not used, see Current state)* |
 | D1 Time Travel | 7 days PITR on free | + weekly off-site export (GitHub Actions). |
 
 **Location:** create D1 with location hint **`weur`** (closest to Algeria). Static pages are served from the nearest Cloudflare PoP.
@@ -53,15 +83,15 @@
   📱 Client ───────────► │  Worker "henine"  (Static Assets + Hono)                          │
   (4G, mid Android)      │   ├─ /*              → prebuilt storefront HTML/CSS/JS  (free, ∞) │
                          │   ├─ /produit/<new>  → fallback shell (client-rendered) until rebuild
-                         │   ├─ /admin/*        → Admin SPA            [Cloudflare Access]   │
-                         │   ├─ /api/*          → public API  (Turnstile, rate-limit, zod)   │
-                         │   ├─ /api/admin/*    → admin API   [Access JWT verify + RBAC]     │
+                         │   ├─ /admin/*        → Admin SPA            [own sign-in + code]  │
+                         │   ├─ /api/*          → public API  (form ticket, rate-limit, zod) │
+                         │   ├─ /api/admin/*    → admin API   [session cookie + RBAC]        │
                          │   ├─ /api/tg/<secret>→ Telegram webhook (secret-token header)     │
                          │   ├─ /api/carrier/*  → carrier webhooks (signed)                  │
                          │   └─ scheduled()     → outbox retry · carrier sync · reports ·    │
                          │                         rebuild-if-dirty · push drip · cleanup     │
                          │  D1  "henine-db"  (weur)      R2 "henine-media" ─► media.<domain> │
-                         │  Turnstile · WAF · Bot Fight · Web Analytics · Zero Trust Access  │
+                         │  Durable Object AdminHub · Workers AI · Images · rate limits      │
                          └───────────────────────────────────────────────────────────────────┘
           ▲                                  │                         ▲
           │ inline buttons / commands        │ new order, alerts       │ build + wrangler deploy
@@ -179,7 +209,7 @@ All money in **integer DZD** (no decimals). All timestamps UTC epoch ms; display
 
 ## 4. Storefront (customer website)
 
-### 4.1 Pages (FR at `/`, AR at `/ar/…`, RTL)
+### 4.1 Pages (AR at `/`, FR at `/fr/…`; *superseded order, see Current state*)
 | Route | Content |
 |---|---|
 | `/` | Homepage built from admin blocks (§5.3) |
@@ -195,7 +225,7 @@ All money in **integer DZD** (no decimals). All timestamps UTC epoch ms; display
 | `/liens` | Link-in-bio page for Instagram (managed in Marketing → Liens) |
 | `/l/[slug]` | Short links with UTM + click counting (Worker redirect) |
 | `/avis/[token]` | Verified review form sent after delivery |
-| `/contact`, `/p/[slug]` | Contact form (Turnstile), static content pages |
+| `/contact`, `/p/[slug]` | Contact form (invisible form ticket), static content pages |
 | `/404` | Branded, with search + best-sellers; misses are logged |
 
 ### 4.2 UX principles (phone-first)
@@ -213,7 +243,7 @@ All money in **integer DZD** (no decimals). All timestamps UTC epoch ms; display
 3. Wilaya (69) → Commune (filtered) → **À domicile** (address field) or **Stop-desk / bureau** (office list for the carrier)
 4. Note (optional), coupon field (collapsed), points toggle (if phone has points).
 5. Summary: items, subtotal, remise, livraison, **Total**.
-6. Invisible **Turnstile** token, then **Commander** (sticky). Double-submit protection via `idempotency_key` (UUID generated when the page loads).
+6. Invisible form ticket *(was Turnstile, see Current state)*, then **Commander** (sticky). Double-submit protection via `idempotency_key` (UUID generated when the page loads).
 - Server recomputes **everything** (prices, promos, shipping, points). The client is never trusted.
 - Cart autosaved (after phone + consent) → powers **Paniers abandonnés**.
 - Offline/poor network: request retried with the same idempotency key; the service worker queues it with Background Sync where supported.
@@ -222,7 +252,7 @@ All money in **integer DZD** (no decimals). All timestamps UTC epoch ms; display
 Three ways in, no account, no password:
 1. **Automatic:** after ordering, the order is saved on the device (`localStorage`). A small "📦 Ma commande: *Expédiée*" pill appears in the header on every return visit. Tap it for the timeline.
 2. **Link:** `/suivi/HN-7K3P9?t=<token>` shown on the thank-you page, with a one-tap **"Envoyer sur WhatsApp"** button (the customer sends it to herself) and included in the confirmation WhatsApp message the team sends.
-3. **Phone number only:** `/suivi` asks for the phone number. It shows her recent orders with **status, date, item thumbnails and wilaya only**. The address and full name are hidden unless she also has the order code or token. Protected by Turnstile + rate limit, so this lookup can't be used to harvest customer details.
+3. **Phone number only:** `/suivi` asks for the phone number. It shows her recent orders with **status, date, item thumbnails and wilaya only**. The address and full name are hidden unless she also has the order code or token. Protected by rate limits *(Turnstile dropped, see Current state)*, so this lookup can't be used to harvest customer details.
 
 Timeline: *Reçue → Confirmée → En préparation → Expédiée (n° de suivi + transporteur) → En livraison → Livrée* (or *Retour*). Carrier statuses are synced automatically (§6.5). Optional extra: a **Telegram deep link** `t.me/<bot>?start=<code>` to get status updates for free.
 
@@ -343,13 +373,13 @@ hero slider (separate mobile/desktop crops, image or video, CTA), announcement b
 | Préparation / Stock | Orders `en_preparation → expédiée`, stock, labels |
 | Marketing | Home page, promos, reviews, notifier, liens, stats (no costs) |
 | Lecture seule | Dashboards only |
-Inviting a member adds their email to the Cloudflare Access group through the Cloudflare API, so there's one place to manage access. Deactivating a member revokes it immediately.
+*(superseded: invitations send a sign-in link; the member sets a password and an authenticator app, see Current state.)* Inviting a member adds their email to the Cloudflare Access group through the Cloudflare API, so there's one place to manage access. Deactivating a member revokes it immediately.
 
 **Comptes** *(interpreted as accounts & integrations; tell me if you meant something else)*: store identity (name, logo, favicon, colours, languages, currency), **Telegram bot** (status, group/topic IDs, test message, event → topic routing), **carrier accounts** (API keys, default carrier per wilaya, stop-desk sync), **Meta Pixel + Conversions API**, TikTok Pixel, Google Search Console verification, Chargily Pay (phase 2), Cloudflare/GitHub tokens for publish. Secrets are write-only in the UI (shown as `••••1234`), stored as Worker secrets or encrypted in D1 (AES-GCM with a Worker secret key). My security: active Access sessions, sign-out everywhere.
 
 **Contenu**: static pages (À propos, CGV, Confidentialité, Livraison & retours, FAQ), **size guides**, **Livraison** (69 wilayas × domicile/bureau prices, delays, active flags, communes, stop desks, free-shipping rules), UI translations FR/AR, global SEO (titles, OG image), WhatsApp/Telegram message templates, **media library** (R2 browser, find unused images), redirects, maintenance/vacation mode.
 
-**Erreurs**: grouped error feed (client JS errors via `window.onerror`/`unhandledrejection` beacon (sampled, PII-scrubbed), API exceptions, cron failures, failed Telegram/carrier/push calls from the outbox with a **Réessayer** button), 404 log (→ one-click redirect), security events (Turnstile failures, rate-limit hits, denied admin calls), audit-log viewer. New error types → Telegram "Erreurs" topic.
+**Erreurs**: grouped error feed (client JS errors via `window.onerror`/`unhandledrejection` beacon (sampled, PII-scrubbed), API exceptions, cron failures, failed Telegram/carrier/push calls from the outbox with a **Réessayer** button), 404 log (→ one-click redirect), security events (refused form tickets, rate-limit hits, denied admin calls), audit-log viewer. New error types → Telegram "Erreurs" topic.
 
 ### 5.6 Extra modules ("and more")
 - **Publier**: build status, last deploy, "Publier maintenant", auto-publish when the catalogue is dirty.
@@ -362,23 +392,24 @@ Inviting a member adds their email to the Cloudflare Access group through the Cl
 ## 6. Backend (Worker API)
 
 ### 6.1 Public API
+*(Turnstile replaced by the invisible form ticket, see Current state.)*
 | Method & path | Purpose | Protection |
 |---|---|---|
 | `GET /api/live?v=…` | stock + current price for variant IDs | edge cache 60 s |
 | `GET /api/product/:slug` | fallback data for not-yet-built products | edge cache 60 s |
 | `POST /api/quote` | server-side cart pricing (promos, shipping, points) | rate limit |
-| `POST /api/orders` | create order | Turnstile + rate limit (IP & phone) + idempotency + zod |
+| `POST /api/orders` | create order | form ticket + rate limit (IP & phone) + idempotency + zod |
 | `POST /api/carts` | save checkout-in-progress (abandoned carts) | rate limit, consent flag |
-| `POST /api/track` | lookup by phone / code (+token) | Turnstile + rate limit, masked output |
-| `POST /api/loyalty` | points lookup by phone + order code | Turnstile + rate limit |
-| `POST /api/reviews` | submit review (token for verified) | Turnstile |
-| `POST /api/contact`, `/api/stock-alert`, `/api/push/subscribe` | forms | Turnstile + rate limit |
+| `POST /api/track` | lookup by phone / code (+token) | rate limit, masked output |
+| `POST /api/loyalty` | points lookup by phone + order code | rate limit |
+| `POST /api/reviews` | submit review (token for verified) | form ticket + rate limit |
+| `POST /api/contact`, `/api/stock-alert`, `/api/push/subscribe` | forms | form ticket + rate limit |
 | `POST /api/e` | batched analytics beacon → aggregated counters | sampling, size cap |
 | `POST /api/log` | client error beacon | sampling, dedupe, size cap |
 | `GET /l/:slug` | short-link redirect + click count | — |
 
 ### 6.2 Order creation (≈2–4 ms CPU)
-1. zod-validate → normalize phone → verify Turnstile (subrequest, I/O not CPU) → rate-limit checks.
+1. zod-validate → normalize phone → check the form ticket and hidden field → rate-limit checks.
 2. Load variants/promos/wilaya pricing (1–3 indexed reads) → recompute totals in `packages/shared/pricing`.
 3. **One D1 `batch()`** (transactional): conditional stock reservation `UPDATE variants SET stock_reserved = stock_reserved + ? WHERE id = ? AND stock_on_hand - stock_reserved >= ?` (aborts if any line fails), upsert customer, insert order + items + event + outbox rows, increment coupon usage.
 4. Return `{ code, token }` → client stores for tracking.
@@ -405,6 +436,7 @@ Inviting a member adds their email to the Cloudflare Access group through the Cl
 - Limits handled: 429 `retry_after` respected, ≤ 20 msgs/min per group via outbox pacing.
 
 ### 6.4 Admin API security
+*(superseded: the session cookie from the password + code sign-in is checked first; the Access JWT below is an optional extra wall, see Current state.)*
 Every `/api/admin/*` request: verify the **`Cf-Access-Jwt-Assertion`** JWT (RS256 signature against the team's JWKS (cached), `aud`, `iss`, `exp`) → map email → active `team_member` → check the route's permission → handle → write `audit_log`. Also require `Origin` = own domain and `Content-Type: application/json` on mutations (CSRF defence), and return `Cache-Control: no-store`.
 
 ### 6.5 Carriers (adapter pattern)
@@ -429,12 +461,12 @@ Every `/api/admin/*` request: verify the **`Cf-Access-Jwt-Assertion`** JWT (RS25
 **Edge / Cloudflare**
 - Custom domain proxied; **HSTS** (preload), TLS ≥ 1.2, Always HTTPS, `workers_dev: false`, preview URLs protected by Access.
 - WAF free managed rules, **Bot Fight Mode**, the free **rate-limiting rule** on `POST /api/orders`, block non-GET methods on static paths, optional geo-challenge for non-DZ traffic on `/api/orders` (tunable; diaspora customers exist).
-- **Cloudflare Access** on `/admin*` and `/api/admin*`: email OTP or Google login (enforce 2FA at the Google side), session 12–24 h, optional country/device rules.
+- *(superseded: optional, not configured; see Current state)* **Cloudflare Access** on `/admin*` and `/api/admin*`: email OTP or Google login (enforce 2FA at the Google side), session 12–24 h, optional country/device rules.
 
 **Application**
 - zod validation on every input (shared schemas), Drizzle parameterized queries (no string SQL), output encoding by React, markdown rendered with a strict allow-list sanitizer.
 - Server-side price/promo/shipping/points recomputation; idempotency keys; conditional stock updates inside transactional batches.
-- Turnstile on every public write endpoint; Workers Rate Limiting binding + D1 fallback counters per IP-hash and per phone.
+- *(superseded: invisible form ticket + hidden field instead of Turnstile)* Turnstile on every public write endpoint; Workers Rate Limiting binding + D1 fallback counters per IP-hash and per phone.
 - Tracking/review tokens: 128-bit random, only **SHA-256 (peppered) hashes** stored; public codes are non-sequential.
 - Telegram and carrier webhooks: secret header / signature, constant-time compare, replay window.
 - RBAC + audit log for every admin write; cost prices and exports permission-gated.
@@ -442,7 +474,7 @@ Every `/api/admin/*` request: verify the **`Cf-Access-Jwt-Assertion`** JWT (RS25
 - No customer passwords, no sessions to steal on the storefront. The cart lives in `localStorage` and never holds secrets.
 
 **Headers** (via `_headers` for static + Worker for API/admin)
-- `Content-Security-Policy`: storefront gets **per-page SHA-256 hashes** of Next's inline scripts, computed by a post-build script into `_headers`; admin needs no nonces: the Vite build emits no inline scripts, so the Worker serves `script-src 'self'`. Because `_headers` is capped at 100 rules, storefront hashes go into a per-page `<meta http-equiv="Content-Security-Policy">` injected post-build. Allow-list: self, `media.<domain>`, `challenges.cloudflare.com`, Meta/TikTok only after consent. `frame-ancestors 'none'`, `base-uri 'none'`, `object-src 'none'`.
+- `Content-Security-Policy` *(current policy: see Current state)*: storefront gets **per-page SHA-256 hashes** of the inline boot scripts, computed by a post-build script into `_headers`; admin needs no nonces: the Vite build emits no inline scripts, so the Worker serves `script-src 'self'`. Because `_headers` is capped at 100 rules, storefront hashes go into a per-page `<meta http-equiv="Content-Security-Policy">` injected post-build. Allow-list: self, `media.<domain>`, `challenges.cloudflare.com`, Meta/TikTok only after consent. `frame-ancestors 'none'`, `base-uri 'none'`, `object-src 'none'`.
 - `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (camera only for `/admin`), `Cross-Origin-Opener-Policy: same-origin`.
 - CORS: same-origin only; the API rejects foreign `Origin`s.
 
@@ -471,10 +503,10 @@ Every `/api/admin/*` request: verify the **`Cf-Access-Jwt-Assertion`** JWT (RS25
 
 - **Unit (Vitest):** pricing/promo engine, phone normalization, state machine, loyalty math, carrier status mapping, CSP hash script.
 - **Integration:** Worker + local D1 via `wrangler dev` / `@cloudflare/vitest-pool-workers` (orders, stock races, idempotency, Telegram webhook, RBAC).
-- **E2E (Playwright):** mobile viewports (Galaxy A-series, iPhone SE, Pixel), RTL, slow-4G + CPU ×4: browse → express order → Telegram (mocked) → confirm → track.
+- **E2E (Playwright, done: `npm run test:e2e`, CI job `e2e`):** mobile viewports (Galaxy A-series, iPhone SE, Pixel), RTL, slow-4G + CPU ×4: browse → express order → Telegram (mocked) → confirm → track.
 - **Lighthouse CI** with budgets (§4.5) blocking merges; bundle-size check.
 - **CI/CD (GitHub Actions):** lint · typecheck · test · build web + admin · merge into `dist` · compute CSP hashes · `wrangler d1 migrations apply` · `wrangler deploy`. Preview environment with its own D1/R2 (`henine-db-preview`).
-- Observability: Workers Logs (sampled), our `error_events`, Telegram error topic.
+- Observability: Workers Logs on every request (`head_sampling_rate: 1`), our `error_events`, Telegram error topic.
 
 ---
 
@@ -520,7 +552,7 @@ Every `/api/admin/*` request: verify the **`Cf-Access-Jwt-Assertion`** JWT (RS25
 - [x] **Phase 1: Storefront core** (2026-10-01): home with animated tagline, categories, product pages (variants, live stock, reviews, "Prévenez-moi"), cart, one-page checkout + commande express, thank-you, tracking (device / private link / phone), favourites, search, contact, link-in-bio, content pages, FR/AR. Verified end-to-end in a real browser.
 - [x] **Phase 2: Admin core**: login (email + password + emailed code, invitations, reset, lockout), every menu section functional (see §5), Telegram bot (new-order messages with buttons, commands, retry outbox), demo seed.
 - [ ] Phase 3: ZR Express API (parcel creation, labels, status sync): needs ZR API credentials.
-- [ ] Not yet: loyalty points redemption at checkout, web push, Meta CAPI/pixels on the storefront, AVIF images, real email provider + Turnstile keys (deployment step).
+- [ ] Not yet: Meta CAPI on the server, AVIF images, a real email provider. *(Done since: points at checkout, web push, pixels; Turnstile dropped.)*
 
 **Architecture change vs. §2:** product/category/content pages are pre-built "_" shells that load their data from the API (edge-cached, versioned on every admin change), so admin edits and new products are live instantly with no rebuild. The Worker injects the product's title/OpenGraph tags for link previews.
 
@@ -534,7 +566,7 @@ Every `/api/admin/*` request: verify the **`Cf-Access-Jwt-Assertion`** JWT (RS25
 
 | Area | Already in place | Gap |
 |---|---|---|
-| COD verification | statuses `nouvelle → injoignable → confirmee → en_preparation → expediee → en_livraison → livree / retour / annulee / doublon / fausse`; zod validation on both sides; Turnstile; per-phone hourly limit; naive `risk_score` | risk score opaque (3 hard-coded terms), no reasons, not shown consistently |
+| COD verification | statuses `nouvelle → injoignable → confirmee → en_preparation → expediee → en_livraison → livree / retour / annulee / doublon / fausse`; zod validation on both sides; invisible form ticket *(was Turnstile)*; per-phone hourly limit; naive `risk_score` | risk score opaque (3 hard-coded terms), no reasons, not shown consistently |
 | Checkout | wilaya → commune (loaded per wilaya, edge-cached) → domicile/bureau with prices; server-side quote | native `<select>` of 69/≈30 entries is slow on phones; no search; no commune-level pricing; delay not shown |
 | Tracking | private link `code + token` (SHA-256 + pepper, timing-safe), phone lookup with limited data, timeline | no money breakdown, no commune, no unit prices, cancelled/returned shown as one line |
 | Sharing / OG | Worker injects title/description/og:image (1440 px) into product shells | no share button; no og:url/site_name/price/twitter card; image larger than needed |
@@ -695,3 +727,13 @@ Live at https://henine-boutique.karimmaticmz.workers.dev (Worker `henine-boutiqu
 - 2026-10-11 (security pass): Telegram data commands (/chercher /cmd /jour /semaine /attente /stock) only for a linked member with the permission (or the trusted team group), deactivated members refused even in the group; phone-proven reviews always wait for approval; loyalty points (quote and order) only with the private link of one of her orders (`proofs`, `ownsPhone`); store orders ≤ 10 pieces and ≤ 12 unconfirmed per connection per day; the worker refuses to run without AUTH_PEPPER / TRACK_TOKEN_PEPPER / IP_HASH_SALT / SETTINGS_KEY; cost price hidden and kept without cost.view, product save keeps quantities without stock.edit; audit log needs audit.view, outbox retry integrations.manage; parcel photos private (`private/packing/`, served by /orders/:id/pack-photo, old `packing/` blocked) and deleted with the order; item / discount edits carry the order version (409 order_changed); re-invite only for accounts within the inviter's rights; CSV cells formula-safe (lib/csv.ts); push links same-site only (server + service worker). Banner title back to rising words, glint pearl-rose instead of gold.
 - 2026-10-11 (audit review): AUDIT-001/002/003 not reproducible (fresh clone: npm ci, build, 194 tests, typecheck all pass; GitHub CI green on every push) — caused by the auditor's install; renewed the stale `allowScripts` approval of workerd. AUDIT-004: live catalogue = 18 demo products with no photo, the feed rightly skips them → new bell alert « produits publiés sans photo ». AUDIT-005: their query used a non-existent table (members → team_members); comment clarified + `npm run db:sql:local -- "SQL"`. CI deploy step migrated the wrong database name (henine-db → henine-boutique-db). Bell alerts shown in Arabic in the Arabic admin (lib/alertText.ts). axe-core (WCAG 2.1 AA + best practice): 0 violations on 10 pages × phone/desktop after fixing link names (language switch, footer socials), decorative tiles, WhatsApp button contrast (dark text on #25D366).
 - 2026-10-11 (second audit review): reproduced the auditor's store-build crash ("reading 'context'") by leaving a second copy of Preact in apps/web/node_modules; fixed for good with `resolve.dedupe` (Preact, preact-render-to-string) in apps/web/vite.config.ts — the same broken install now builds. Added scripts/doctor.mjs (run by `prebuild` / `pretest`): stops with a clear message on Node < 22 or any second copy of Preact / Vite / Vitest / React in a workspace. README: CI badge + "Verify a clean checkout" + Windows note for SQLITE_IOERR_TRUNCATE (local dev reload during a build).
+
+## 19. Toward the 10/10 audit (2026-10-11 → 10-12)
+
+- Invisible bot check on the public forms (signed ticket ≥ 3 s / ≤ 6 h, hidden field, per-ticket rate limit; the store renews a refused ticket and resends once). Verified live: a form posted without the page is refused (403 `form_expired`).
+- Admin recovery codes (migration `0007`): 8 one-time codes shown at activation (copy / download, "kept them" tick), renewed in Mon compte after the password; "Téléphone perdu ?" on the sign-in code screen; each use audited.
+- Storefront CSP: `img-src` / `media-src` only the shop (+ `MEDIA_ORIGIN`), no more "any https site".
+- Browser tests in CI (Playwright on the runner's Chrome + axe): 60 tests; deploy job waits for them.
+- Performance: new-order sound starts at its first audible sample (the built-in file had 0.6 s of silence), rings before list refreshes, resumes paused audio, dead live connections replaced within ~20 s; storefront animations moved to transforms and paused off screen, blur removed from cards and phone bars, bottom-bar followers slide with a transform; assistant scrolls only its own panel, no keyboard pop-up on phones, no re-focus while typing, 6 s AI budget.
+- Route files split by admin tab (catalog 1,022 → 521 lines; system 973, orders 838 and marketing 737 lines split into dashboard, team, accounts, content, sales, customers, carts, promos, homepage, reviews, notifier, links, contact, photos, categories, stock); route lists checked identical before/after; `mounted.test.ts` fails if a route file is not mounted.
+- Workers Logs sampling 10 % → 100 %.

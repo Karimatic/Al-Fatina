@@ -16,15 +16,19 @@ packages/shared  phone/money/i18n utils, order state machine, zod schemas, permi
 ## Verify a clean checkout
 
 Every push to `main` runs, on a fresh GitHub machine: `npm ci` → `npm run typecheck` →
-`npm test` → `npm run build` (the badge above). To check it yourself:
+`npm test` → `npm run build` → `npm run test:e2e` (the badge above). To check it yourself:
 
 ```sh
 git clone https://github.com/Karimatic/Henine-Boutique && cd Henine-Boutique
 npm ci              # once, at the root (never `npm install` inside apps/… or packages/…)
 npm run typecheck   # 5 workspaces, 0 errors
-npm test            # 28 test files: worker, db, shared
+npm test            # 30 test files: worker, db, shared
 npm run build       # storefront (38 pre-rendered pages) + admin → dist/
+npm run test:e2e    # browser tests (Google Chrome): orders in AR/FR, bot check, CSP, accessibility
 ```
+
+`npm run test:e2e` serves the build on http://127.0.0.1:8799 with its own throwaway database
+(`apps/worker/.wrangler/e2e`, rebuilt each run): your local database is never touched.
 
 `npm test` and `npm run build` first run `scripts/doctor.mjs`, which stops with a clear message if
 the install is broken (Node < 22, or a second copy of Preact / Vite / Vitest left in a sub-folder by

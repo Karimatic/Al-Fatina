@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 import type { Env } from "../../env";
 import { quote } from "../../lib/orders";
 import { member, OWNER, seedShop, testApp, testDb } from "../../test/db";
-import { systemRoutes } from "./system";
+import { contentRoutes } from "./content";
 
 describe("commune delivery settings (Contenu → Livraison → communes)", () => {
   it("lists a wilaya's communes and the checkout uses their own home price and availability", async () => {
     const db = testDb();
     seedShop(db);
-    const app = testApp(systemRoutes, db, OWNER);
+    const app = testApp(contentRoutes, db, OWNER);
     const list = await app.call<{ id: number; name_fr: string; home_price: number | null; home_supported: number }[]>("GET", "/content/wilayas/35/communes");
     expect(list.status).toBe(200);
     expect(list.body.length).toBeGreaterThan(5);
@@ -31,7 +31,7 @@ describe("commune delivery settings (Contenu → Livraison → communes)", () =>
 
   it("needs the delivery permission", async () => {
     const db = testDb();
-    const app = testApp(systemRoutes, db, member(["orders.view"]));
+    const app = testApp(contentRoutes, db, member(["orders.view"]));
     expect((await app.call("PUT", "/content/communes", { ids: [1], homePrice: 500 })).status).toBe(403);
   });
 });

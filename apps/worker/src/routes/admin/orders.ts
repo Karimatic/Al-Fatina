@@ -1,58 +1,28 @@
 /**
- * Admin → Commandes: orders, manual sales (Ventes), customers, abandoned carts, loyalty.
+ * Admin → Commandes: the list and its filters, an order's page, status changes (one or many),
+ * editing, notes, delivery slips, the CSV export, and deleting orders (owner only).
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import {
-  assessRisk,
-  cleanText,
-  customerRiskSql,
-  customerSegment,
-  dzPhone,
-  formatDzPhone,
-  nextStatuses,
-  ORDER_STATUSES,
-  orderLine,
-  OUTCOME_REASON_LABEL,
-  OUTCOME_REASONS,
-  RISK_LEVELS,
-  segmentSql,
-  sourceLabel,
-  EXTRA_SEGMENTS,
-  extraSegmentSql,
-  STATUS_LABELS,
-  type CustomerSegment,
-  statusPath,
-  type OrderStatus,
-} from "@henine/shared";
+import { assessRisk, cleanText, customerRiskSql, customerSegment, dzPhone, formatDzPhone, nextStatuses, ORDER_STATUSES, OUTCOME_REASON_LABEL, OUTCOME_REASONS, RISK_LEVELS, sourceLabel, STATUS_LABELS, statusPath, type OrderStatus } from "@henine/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { variantLabels } from "../../lib/catalog";
 import { csvCell } from "../../lib/csv";
 import { body, HttpError, intParam } from "../../lib/http";
-import { applyStatusChange, CANCELLED_SQL, createOrder, deleteOrder, noRecordCustomerStmt } from "../../lib/orders";
-import { getSetting, getSettings, setSetting } from "../../lib/settings";
+import { applyStatusChange, deleteOrder } from "../../lib/orders";
+import { getSettings } from "../../lib/settings";
 import { permissionFor, syncOrderMessage } from "../../lib/telegram";
 import { actorOf, requireOwner, requirePermission } from "../../middleware/access";
-import { detectDuplicates, OPEN_DUPLICATE_SQL } from "../../lib/duplicates";
-import {
-  DEFAULT_SLA,
-  hasPermission,
-  isEditable,
-  orderProfit,
-  slaLateMinutes,
-  slaLimitMinutes,
-  slaStage,
-  type ProfitResult,
-  type SlaSettings,
-} from "@henine/shared";
+import { OPEN_DUPLICATE_SQL } from "../../lib/duplicates";
+import { DEFAULT_SLA, hasPermission, isEditable, orderProfit, slaLateMinutes, slaLimitMinutes, slaStage, type ProfitResult, type SlaSettings } from "@henine/shared";
 import { lateOrdersSql } from "../../lib/alerts";
 
 export const orderRoutes = new Hono<AppEnv>();
 
 /* ───────────── Orders ───────────── */
 
-type RiskCounters = {
+export type RiskCounters = {
   delivered_count: number | null; returned_count: number | null; cancelled_count: number | null; fake_count: number | null;
   is_blacklisted: number | null; risk_flags: string | null;
 };
@@ -512,292 +482,6 @@ orderRoutes.get("/orders.csv", requirePermission("orders.export"), async (c) => 
   });
 });
 
-/* ───────────── Ventes: manual sales + performance ───────────── */
-
-orderRoutes.post("/sales/manual", requirePermission("sales.create"), async (c) => {
-  const input = await body(
-    c,
-    z.object({
-      channel: z.enum(["boutique", "instagram", "whatsapp", "telephone"]),
-      name: cleanText(80).pipe(z.string().min(2)).optional(),
-      /** optional for a boutique sale (walk-in customer) */
-      phone: dzPhone.optional(),
-      lines: z.array(orderLine).min(1).max(30),
-      status: z.enum(["livree", "confirmee", "nouvelle"]),
-      wilaya: z.number().int().min(1).max(69).default(35),
-      communeId: z.number().int().positive().nullable().default(null),
-      deliveryType: z.enum(["domicile", "bureau"]).default("bureau"),
-      address: cleanText(200).optional(),
-      shipping: z.number().int().min(0).max(10000).optional(),
-      coupon: z.string().trim().toUpperCase().max(32).optional(),
-      note: cleanText(500).optional(),
-    }),
-  );
-  if (input.channel !== "boutique" && (!input.phone || !input.name)) throw new HttpError(422, "validation_failed", { phone: "required" });
-  const order = await createOrder(c.env, {
-    idempotencyKey: crypto.randomUUID(),
-    name: input.name ?? "Cliente en boutique",
-    phone: input.phone ?? "",
-    wilaya: input.wilaya,
-    communeId: input.communeId,
-    communeText: input.channel === "boutique" ? "Boutique" : undefined,
-    deliveryType: input.deliveryType,
-    address: input.address,
-    coupon: input.coupon || undefined,
-    lines: input.lines,
-    channel: input.channel,
-    locale: "fr",
-    initialStatus: input.status,
-    actor: actorOf(c.get("member")),
-    internalNote: input.note,
-    shippingOverride: input.channel === "boutique" ? 0 : input.shipping,
-  });
-  await c.env.DB.batch([auditStmt(c.env, actorOf(c.get("member")), "manual_sale", "order", order.id, { channel: input.channel, total: order.total })]);
-  // an order taken by phone / Instagram may already exist on the website
-  if (input.channel !== "boutique") c.executionCtx.waitUntil(detectDuplicates(c.env, order.id).catch(() => undefined));
-  return c.json(order, 201);
-});
-
-orderRoutes.get("/sales", requirePermission("sales.view"), async (c) => {
-  const days = Math.min(365, Math.max(1, Number(c.req.query("days") ?? 30)));
-  const since = Date.now() - days * 86400_000;
-  const valid = "o.status NOT IN ('nouvelle','injoignable','annulee','doublon','fausse')";
-  const canSeeCost = c.get("member").permissions.includes("*") || c.get("member").permissions.includes("cost.view");
-  const [byProduct, byChannel, totals, recent] = await c.env.DB.batch([
-    c.env.DB.prepare(
-      `SELECT oi.product_id, oi.name_fr, SUM(oi.qty) AS units, SUM(oi.unit_price * oi.qty) AS revenue,
-              SUM(oi.qty * COALESCE(p.cost_price, 0)) AS cost,
-              SUM(CASE WHEN o.status IN ('retour','retour_recu') THEN oi.qty ELSE 0 END) AS returned
-         FROM order_items oi JOIN orders o ON o.id = oi.order_id LEFT JOIN products p ON p.id = oi.product_id
-        WHERE o.created_at > ? AND ${valid}
-        GROUP BY oi.product_id, oi.name_fr ORDER BY revenue DESC LIMIT 50`,
-    ).bind(since),
-    c.env.DB.prepare(`SELECT o.channel, COUNT(*) AS orders, SUM(o.total) AS revenue FROM orders o WHERE o.created_at > ? AND ${valid} GROUP BY o.channel ORDER BY revenue DESC`).bind(since),
-    c.env.DB.prepare(`SELECT COUNT(*) AS orders, COALESCE(SUM(o.total), 0) AS revenue, COALESCE(SUM(o.subtotal - o.discount_total), 0) AS merch FROM orders o WHERE o.created_at > ? AND ${valid}`).bind(since),
-    c.env.DB.prepare(
-      `SELECT o.id, o.public_code, o.channel, o.name, o.total, o.status, o.created_at FROM orders o WHERE o.channel IN ('boutique','instagram','whatsapp','telephone') ORDER BY o.id DESC LIMIT 15`,
-    ),
-  ]);
-  return c.json({
-    days,
-    totals: totals!.results[0],
-    byProduct: (byProduct!.results as Record<string, unknown>[]).map((r) => (canSeeCost ? r : { ...r, cost: null })),
-    byChannel: byChannel!.results,
-    recentManual: recent!.results,
-  });
-});
-
-/* ───────────── Customers ───────────── */
-
-/**
- * Customers (identified by phone). Segments come from real order history with the same
- * rules as the risk score (see @henine/shared risk.ts), so filters and badges always agree.
- */
-orderRoutes.get("/customers", requirePermission("customers.view"), async (c) => {
-  const q = (c.req.query("q") ?? "").trim();
-  const segment = c.req.query("segment") ?? "all";
-  // the hidden "Clientes sans fiche" entry (walk-in sales, deleted customers) is not a customer
-  const where: string[] = ["c.phone != ''"];
-  const binds: unknown[] = [];
-  if (q) {
-    where.push("(c.name LIKE ? OR c.phone LIKE ?)");
-    binds.push(`%${q}%`, `%${q.replace(/\s/g, "")}%`);
-  }
-  const now = Date.now();
-  if (["new", "returning", "vip", "high_risk"].includes(segment)) where.push(segmentSql(segment as CustomerSegment, "c"));
-  else if ((EXTRA_SEGMENTS as readonly string[]).includes(segment)) where.push(extraSegmentSql(segment as (typeof EXTRA_SEGMENTS)[number], "c", now));
-  const segCounts = [
-    ...(["new", "returning", "vip", "high_risk"] as const).map((s) => `SUM(CASE WHEN ${segmentSql(s, "c")} THEN 1 ELSE 0 END) AS "${s}"`),
-    ...EXTRA_SEGMENTS.map((s) => `SUM(CASE WHEN ${extraSegmentSql(s, "c", now)} THEN 1 ELSE 0 END) AS "${s}"`),
-  ].join(", ");
-  const [rows, counts] = await c.env.DB.batch([
-    c.env.DB.prepare(
-      `SELECT c.id, c.name, c.phone, c.wilaya_code, w.name_fr AS wilaya, c.orders_count, c.delivered_count, c.returned_count, c.cancelled_count,
-              c.fake_count, c.total_spent, c.points_balance, c.is_blacklisted, c.tags, c.last_order_at
-         FROM customers c LEFT JOIN wilayas w ON w.code = c.wilaya_code
-         ${where.length ? `WHERE ${where.join(" AND ")}` : ""} ORDER BY c.last_order_at DESC LIMIT 200`,
-    ).bind(...binds),
-    c.env.DB.prepare(`SELECT COUNT(*) AS all_count, ${segCounts} FROM customers c WHERE c.phone != ''`),
-  ]);
-  type Row = RiskCounters & { total_spent: number };
-  return c.json({
-    counts: counts!.results[0],
-    rows: (rows!.results as (Record<string, unknown> & Row)[]).map((r) => {
-      const h = {
-        deliveredCount: r.delivered_count ?? 0, returnedCount: r.returned_count ?? 0, cancelledCount: r.cancelled_count ?? 0,
-        fakeCount: r.fake_count ?? 0, isBlacklisted: !!r.is_blacklisted,
-      };
-      const risk = assessRisk(h);
-      return { ...r, segment: customerSegment({ ...h, totalSpent: r.total_spent ?? 0 }), risk: { level: risk.level, score: risk.score } };
-    }),
-  });
-});
-
-orderRoutes.get("/customers/:id", requirePermission("customers.view"), async (c) => {
-  const id = intParam(c, "id");
-  const cust = await c.env.DB.prepare("SELECT c.*, w.name_fr AS wilaya FROM customers c LEFT JOIN wilayas w ON w.code = c.wilaya_code WHERE c.id = ?")
-    .bind(id)
-    .first<Record<string, unknown> & RiskCounters & { total_spent: number }>();
-  if (!cust) throw new HttpError(404, "not_found");
-  const [orders, ledger] = await c.env.DB.batch([
-    c.env.DB.prepare("SELECT id, public_code, status, total, channel, created_at, outcome_reason FROM orders WHERE customer_id = ? ORDER BY id DESC LIMIT 50").bind(id),
-    c.env.DB.prepare("SELECT * FROM loyalty_ledger WHERE customer_id = ? ORDER BY id DESC LIMIT 50").bind(id),
-  ]);
-  const h = {
-    deliveredCount: cust.delivered_count ?? 0, returnedCount: cust.returned_count ?? 0, cancelledCount: cust.cancelled_count ?? 0,
-    fakeCount: cust.fake_count ?? 0, isBlacklisted: !!cust.is_blacklisted,
-  };
-  return c.json({
-    customer: cust,
-    orders: orders!.results,
-    ledger: ledger!.results,
-    risk: assessRisk(h),
-    segment: customerSegment({ ...h, totalSpent: cust.total_spent ?? 0 }),
-  });
-});
-
-orderRoutes.patch("/customers/:id", requirePermission("customers.edit"), async (c) => {
-  const id = intParam(c, "id");
-  const input = await body(
-    c,
-    z.object({
-      name: cleanText(80).pipe(z.string().min(2)).optional(),
-      notes: cleanText(2000).nullable().optional(),
-      tags: z.array(cleanText(30)).max(10).optional(),
-      isBlacklisted: z.boolean().optional(),
-      blacklistReason: cleanText(200).nullable().optional(),
-    }),
-  );
-  await c.env.DB.batch([
-    c.env.DB.prepare(
-      `UPDATE customers SET name = COALESCE(?, name), notes = CASE WHEN ? THEN ? ELSE notes END, tags = COALESCE(?, tags),
-         is_blacklisted = COALESCE(?, is_blacklisted), blacklist_reason = CASE WHEN ? THEN ? ELSE blacklist_reason END WHERE id = ?`,
-    ).bind(
-      input.name ?? null, "notes" in input ? 1 : 0, input.notes ?? null, input.tags ? JSON.stringify(input.tags) : null,
-      input.isBlacklisted == null ? null : input.isBlacklisted ? 1 : 0, "blacklistReason" in input ? 1 : 0, input.blacklistReason ?? null, id,
-    ),
-    auditStmt(c.env, actorOf(c.get("member")), "update", "customer", id, Object.keys(input)),
-  ]);
-  return c.json({ ok: true });
-});
-
-orderRoutes.post("/customers/:id/points", requirePermission("loyalty.edit"), async (c) => {
-  const id = intParam(c, "id");
-  const input = await body(c, z.object({ delta: z.number().int().min(-100_000).max(100_000), note: cleanText(200).pipe(z.string().min(2)) }));
-  const cur = await c.env.DB.prepare("SELECT points_balance FROM customers WHERE id = ?").bind(id).first<{ points_balance: number }>();
-  if (!cur) throw new HttpError(404, "not_found");
-  if (cur.points_balance + input.delta < 0) throw new HttpError(409, "points_negative");
-  await c.env.DB.batch([
-    c.env.DB.prepare("UPDATE customers SET points_balance = points_balance + ? WHERE id = ?").bind(input.delta, id),
-    c.env.DB.prepare("INSERT INTO loyalty_ledger (customer_id, delta, reason, actor, note, created_at) VALUES (?, ?, 'manual', ?, ?, ?)").bind(
-      id, input.delta, actorOf(c.get("member")), input.note, Date.now(),
-    ),
-  ]);
-  return c.json({ balance: cur.points_balance + input.delta });
-});
-
-/* ───────────── Paniers (abandoned checkouts) ───────────── */
-
-/** A checkout counts as abandoned after 30 minutes without activity and without an order. */
-export const ABANDONED_AFTER = 30 * 60_000;
-
-orderRoutes.get("/carts", requirePermission("carts.view"), async (c) => {
-  const filter = c.req.query("filter") ?? "abandoned";
-  const now = Date.now();
-  const where =
-    filter === "recovered"
-      ? "ca.recovered_order_id IS NOT NULL"
-      : filter === "all"
-        ? "1=1"
-        : filter === "active"
-          ? `ca.recovered_order_id IS NULL AND ca.updated_at >= ${now - ABANDONED_AFTER}`
-          : `ca.recovered_order_id IS NULL AND ca.updated_at < ${now - ABANDONED_AFTER}`;
-  // a cart counts as recovered when the same phone ordered after the cart was saved
-  await c.env.DB.prepare(
-    `UPDATE carts SET recovered_order_id = (SELECT o.id FROM orders o WHERE o.phone = carts.phone AND o.created_at >= carts.created_at ORDER BY o.id LIMIT 1)
-      WHERE recovered_order_id IS NULL AND phone IS NOT NULL
-        AND EXISTS (SELECT 1 FROM orders o WHERE o.phone = carts.phone AND o.created_at >= carts.created_at)`,
-  ).run();
-  const [rows, stats] = await c.env.DB.batch([
-    c.env.DB.prepare(
-      `SELECT ca.*, w.name_fr AS wilaya, cm.name_fr AS commune, o.public_code AS recovered_code,
-              (SELECT COUNT(*) FROM orders x WHERE x.phone = ca.phone AND x.status NOT IN ${CANCELLED_SQL}) AS customer_orders
-         FROM carts ca LEFT JOIN wilayas w ON w.code = ca.wilaya_code LEFT JOIN communes cm ON cm.id = ca.commune_id
-         LEFT JOIN orders o ON o.id = ca.recovered_order_id
-        WHERE ${where} ORDER BY ca.updated_at DESC LIMIT 100`,
-    ),
-    c.env.DB.prepare(
-      `SELECT COUNT(*) AS total, SUM(CASE WHEN recovered_order_id IS NOT NULL THEN 1 ELSE 0 END) AS recovered,
-              COALESCE(SUM(CASE WHEN recovered_order_id IS NULL THEN value ELSE 0 END), 0) AS lost_value FROM carts WHERE created_at > ?`,
-    ).bind(Date.now() - 30 * 86400_000),
-  ]);
-  const carts = rows!.results as { items: string }[];
-  const variantIds = [...new Set(carts.flatMap((ca) => (JSON.parse(ca.items) as { variantId: number }[]).map((i) => i.variantId)))];
-  const names = new Map<number, string>();
-  if (variantIds.length) {
-    const [{ results }, labels] = await Promise.all([
-      c.env.DB.prepare(`SELECT v.id, p.name_fr FROM variants v JOIN products p ON p.id = v.product_id WHERE v.id IN (${variantIds.map(() => "?").join(",")})`)
-        .bind(...variantIds)
-        .all<{ id: number; name_fr: string }>(),
-      variantLabels(c.env, variantIds),
-    ]);
-    for (const r of results) names.set(r.id, `${r.name_fr}${labels.get(r.id)?.fr ? ` (${labels.get(r.id)!.fr})` : ""}`);
-  }
-  return c.json({
-    stats: stats!.results[0],
-    rows: carts.map((ca) => ({
-      ...ca,
-      items: (JSON.parse(ca.items) as { variantId: number; qty: number }[]).map((i) => ({ ...i, name: names.get(i.variantId) ?? "?" })),
-    })),
-  });
-
-});
-
-/** An unfinished checkout removed from the list (handled, test, spam). */
-orderRoutes.delete("/carts/:id", requirePermission("carts.view"), async (c) => {
-  const id = c.req.param("id");
-  await c.env.DB.batch([
-    c.env.DB.prepare("DELETE FROM carts WHERE id = ?").bind(id),
-    auditStmt(c.env, actorOf(c.get("member")), "delete", "cart", id),
-  ]);
-  return c.json({ ok: true });
-});
-
-orderRoutes.post("/carts/:id/contacted", requirePermission("carts.view"), async (c) => {
-  await c.env.DB.prepare("UPDATE carts SET last_contacted_at = ? WHERE id = ?").bind(Date.now(), c.req.param("id")).run();
-  return c.json({ ok: true });
-});
-
-/* ───────────── Fidélité ───────────── */
-
-orderRoutes.get("/loyalty", requirePermission("loyalty.edit"), async (c) => {
-  const [settings, top, stats] = await Promise.all([
-    getSetting(c.env, "loyalty"),
-    c.env.DB.prepare("SELECT id, name, phone, points_balance, delivered_count, total_spent FROM customers WHERE points_balance > 0 ORDER BY points_balance DESC LIMIT 20").all(),
-    c.env.DB.prepare(
-      "SELECT COALESCE(SUM(points_balance), 0) AS outstanding, COUNT(CASE WHEN points_balance > 0 THEN 1 END) AS members FROM customers",
-    ).first<{ outstanding: number; members: number }>(),
-  ]);
-  // redeem_value_da = value of ONE point in DA
-  return c.json({ settings, top: top.results, stats: { ...stats, liabilityDa: (stats?.outstanding ?? 0) * settings.redeem_value_da } });
-});
-
-orderRoutes.put("/loyalty", requirePermission("loyalty.edit"), async (c) => {
-  const input = await body(
-    c,
-    z.object({
-      enabled: z.boolean(),
-      points_per_100da: z.number().int().min(0).max(100),
-      redeem_value_da: z.number().int().min(0).max(10000),
-      min_redeem: z.number().int().min(0).max(100000),
-      expiry_days: z.number().int().min(0).max(3650),
-    }),
-  );
-  await setSetting(c.env, "loyalty", input);
-  await c.env.DB.batch([auditStmt(c.env, actorOf(c.get("member")), "update", "settings", "loyalty", input)]);
-  return c.json(input);
-});
-
 /* ───────────── Deleting (owner only) ───────────── */
 
 /** ?restock=1: pieces that already left the shop come back to stock (a test order). */
@@ -817,22 +501,4 @@ orderRoutes.post("/orders/bulk-delete", requireOwner, async (c) => {
     }
   }
   return c.json({ done });
-});
-
-/**
- * A customer removed from the list. Her orders stay (sales history) under "Clientes sans
- * fiche"; her loyalty points go with her. A new order from her number starts a new record.
- */
-orderRoutes.delete("/customers/:id", requireOwner, async (c) => {
-  const id = intParam(c, "id");
-  const cust = await c.env.DB.prepare("SELECT id, name, phone FROM customers WHERE id = ?").bind(id).first<{ id: number; name: string; phone: string }>();
-  if (!cust || cust.phone === "") throw new HttpError(404, "not_found");
-  await c.env.DB.batch([
-    noRecordCustomerStmt(c.env),
-    c.env.DB.prepare("UPDATE orders SET customer_id = (SELECT id FROM customers WHERE phone = '') WHERE customer_id = ?").bind(id),
-    c.env.DB.prepare("DELETE FROM loyalty_ledger WHERE customer_id = ?").bind(id),
-    c.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(id),
-    auditStmt(c.env, actorOf(c.get("member")), "delete", "customer", id, { name: cust.name, phone: cust.phone }),
-  ]);
-  return c.json({ ok: true });
 });
