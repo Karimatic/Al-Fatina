@@ -330,7 +330,7 @@ export function Shell() {
         )}
 
       <div className="flex min-w-0 flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-        <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-line bg-surface/95 md:bg-surface/90 md:backdrop-blur">
           <div className="mx-auto flex h-14 max-w-[90rem] items-center justify-between gap-3 px-3 sm:px-6 md:h-16">
             <div className="flex min-w-0 items-center gap-2 sm:gap-3">
               <button type="button" onClick={toggle} aria-label={tr("Afficher / masquer le menu")} className="grid size-9 shrink-0 place-items-center rounded-lg text-ink-soft hover:bg-rose-100 hover:text-plum-700">
@@ -394,7 +394,7 @@ export function Shell() {
       </div>
 
       {/* Phone tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgb(23_10_16/0.06)] backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgb(23_10_16/0.06)] md:hidden">
         <ul className="grid grid-cols-5 text-[11px] font-medium">
           {TABS.map((t) => (
             <li key={t.path}>

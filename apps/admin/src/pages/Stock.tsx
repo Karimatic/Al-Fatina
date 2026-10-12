@@ -415,7 +415,7 @@ export function ReceptionPage() {
       <div className="mt-4">
         <TextField label={tr("Note (fournisseur, facture…)")} value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} />
       </div>
-      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-surface/95 p-3 backdrop-blur md:bottom-0 md:ps-[15rem]">
+      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-surface/95 p-3 md:bottom-0 md:ps-[15rem]">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-1 md:px-8">
           <p className="text-sm">
             <b className="text-lg tabular-nums">{pieces}</b> {tr("pièce(s) à ajouter")}

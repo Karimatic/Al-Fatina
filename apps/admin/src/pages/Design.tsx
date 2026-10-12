@@ -298,7 +298,7 @@ export function DesignEditor() {
         </div>
       </Card>
 
-      <div className="sticky bottom-3 z-10 flex items-center justify-end gap-3 rounded-xl border border-line bg-surface/95 p-3 shadow-lg backdrop-blur">
+      <div className="sticky bottom-3 z-10 flex items-center justify-end gap-3 rounded-xl border border-line bg-surface/95 p-3 shadow-lg">
         {dirty && <span className="text-sm text-ink-soft">{tr("Modifications non enregistrées")}</span>}
         <Button variant="primary" loading={save.isPending} disabled={!dirty || !colorOk} onClick={() => save.mutate(d)}>
           {tr("Enregistrer l'apparence")}

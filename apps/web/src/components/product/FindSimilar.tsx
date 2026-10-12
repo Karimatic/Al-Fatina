@@ -21,7 +21,7 @@ export function FindSimilarButton({ product, className = "" }: { product: Produc
           e.stopPropagation();
           setOpen(true);
         }}
-        className={`inline-flex h-9 items-center gap-1 rounded-full bg-ivory/90 px-3.5 text-xs font-semibold text-ink shadow-sm backdrop-blur ${className}`}
+        className={`inline-flex h-9 items-center gap-1 rounded-full bg-ivory/95 px-3.5 text-xs font-semibold text-ink shadow-sm ${className}`}
       >
         {S.open}
       </button>

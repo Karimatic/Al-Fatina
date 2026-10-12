@@ -16,7 +16,8 @@ type Input = z.infer<typeof assistantInput>;
 
 /** Multilingual, cheap enough for several hundred answers a day inside the free allocation. */
 export const DEFAULT_ASSISTANT_MODEL = "@cf/google/gemma-4-26b-a4b-it";
-const TIMEOUT_MS = 9000;
+/** The whole AI step (limits, shop facts, the model): past this she gets the rules' answer at once. */
+const TIMEOUT_MS = 6000;
 
 const SYSTEM = `Tu es « l'assistante Henine », la vendeuse en ligne de Henine Boutique, une boutique de vêtements pour femmes à Dellys (Boumerdès, Algérie) : pyjamas, nuisettes, lingerie, gaines, trousseau de mariée, sportswear, gandouras et djebbas.
 
@@ -106,12 +107,31 @@ function ruleFacts(r: AssistantReplyDTO) {
 
 type RunAi = (model: string, inputs: unknown, options?: unknown) => Promise<unknown>;
 
-/** The rules' answer, worded by the model when it can (see the header). */
+/** The rules' answer, worded by the model when it can (see the header), within TIMEOUT_MS. */
 export async function withAiVoice(env: Env, input: Input, ruled: AssistantReplyDTO, ip: string): Promise<AssistantReplyDTO> {
   const model = env.ASSISTANT_MODEL ?? DEFAULT_ASSISTANT_MODEL;
   if (!env.AI || model === "off") return ruled;
   // small talk the rules already say well costs nothing
   if (ruled.intent === "thanks") return ruled;
+  const started = Date.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<AssistantReplyDTO>((resolve) => {
+    timer = setTimeout(() => {
+      console.warn("assistant ai fallback: ai_timeout");
+      resolve(ruled);
+    }, TIMEOUT_MS);
+  });
+  try {
+    const voiced = await Promise.race([aiVoice(env, model, input, ruled, ip), late]);
+    if (voiced.ai) console.log(`assistant ai ${Date.now() - started} ms`);
+    return voiced;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function aiVoice(env: Env, model: string, input: Input, ruled: AssistantReplyDTO, ip: string): Promise<AssistantReplyDTO> {
+  if (!env.AI) return ruled;
   if (env.RL_AI && !(await env.RL_AI.limit({ key: `ai:${ip}` })).success) return ruled;
 
   const ar = input.locale === "ar";
@@ -128,10 +148,7 @@ export async function withAiVoice(env: Env, input: Input, ruled: AssistantReplyD
 
   try {
     const run = env.AI.run.bind(env.AI) as unknown as RunAi;
-    const out = (await Promise.race([
-      run(model, { messages, max_tokens: 350, temperature: 0.4, response_format: RESPONSE_FORMAT, chat_template_kwargs: { enable_thinking: false } }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error("ai_timeout")), TIMEOUT_MS)),
-    ])) as { response?: unknown; choices?: { message?: { content?: string | null } }[] };
+    const out = (await run(model, { messages, max_tokens: 350, temperature: 0.4, response_format: RESPONSE_FORMAT, chat_template_kwargs: { enable_thinking: false } })) as { response?: unknown; choices?: { message?: { content?: string | null } }[] };
     const raw = typeof out.response === "string" ? out.response : out.response && typeof out.response === "object" ? JSON.stringify(out.response) : (out.choices?.[0]?.message?.content ?? "");
     const parsed = parseModelReply(raw);
     if (!parsed || parsed.reply.length > 900) return ruled;

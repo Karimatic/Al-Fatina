@@ -155,6 +155,18 @@ let missedRing = false;
  */
 const decoded = new Map<string, AudioBuffer>();
 const loading = new Map<string, Promise<AudioBuffer | null>>();
+/** where the sound really starts: files often open with silence (the built-in one: 0.6 s) */
+const soundStart = new Map<AudioBuffer, number>();
+function firstSound(buf: AudioBuffer): number {
+  let peak = 0;
+  const channels = Array.from({ length: buf.numberOfChannels }, (_, i) => buf.getChannelData(i));
+  for (const d of channels) for (let i = 0; i < d.length; i += 4) peak = Math.max(peak, Math.abs(d[i]!));
+  const threshold = Math.max(peak * 0.02, 0.002);
+  for (let i = 0; i < buf.length; i++) {
+    if (channels.some((d) => Math.abs(d[i]!) > threshold)) return Math.max(0, i / buf.sampleRate - 0.02);
+  }
+  return 0;
+}
 function loadSound(c: AudioContext, url: string): Promise<AudioBuffer | null> {
   const ready = decoded.get(url);
   if (ready) return Promise.resolve(ready);
@@ -163,7 +175,7 @@ function loadSound(c: AudioContext, url: string): Promise<AudioBuffer | null> {
     p = fetch(url, { credentials: "same-origin" })
       .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
       .then((b) => c.decodeAudioData(b))
-      .then((buf) => (decoded.set(url, buf), buf))
+      .then((buf) => (soundStart.set(buf, firstSound(buf)), decoded.set(url, buf), buf))
       .catch(() => (loading.delete(url), null));
     loading.set(url, p);
   }
@@ -194,14 +206,16 @@ function playShopSound(url: string, volume: number, c: AudioContext) {
     const t0 = c.currentTime + 0.01;
     gain.gain.setValueAtTime(v, t0);
     // whole file, or stopped at the chosen length with a short fade
+    const offset = soundStart.get(buf) ?? 0;
     const max = shopSoundSeconds;
-    if (max != null && max < buf.duration) {
+    if (max != null && max < buf.duration - offset) {
       const fade = Math.min(0.3, max / 3);
       gain.gain.setValueAtTime(v, t0 + max - fade);
       gain.gain.linearRampToValueAtTime(0, t0 + max);
       src.stop(t0 + max + 0.05);
     }
-    src.start(t0);
+    // straight to the first sound, no silent lead-in
+    src.start(t0, offset);
     playing = src;
   };
   const buf = decoded.get(url);
@@ -211,9 +225,20 @@ function playShopSound(url: string, volume: number, c: AudioContext) {
   return true;
 }
 
-export function playTone(tone: SoundKey, volume: number) {
+export function playTone(tone: SoundKey, volume: number): boolean {
   const c = ctx();
-  if (!c || c.state !== "running") return false;
+  if (!c) return false;
+  if (c.state !== "running") {
+    // paused by the browser after a while in the background: a page already touched once may
+    // resume it without a new click (Chrome, Safari), then ring
+    if (!navigator.userActivation?.hasBeenActive) return false;
+    // (refused after all: it rings at the next touch of the page)
+    void c.resume().then(
+      () => (c.state === "running" ? playTone(tone, volume) : (missedRing = true)),
+      () => (missedRing = true),
+    );
+    return true;
+  }
   if (tone === "boutique") return playShopSound(currentUrl(), volume, c);
   if (tone === "annonce") return playShopSound(DEFAULT_SHOP_SOUND_URL, volume, c);
   const t0 = c.currentTime + 0.02;
@@ -319,6 +344,8 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
   }, [ops.data]);
   const navigate = useNavigate();
   const [connected, setConnected] = useState(false);
+  const connectedRef = useRef(false);
+  connectedRef.current = connected;
   const [cards, setCards] = useState<Card[]>([]);
   const [prefs, setPrefs] = useState(loadPrefs);
   const [needsUnlock, setNeedsUnlock] = useState(false);
@@ -329,8 +356,8 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
     queryKey: ["unseen"],
     queryFn: () => api<{ count: number; last: number | null }>("/orders/unseen"),
     enabled,
-    // a safety net: the WebSocket updates it instantly, but a phone asleep loses its connection
-    refetchInterval: 60_000,
+    // a safety net: the WebSocket updates it instantly; while it is down, check every 15 s
+    refetchInterval: () => (connectedRef.current ? 60_000 : 15_000),
   });
 
   useEffect(() => {
@@ -424,6 +451,13 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
 
   const onOrder = useCallback(
     async (e: OrderEvent) => {
+      // the ring comes first (one tab only), before any list refresh
+      const mine = await claim(`o${e.id}`);
+      const p = prefsRef.current;
+      if (mine && p.sound && !playTone(p.tone, p.volume)) {
+        missedRing = true;
+        setNeedsUnlock(true);
+      }
       void qc.invalidateQueries({ queryKey: ["unseen"] });
       void qc.invalidateQueries({ queryKey: ["orders"] });
       void qc.invalidateQueries({ queryKey: ["dashboard"] });
@@ -432,13 +466,8 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
       pushCard({ key: `o${e.id}`, kind: "order", title, text, orderId: e.id });
       flashTitle(title);
       lastRung.current = Math.max(lastRung.current ?? 0, e.at);
-      // sound + system notification: one tab only
-      if (!(await claim(`o${e.id}`))) return;
-      const p = prefsRef.current;
-      if (p.sound && !playTone(p.tone, p.volume)) {
-        missedRing = true;
-        setNeedsUnlock(true);
-      }
+      // system notification: one tab only
+      if (!mine) return;
       if (p.browser && "Notification" in window && Notification.permission === "granted" && document.hidden) {
         try {
           const n = new Notification(tr("🛍️ Nouvelle commande {0}", { 0: e.code }), { body: text, tag: `order-${e.id}`, icon: "/icon.svg" });
@@ -470,7 +499,11 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
     [qc, pushCard],
   );
 
-  // the connection: reconnects with a growing delay, keep-alive ping every 30 s
+  /*
+   * The connection: a ping every 15 s that must be answered within 5 s, else the connection is
+   * dead (phone asleep, Wi-Fi ↔ 4G) and is replaced at once, not after the next missed order.
+   * Coming back to the tab or back online checks it immediately. Reconnects with a growing delay.
+   */
   useEffect(() => {
     if (!enabled) return;
     sweepFlags();
@@ -479,8 +512,16 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
     let retry = 0;
     let ping: ReturnType<typeof setInterval> | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let deadline: ReturnType<typeof setTimeout> | undefined;
+    const check = () => {
+      if (ws?.readyState !== WebSocket.OPEN) return;
+      ws.send("ping");
+      clearTimeout(deadline);
+      deadline = setTimeout(() => ws?.close(4000, "no pong"), 5_000);
+    };
     const connect = () => {
       if (stopped) return;
+      clearTimeout(timer);
       ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/api/admin/live`);
       ws.onopen = () => {
         retry = 0;
@@ -488,9 +529,10 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
         // anything missed while disconnected
         void qc.invalidateQueries({ queryKey: ["unseen"] });
         void qc.invalidateQueries({ queryKey: ["alerts"] });
-        ping = setInterval(() => ws?.readyState === WebSocket.OPEN && ws.send("ping"), 30_000);
+        ping = setInterval(check, 15_000);
       };
       ws.onmessage = (m) => {
+        clearTimeout(deadline);
         if (m.data === "pong") return;
         let msg: LiveMessage;
         try {
@@ -505,15 +547,29 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
       ws.onclose = (e) => {
         setConnected(false);
         clearInterval(ping);
+        clearTimeout(deadline);
         if (stopped || e.code === 4001) return; // signed out elsewhere
-        timer = setTimeout(connect, Math.min(30_000, 1000 * 2 ** retry++));
+        // a dead connection we closed ourselves comes back at once
+        timer = setTimeout(connect, e.code === 4000 ? 0 : Math.min(30_000, 1000 * 2 ** retry++));
       };
     };
+    const wake = () => {
+      if (document.visibilityState !== "visible" || stopped) return;
+      if (ws?.readyState === WebSocket.OPEN) return check();
+      if (ws?.readyState === WebSocket.CONNECTING) return;
+      retry = 0;
+      connect();
+    };
+    document.addEventListener("visibilitychange", wake);
+    window.addEventListener("online", wake);
     connect();
     return () => {
       stopped = true;
       clearInterval(ping);
       clearTimeout(timer);
+      clearTimeout(deadline);
+      document.removeEventListener("visibilitychange", wake);
+      window.removeEventListener("online", wake);
       ws?.close();
     };
   }, [enabled, qc, onOrder, onAlerts]);

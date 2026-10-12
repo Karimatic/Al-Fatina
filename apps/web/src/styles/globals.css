@@ -252,8 +252,6 @@
   /* the base style caps images at 100 % of their box: this one must overflow it */
   max-width: none;
   object-fit: cover;
-  /* the shop's photos are small: a hint of softness reads as film, not as blur */
-  filter: saturate(1.05) contrast(1.05);
   will-change: transform, opacity;
 }
 /* one photo: a slow push-in and back, forever */
@@ -280,8 +278,8 @@
 }
 /* film grain (tiny SVG noise), shivering a little */
 .hero-grain {
-  opacity: 0.09;
-  mix-blend-mode: overlay;
+  opacity: 0.06;
+  will-change: transform;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: hero-grain 1.2s steps(4) infinite;
 }
@@ -294,14 +292,16 @@
 }
 /* a soft light passing over the silk every few seconds */
 .hero-sweep {
-  background: linear-gradient(105deg, transparent 35%, rgb(255 236 214 / 0.13) 50%, transparent 65%);
-  background-size: 250% 100%;
+  background: linear-gradient(105deg, transparent 38%, rgb(255 236 214 / 0.13) 50%, transparent 62%);
+  will-change: transform;
   animation: hero-sweep 9s ease-in-out infinite;
 }
 @keyframes hero-sweep {
-  0%, 30% { background-position: 120% 0; }
-  70%, 100% { background-position: -20% 0; }
+  0%, 30% { transform: translate3d(-75%, 0, 0); }
+  70%, 100% { transform: translate3d(75%, 0, 0); }
 }
+/* out of view (lib/pauseOffscreen.ts): every endless animation inside stops */
+[data-paused], [data-paused] *, [data-paused]::before { animation-play-state: paused !important; }
 /* thin gold frame inside the card */
 .hero-frame {
   inset: 0.75rem;
@@ -351,10 +351,22 @@
 
 /* ── Announcement bar: flowing rose gradient + endless marquee ── */
 .announce {
+  position: relative;
+  isolation: isolate;
+  background: var(--color-rose-800);
+}
+.announce::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 300%;
+  z-index: -1;
   background: linear-gradient(90deg, var(--color-rose-700), var(--color-rose-800), var(--color-plum-600), var(--color-rose-800), var(--color-rose-700));
-  background-size: 300% 100%;
+  will-change: transform;
   animation: announce-flow 14s ease-in-out infinite alternate;
 }
+.announce-track { will-change: transform; }
 .announce-track {
   display: flex;
   width: max-content;
@@ -363,8 +375,13 @@
 .announce:hover .announce-track { animation-play-state: paused; }
 [dir="rtl"] .announce-track { animation-name: marquee-rtl; }
 @keyframes announce-flow {
-  from { background-position: 0% 0; }
-  to { background-position: 100% 0; }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-66.666%, 0, 0); }
+}
+[dir="rtl"] .announce::before { animation-name: announce-flow-rtl; }
+@keyframes announce-flow-rtl {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(66.666%, 0, 0); }
 }
 @keyframes marquee {
   from { transform: translateX(0); }
@@ -633,7 +650,8 @@
   0%, 70% { transform: translateX(-120%); }
   100% { transform: translateX(120%); }
 }
-.assistant-spark { animation: assistant-twinkle 2.4s ease-in-out infinite; transform-origin: center; }
+/* on an HTML wrapper (moved by the graphics chip), not on the SVG (repainted every frame) */
+.assistant-spark { display: inline-grid; animation: assistant-twinkle 2.4s ease-in-out infinite; transform-origin: center; will-change: transform; }
 @keyframes assistant-twinkle {
   0%, 100% { transform: scale(1) rotate(0); }
   50% { transform: scale(1.15) rotate(12deg); }
@@ -642,14 +660,24 @@
   .assistant-fab::after, .assistant-spark { animation: none; }
 }
 
-/* Height of the phone's bottom tab bar: 0 while it is tucked away (scrolling down), so the
-   buy bar and the floating buttons slide down with it. */
+/* Height of the phone's bottom tab bar. While it is tucked away (scrolling down) the buy bar
+   and the floating buttons slide down with it: a transform (smooth, done by the graphics chip),
+   not a change of `bottom` (the page laid out again on every frame). */
 :root {
   --nav-h: 4rem;
 }
-:root[data-nav="hidden"] {
-  --nav-h: 0rem;
-}
 .follow-nav {
-  transition: bottom 0.3s ease;
+  transition: transform 0.3s ease;
+}
+@media (max-width: 767px) {
+  :root[data-nav="hidden"] .follow-nav { transform: translate3d(0, var(--nav-h), 0); }
+}
+
+/* the assistant's panel: slides up once (a transform), its backdrop fades in */
+.sheet-in { animation: sheet-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.sheet-backdrop { animation: sheet-fade 0.25s ease-out both; }
+@keyframes sheet-in { from { transform: translate3d(0, 24px, 0); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .sheet-in, .sheet-backdrop { animation: none; }
 }

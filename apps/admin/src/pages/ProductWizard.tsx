@@ -318,7 +318,7 @@ export function ProductWizard() {
 
       {/* navigation */}
       {step < 4 && (
-        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-surface/95 p-3 backdrop-blur md:bottom-0 md:ps-[15rem]">
+        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-surface/95 p-3 md:bottom-0 md:ps-[15rem]">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-1">
             <Button disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("← Retour")}</Button>
             {step === 1 && !canNext && <span className="text-xs text-ink-soft">{tr("Nom et prix requis")}</span>}

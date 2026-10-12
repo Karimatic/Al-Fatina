@@ -28,7 +28,7 @@ export function Badges({ p, className = "" }: { p: Pick<ProductCardDTO, "badge" 
   return (
     <span className={`flex flex-wrap gap-1 ${className}`}>
       {list.map((b) => (
-        <span key={b} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold shadow-sm backdrop-blur ${TONE[b]}`}>
+        <span key={b} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold shadow-sm ${TONE[b]}`}>
           {t.badges[b]}
         </span>
       ))}

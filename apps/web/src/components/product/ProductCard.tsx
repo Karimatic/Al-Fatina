@@ -55,7 +55,7 @@ export function ProductCard({ p, priority = false, level = 3 }: { p: ProductCard
         onClick={() => toggleFavorite(p.slug)}
         aria-pressed={fav}
         aria-label={fav ? t.product.favoriteRemove : t.product.favoriteAdd}
-        className={`absolute end-2 top-2 grid size-9 place-items-center rounded-full bg-ivory/90 shadow-sm backdrop-blur transition active:scale-90 ${fav ? "text-rose-700" : "text-ink-soft"}`}
+        className={`absolute end-2 top-2 grid size-9 place-items-center rounded-full bg-ivory/95 shadow-sm transition active:scale-90 ${fav ? "text-rose-700" : "text-ink-soft"}`}
       >
         <HeartIcon size={18} fill={fav ? "currentColor" : "none"} />
       </button>

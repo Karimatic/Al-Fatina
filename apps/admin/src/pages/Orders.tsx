@@ -316,7 +316,7 @@ function BulkBar({ ids, rows, onDone }: { ids: number[]; rows: OrderRow[]; onDon
     ? OUTCOME_REASONS.filter((r) => r !== "duplicate" && (askReason === "retour" ? r !== "size_issue" && r !== "product_issue" : !["too_small", "too_large", "defect"].includes(r)))
     : [];
   return (
-    <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-surface/95 p-3 shadow-[0_-4px_16px_rgb(43_22_32/0.08)] backdrop-blur md:bottom-0 md:ps-[15rem]">
+    <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-surface/95 p-3 shadow-[0_-4px_16px_rgb(43_22_32/0.08)] md:bottom-0 md:ps-[15rem]">
       <div className="mx-auto max-w-6xl space-y-2 px-1 md:px-8">
         {askReason && (
           <div className="flex flex-wrap items-center gap-1.5 rounded-lg bg-ivory-deep p-2 text-sm">

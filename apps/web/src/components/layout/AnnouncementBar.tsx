@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { SiteConfigDTO } from "@henine/shared";
 import { useApi } from "@/lib/api";
 import { useStoreTexts } from "@/lib/storeTexts";
+import { usePauseOffscreen } from "@/lib/pauseOffscreen";
 
 /**
  * Top banner: a slowly flowing rose gradient with the messages. How they move is chosen in
@@ -13,11 +14,12 @@ export function AnnouncementBar() {
   const { data } = useApi<SiteConfigDTO>("/site");
   const messages = useStoreTexts().announcement; // built-in or edited in the admin, in the language of the page
   const animation = data?.announcement.animation ?? "scroll";
+  const ref = usePauseOffscreen<HTMLDivElement>();
   if (data && !data.announcement.active) return null;
   if (animation === "fade" || animation === "slide") return <OneAtATime messages={messages} slide={animation === "slide"} />;
   if (animation === "static") {
     return (
-      <div className="announce overflow-hidden px-4 py-2 text-center text-[13px] font-medium text-white" role="region" aria-label={messages.join(" · ")}>
+      <div ref={ref} className="announce overflow-hidden px-4 py-2 text-center text-[13px] font-medium text-white" role="region" aria-label={messages.join(" · ")}>
         <p className="truncate">{messages.join("  ✦  ")}</p>
       </div>
     );
@@ -26,7 +28,7 @@ export function AnnouncementBar() {
   const lane = Array.from({ length: Math.max(2, Math.ceil(8 / messages.length)) }, () => messages).flat();
 
   return (
-    <div className="announce overflow-hidden text-[13px] font-medium text-white" role="region" aria-label={messages.join(" · ")}>
+    <div ref={ref} className="announce overflow-hidden text-[13px] font-medium text-white" role="region" aria-label={messages.join(" · ")}>
       <div className="announce-track py-2" aria-hidden="true">
         {[0, 1].map((copy) => (
           <ul key={copy} className="flex shrink-0">
@@ -48,13 +50,14 @@ export function AnnouncementBar() {
 /** One message at a time, changing every few seconds (fading, or sliding up). */
 function OneAtATime({ messages, slide }: { messages: string[]; slide: boolean }) {
   const [i, setI] = useState(0);
+  const ref = usePauseOffscreen<HTMLDivElement>();
   useEffect(() => {
     if (messages.length < 2) return;
     const t = setInterval(() => setI((n) => (n + 1) % messages.length), 3800);
     return () => clearInterval(t);
   }, [messages.length]);
   return (
-    <div className="announce overflow-hidden text-[13px] font-medium text-white" role="region" aria-label={messages.join(" · ")}>
+    <div ref={ref} className="announce overflow-hidden text-[13px] font-medium text-white" role="region" aria-label={messages.join(" · ")}>
       <p key={i} aria-hidden="true" className={`truncate px-4 py-2 text-center ${slide ? "announce-slide" : "announce-fade"}`}>
         {messages[i % messages.length]}
       </p>

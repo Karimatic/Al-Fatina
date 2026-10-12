@@ -508,7 +508,7 @@ export function ProductEditor() {
       </div>
 
       {!readOnly && (
-        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-ivory/95 p-3 backdrop-blur md:bottom-0 md:ps-[15rem]">
+        <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-line bg-ivory/95 p-3 md:bottom-0 md:ps-[15rem]">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-1 md:px-8">
             <p className="min-w-0 truncate text-sm text-red-700">{error}</p>
             <div className="flex shrink-0 gap-2">

@@ -160,7 +160,7 @@ export function Newsletter() {
     <section className="mx-auto max-w-6xl px-3 py-6 md:px-4">
       <Reveal>
         <div className="relative overflow-hidden rounded-[1.75rem] bg-rose-100 px-5 py-8 text-center md:px-10">
-          <span aria-hidden="true" className="pointer-events-none absolute -end-10 -top-10 size-40 rounded-full bg-surface/50 blur-2xl" />
+          <span aria-hidden="true" className="pointer-events-none absolute -end-10 -top-10 size-56 rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-surface)_50%,transparent),transparent)]" />
           <p className="text-3xl" aria-hidden="true">💌</p>
           <h2 className="heading-display mt-2 text-3xl">{N.title}</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft">{N.text}</p>

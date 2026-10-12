@@ -8,6 +8,7 @@ import { useDesign, useSite } from "@/lib/site";
 import { useStoreTexts } from "@/lib/storeTexts";
 import { DropBanner } from "@/components/views/DropViews";
 import { AnimatedTagline } from "./AnimatedTagline";
+import { usePauseOffscreen } from "@/lib/pauseOffscreen";
 import { LoopVideo } from "@/components/ui/LoopVideo";
 import { Banners, Featured, FlashBlock, Newsletter } from "./HomeExtras";
 import { Faq, InstagramCard, SectionHead } from "./Sections";
@@ -22,6 +23,8 @@ export function HomePage() {
   const { t, href, ar } = useLocale();
   const site = useSite();
   const design = useDesign();
+  // the banner's endless animations stop once it is scrolled away
+  const heroRef = usePauseOffscreen<HTMLDivElement>();
   const catalog = useApi<ProductCardDTO[]>("/catalog");
   const categories = useApi<CategoryDTO[]>("/categories");
 
@@ -47,7 +50,7 @@ export function HomePage() {
     hero: () => (
       /* Hero: the shop's photo, the promise centred on it */
       <section className="px-3 pt-3 md:px-4">
-        <div className="relative mx-auto flex min-h-[58svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
+        <div ref={heroRef} className="relative mx-auto flex min-h-[58svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
           {/* cinematic: the shop's photo drifting slowly (or, by default, two silks
               cross-fading), under a warm grade, a vignette, film grain and a light sweep */}
           {design.heroImage ? (
@@ -65,7 +68,7 @@ export function HomePage() {
           <div aria-hidden="true" className="hero-grain pointer-events-none absolute -inset-[10%]" />
           <div aria-hidden="true" className="hero-frame pointer-events-none absolute" />
           <div className="relative flex w-full max-w-2xl flex-col items-center p-6 pb-8 text-white md:p-12">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#e9c98f]/40 bg-black/20 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#f3dcb0] backdrop-blur">
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#e9c98f]/40 bg-black/35 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#f3dcb0]">
               <span className="size-1.5 animate-pulse rounded-full bg-[#e9c98f]" aria-hidden="true" />
               {eyebrow}
             </p>

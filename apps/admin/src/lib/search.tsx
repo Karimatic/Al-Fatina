@@ -624,7 +624,7 @@ function SearchDialog({ groups, permissions, onClose }: { groups: NavGroup[]; pe
   let lastHeading = "";
   return createPortal(
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={tr("Rechercher")} onKeyDown={onKey}>
-      <button type="button" aria-label={tr("Fermer")} className="animate-fade absolute inset-0 bg-noir/40 backdrop-blur-[2px]" onClick={onClose} />
+      <button type="button" aria-label={tr("Fermer")} className="animate-fade absolute inset-0 bg-noir/50" onClick={onClose} />
       <div className="relative mx-auto mt-3 flex max-h-[min(40rem,calc(100dvh-1.5rem))] w-[calc(100%-1.5rem)] max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl sm:mt-[8vh]">
         <div className="flex items-center gap-2 border-b border-line ps-4 pe-2">
           <Search className={`size-5 shrink-0 ${searching ? "animate-pulse text-plum-600" : "text-ink-soft"}`} />

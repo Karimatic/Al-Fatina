@@ -48,7 +48,7 @@ export function ShareButton({ slug, name, price, className = "" }: { slug: strin
       <button
         type="button"
         onClick={share}
-        className={`inline-flex h-11 items-center justify-center gap-2 rounded-full border border-ink/15 bg-ivory/80 px-4 text-sm font-semibold text-ink backdrop-blur transition hover:border-plum-600 active:scale-[0.98] ${className}`}
+        className={`inline-flex h-11 items-center justify-center gap-2 rounded-full border border-ink/15 bg-ivory/90 px-4 text-sm font-semibold text-ink transition hover:border-plum-600 active:scale-[0.98] ${className}`}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />

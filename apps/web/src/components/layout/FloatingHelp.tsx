@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { formatDA, type AssistantReplyDTO } from "@henine/shared";
 import { ProductImage, Spinner } from "@/components/ui/kit";
 import { apiPost } from "@/lib/api";
@@ -47,6 +47,8 @@ export function FloatingHelp() {
     window.addEventListener("henine:assistant", show);
     return () => window.removeEventListener("henine:assistant", show);
   }, []);
+  // stable: the panel's setup (focus, scroll lock) must not run again while she types
+  const close = useCallback(() => setOpen(false), []);
   // not at checkout (its own confirm bar) nor on /liens (the Instagram bio page: links only)
   if (!path || path.startsWith("/commande") || path === "/liens") return null;
   // pages with a bar fixed at the bottom (buy bar, outfit total): sit above it
@@ -80,16 +82,18 @@ export function FloatingHelp() {
           className={`assistant-fab lift relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-gradient-to-br from-rose-500 via-plum-600 to-plum-700 ps-1.5 text-sm ${onProduct ? "pe-1.5 md:pe-4" : "pe-4"} font-semibold text-white shadow-[0_12px_30px_-8px_rgb(142_16_72/0.7)] ring-2 ring-white/80`}
         >
           <span className="grid size-9 place-items-center rounded-full bg-white/20" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="assistant-spark">
-              <path d="M12 2c.6 4.6 2.4 6.4 7 7-4.6.6-6.4 2.4-7 7-.6-4.6-2.4-6.4-7-7 4.6-.6 6.4-2.4 7-7Z" />
-              <path d="M19 14c.3 2 1 2.7 3 3-2 .3-2.7 1-3 3-.3-2-1-2.7-3-3 2-.3 2.7-1 3-3Z" opacity=".8" />
-            </svg>
+            <span className="assistant-spark">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2c.6 4.6 2.4 6.4 7 7-4.6.6-6.4 2.4-7 7-.6-4.6-2.4-6.4-7-7 4.6-.6 6.4-2.4 7-7Z" />
+                <path d="M19 14c.3 2 1 2.7 3 3-2 .3-2.7 1-3 3-.3-2-1-2.7-3-3 2-.3 2.7-1 3-3Z" opacity=".8" />
+              </svg>
+            </span>
           </span>
           {/* on a product page's phone layout: the icon only, the page needs the room */}
           <span className={`whitespace-nowrap ${onProduct ? "max-md:hidden" : ""}`}>{t.plus.assistant.short}</span>
         </button>
       </div>
-      {open && <AssistantPanel onClose={() => setOpen(false)} locale={locale} />}
+      {open && <AssistantPanel onClose={close} locale={locale} />}
     </>
   );
 }
@@ -104,20 +108,36 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
   const [turns, setTurns] = useState<Turn[]>([]);
   const [busy, setBusy] = useState(false);
   const lastSearch = useRef<string | null>(null);
-  const end = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    input.current?.focus();
+    // a computer: ready to type; a phone: no keyboard jumping up over the panel before she asks
+    if (matchMedia("(hover: hover) and (pointer: fine)").matches) input.current?.focus();
     const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", esc);
-    document.body.style.overflow = "hidden";
+    // the page behind stays still, and keeps its width (the scrollbar's room is kept)
+    const html = document.documentElement;
+    const gap = window.innerWidth - html.clientWidth;
+    html.style.overflow = "hidden";
+    if (gap > 0) html.style.paddingInlineEnd = `${gap}px`;
     return () => {
       window.removeEventListener("keydown", esc);
-      document.body.style.overflow = "";
+      html.style.overflow = "";
+      html.style.paddingInlineEnd = "";
     };
   }, [onClose]);
+  // follow the conversation inside the panel only (scrollIntoView also moved the page behind it
+  // and, with the phone's keyboard open, the whole screen); a new answer shows from its start
   useEffect(() => {
-    end.current?.scrollIntoView({ behavior: "smooth", block: "end" }); // braces: scrollIntoView now returns a Promise, not a cleanup
+    const box = list.current;
+    if (!box) return;
+    const id = requestAnimationFrame(() => {
+      const all = box.querySelectorAll<HTMLElement>("[data-turn]");
+      const lastTurn = all[all.length - 1];
+      const top = lastTurn && !busy ? lastTurn.offsetTop - 12 : box.scrollHeight;
+      box.scrollTo({ top, behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
   }, [turns, busy]);
 
   async function ask(text: string) {
@@ -155,8 +175,8 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
   const wa = whatsappLink(site.data?.contact.whatsapp, t.plus.whatsapp.hello);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-noir/40 backdrop-blur-[2px] md:items-center" role="dialog" aria-modal="true" aria-label={A.title} onClick={onClose}>
-      <div className="flex max-h-[88dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-[1.75rem] bg-ivory shadow-2xl md:rounded-[1.75rem]" onClick={(e) => e.stopPropagation()}>
+    <div className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-noir/50 md:items-center" role="dialog" aria-modal="true" aria-label={A.title} onClick={onClose}>
+      <div className="sheet-in flex max-h-[88dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-[1.75rem] bg-ivory shadow-2xl md:rounded-[1.75rem]" onClick={(e) => e.stopPropagation()}>
         <header className="flex items-center justify-between gap-3 bg-gradient-to-br from-plum-600 to-plum-700 px-5 py-4 text-white">
           <div>
             <p className="heading-display text-xl">{A.title}</p>
@@ -167,7 +187,7 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
           </button>
         </header>
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-4" aria-live="polite">
+        <div ref={list} className="relative flex-1 space-y-4 overflow-y-auto overscroll-contain p-4" aria-live="polite">
           <p className="rounded-2xl rounded-ss-sm bg-surface p-3.5 text-sm leading-relaxed shadow-sm">{A.intro}</p>
           {turns.length === 0 && (
             <div className="flex flex-wrap gap-2">
@@ -179,7 +199,7 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
             </div>
           )}
           {turns.map((turn, i) => (
-            <div key={i} className="space-y-2.5">
+            <div key={i} data-turn className="space-y-2.5">
               <p className="ms-auto w-fit max-w-[85%] rounded-2xl rounded-se-sm bg-ink px-3.5 py-2.5 text-sm text-on-ink">{turn.q}</p>
               {turn.error && <p className="text-sm text-danger">{t.common.error}</p>}
               {turn.reply && (
@@ -253,7 +273,6 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
               <Spinner className="size-4" /> {A.thinking}
             </p>
           )}
-          <div ref={end} />
         </div>
 
         <form

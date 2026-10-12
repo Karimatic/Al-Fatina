@@ -121,7 +121,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   clip-path: inset(0 100% 0 0);
-  animation: wordmark-write 1.1s cubic-bezier(0.3, 0.7, 0.2, 1) 0.15s forwards, wordmark-flow 9s ease-in-out 1.3s infinite alternate;
+  animation: wordmark-write 1.1s cubic-bezier(0.3, 0.7, 0.2, 1) 0.15s forwards, wordmark-flow 9s ease-in-out 1.3s 4 alternate;
 }
 @keyframes wordmark-write {
   to { clip-path: inset(0 0 0 0); }

@@ -21,7 +21,7 @@ export function QuickAddButton({ p }: { p: ProductCardDTO }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t.quickAdd.open}
-        className="absolute bottom-2 end-2 grid size-10 place-items-center rounded-full bg-surface/95 text-xl font-light text-ink shadow-md backdrop-blur transition hover:bg-ink hover:text-on-ink active:scale-90"
+        className="absolute bottom-2 end-2 grid size-10 place-items-center rounded-full bg-surface/95 text-xl font-light text-ink shadow-md transition hover:bg-ink hover:text-on-ink active:scale-90"
       >
         +
       </button>

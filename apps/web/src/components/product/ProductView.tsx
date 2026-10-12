@@ -258,7 +258,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
               onClick={() => toggleFavorite(p.slug)}
               aria-pressed={fav}
               aria-label={fav ? t.product.favoriteRemove : t.product.favoriteAdd}
-              className={`absolute end-3 top-3 grid size-11 place-items-center rounded-full bg-ivory/90 shadow-sm backdrop-blur ${fav ? "text-rose-700" : "text-ink-soft"}`}
+              className={`absolute end-3 top-3 grid size-11 place-items-center rounded-full bg-ivory/95 shadow-sm ${fav ? "text-rose-700" : "text-ink-soft"}`}
             >
               <HeartIcon fill={fav ? "currentColor" : "none"} />
             </button>

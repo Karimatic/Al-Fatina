@@ -59,7 +59,7 @@ export function InstagramCard({ children }: { children?: React.ReactNode }) {
     <section className="mx-auto max-w-6xl px-4 py-10">
       <Reveal>
         <div className="ig-card relative overflow-hidden rounded-[2rem] p-6 md:p-8">
-          <div aria-hidden="true" className="pointer-events-none absolute -end-16 -top-16 size-56 rounded-full bg-rose-100 blur-3xl" />
+          <div aria-hidden="true" className="pointer-events-none absolute -end-16 -top-16 size-72 rounded-full bg-[radial-gradient(closest-side,var(--color-rose-100),transparent)]" />
           <div className="relative flex flex-col items-center gap-5 text-center md:flex-row md:text-start">
             <a href={href} target="_blank" rel="noopener noreferrer" className="ig-logo grid size-20 shrink-0 place-items-center rounded-[1.6rem] text-white shadow-lg transition hover:scale-105" aria-label="Instagram">
               <InstagramIcon size={40} strokeWidth={1.8} />

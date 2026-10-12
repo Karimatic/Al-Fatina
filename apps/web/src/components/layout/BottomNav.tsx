@@ -16,15 +16,24 @@ export function BottomNav() {
   // near the top or at the end of the page
   useEffect(() => {
     let last = window.scrollY;
-    const onScroll = () => {
+    let frame = 0;
+    // at most once per frame (a phone fires several scroll events per frame)
+    const check = () => {
+      frame = 0;
       const y = window.scrollY;
       const atEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 40;
       if (y < 80 || atEnd || y < last - 8) setHidden(false);
       else if (y > last + 8) setHidden(true);
       if (Math.abs(y - last) > 8) last = y;
     };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
   }, []);
   useEffect(() => {
     if (hidden) document.documentElement.dataset.nav = "hidden";
@@ -42,7 +51,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation"
-      className={`fixed inset-x-0 bottom-0 z-40 border-t border-line/80 bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgb(23_10_16/0.06)] backdrop-blur transition-transform duration-300 md:hidden ${hidden ? "translate-y-full" : ""}`}
+      className={`fixed inset-x-0 bottom-0 z-40 border-t border-line/80 bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgb(23_10_16/0.06)] transition-transform duration-300 md:hidden ${hidden ? "translate-y-full" : ""}`}
     >
       <ul className="grid grid-cols-5">
         {items.map(({ to, label, Icon, match }) => {
