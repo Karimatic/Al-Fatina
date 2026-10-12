@@ -80,6 +80,9 @@ export function SearchView() {
   }, [needle, results.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    // the box focuses itself as the page appears, often before this script runs: no focus event
+    // then, so read it here (else suggestions only showed after a second tap)
+    if (box.current?.contains(document.activeElement)) setFocused(true);
     const out = (e: PointerEvent) => !box.current?.contains(e.target as Node) && setFocused(false);
     document.addEventListener("pointerdown", out);
     return () => document.removeEventListener("pointerdown", out);
@@ -116,11 +119,12 @@ export function SearchView() {
           aria-autocomplete="list"
         />
         {showSuggest && (
-          <div id="search-suggest" role="listbox" className="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_18px_40px_-16px_rgb(23_10_16/0.35)]">
-            <p className="px-4 pb-1 pt-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">{S.suggestions}</p>
-            <ul>
+          <div className="absolute inset-x-0 top-full z-20 mt-2 overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_18px_40px_-16px_rgb(23_10_16/0.35)]">
+            <p id="search-suggest-title" className="px-4 pb-1 pt-3 text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft">{S.suggestions}</p>
+            {/* the list is the listbox, each link its option (the <li>s are only wrappers) */}
+            <ul id="search-suggest" role="listbox" aria-labelledby="search-suggest-title">
               {matchingCategories.slice(0, 2).map((c) => (
-                <li key={c.id}>
+                <li key={c.id} role="none">
                   <a href={href(`/c/${c.slug}`)} className="flex items-center gap-3 px-4 py-2.5 hover:bg-rose-100/50" role="option" aria-selected={false}>
                     <span className="grid size-10 place-items-center rounded-xl bg-rose-100 text-lg" aria-hidden="true">🗂️</span>
                     <span className="font-medium">{ar ? c.nameAr : c.nameFr}</span>
@@ -129,7 +133,7 @@ export function SearchView() {
                 </li>
               ))}
               {results.slice(0, 5).map((p) => (
-                <li key={p.id}>
+                <li key={p.id} role="none">
                   <a href={href(`/produit/${p.slug}`)} onClick={() => rememberSearch(q)} className="flex items-center gap-3 px-4 py-2 hover:bg-rose-100/50" role="option" aria-selected={false}>
                     <ProductImage image={p.image} alt="" category={p.categorySlug} color={p.colors[0]} sizes="48px" className="aspect-[4/5] w-10 shrink-0 rounded-lg" />
                     <span className="min-w-0 flex-1 truncate">{ar ? p.nameAr : p.nameFr}</span>

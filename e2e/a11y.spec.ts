@@ -44,3 +44,16 @@ for (const prefix of ["", "/fr"]) {
     });
   }
 }
+
+// states that only exist after an action: checked every time, not by luck of timing
+for (const prefix of ["", "/fr"]) {
+  test(`axe ${prefix || "/"} search suggestions open`, async ({ page }) => {
+    await page.goto(`${prefix}/recherche`);
+    await page.waitForLoadState("networkidle");
+    await page.getByRole("combobox").pressSequentially("pyj", { delay: 50 });
+    await expect(page.locator("#search-suggest [role=option]").first()).toBeVisible();
+    const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    const report = violations.map((v) => `${v.id} (${v.impact}): ${v.help}\n    ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join("\n    ")}`);
+    expect(report, report.join("\n")).toEqual([]);
+  });
+}
