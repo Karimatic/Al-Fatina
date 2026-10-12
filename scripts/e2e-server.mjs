@@ -62,14 +62,32 @@ let stopping = false;
 let up = false;
 let misses = 0;
 
+// The server and everything it started. It stays in this script's process group, so the test
+// runner's own cleanup still reaches it at the end (a separate group once left CI hanging).
 const killTree = (child) => {
   if (!child?.pid) return;
-  if (process.platform === "win32") spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
-  else {
+  if (process.platform === "win32") {
+    spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+    return;
+  }
+  const table = spawnSync("ps", ["-A", "-o", "pid=,ppid="], { encoding: "utf8" }).stdout ?? "";
+  const kids = new Map();
+  for (const line of table.trim().split("\n")) {
+    const [pid, ppid] = line.trim().split(/\s+/).map(Number);
+    if (!kids.has(ppid)) kids.set(ppid, []);
+    kids.get(ppid).push(pid);
+  }
+  const all = [];
+  const walk = (pid) => {
+    all.push(pid);
+    for (const k of kids.get(pid) ?? []) walk(k);
+  };
+  walk(child.pid);
+  for (const pid of all.reverse()) {
     try {
-      process.kill(-child.pid, "SIGKILL"); // the whole group (spawned detached)
+      process.kill(pid, "SIGKILL");
     } catch {
-      child.kill("SIGKILL");
+      /* already gone */
     }
   }
 };
@@ -97,7 +115,7 @@ const start = () => {
   dev = spawn(
     "npx",
     ["wrangler", "dev", "--config", CONFIG, "--persist-to", PERSIST, "--env-file", "../../e2e/e2e.vars", "--ip", "127.0.0.1", "--port", String(PORT), "--show-interactive-dev-session=false"],
-    { cwd: worker, stdio: "inherit", shell: process.platform === "win32", detached: process.platform !== "win32" },
+    { cwd: worker, stdio: "inherit", shell: process.platform === "win32" },
   );
   dev.on("exit", (code) => (stopping ? process.exit(0) : restart(`wrangler exited (code ${code})`)));
 };

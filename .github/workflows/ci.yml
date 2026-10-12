@@ -45,6 +45,8 @@ jobs:
       matrix:
         project: [phone, desktop]
     name: e2e (${{ matrix.project }})
+    # a full run takes ~4 min: a hang fails the job instead of running on
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
