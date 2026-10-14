@@ -105,6 +105,18 @@ export function Stories({ categories, products }: { categories: CategoryDTO[] | 
       .map((c) => ({ key: c.slug, label: ar ? c.nameAr : c.nameFr, href: href(`/c/${c.slug}`), category: c.slug, art: artKey(c.slug), count: c.productCount })),
     ...(onSale ? [{ key: "promo", label: S.promo, href: href("/promotions"), art: "promo", count: onSale }] : []),
   ];
+  // while the categories load: the row's own height (it appearing pushed the products down)
+  if (!categories)
+    return (
+      <div className="mx-auto max-w-6xl px-4" aria-hidden="true">
+        <div className="skeleton mb-3 h-8 w-40 rounded-lg" />
+        <div className="flex gap-3 overflow-hidden pb-2 md:grid md:grid-cols-6">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton aspect-[132/203] w-[8.25rem] shrink-0 rounded-[1.4rem] md:w-auto" />
+          ))}
+        </div>
+      </div>
+    );
   if (!stories.length) return null;
   return (
     <section aria-label={t.categories.title} className="mx-auto max-w-6xl px-4">

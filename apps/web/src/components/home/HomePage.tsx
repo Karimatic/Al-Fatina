@@ -50,7 +50,7 @@ export function HomePage() {
     hero: () => (
       /* Hero: the shop's photo, the promise centred on it */
       <section className="px-3 pt-3 md:px-4">
-        <div ref={heroRef} className="relative mx-auto flex min-h-[58svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
+        <div ref={heroRef} className="relative mx-auto flex min-h-[42svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
           {/* cinematic: the shop's photo drifting slowly (or, by default, two silks
               cross-fading), under a warm grade, a vignette, film grain and a light sweep */}
           {design.heroImage ? (
@@ -58,8 +58,24 @@ export function HomePage() {
           ) : (
             // no photo uploaded yet: rose and pearl silk (Unsplash licence), cross-fading slowly
             <>
-              <img src="/hero/silk-rose.webp" alt="" fetchPriority="high" className="hero-cine-img hero-cine-a" />
-              <img src="/hero/silk-pearl.webp" alt="" loading="lazy" className="hero-cine-img hero-cine-b" />
+              {/* sized for the screen (a phone gets ≤ 44 KB instead of 228 KB); phones show the first
+                  one only (no cross-fade: the second photo became the slowest paint) */}
+              <img
+                src="/hero/silk-rose-960.webp"
+                srcSet="/hero/silk-rose-480.webp 480w, /hero/silk-rose-960.webp 960w, /hero/silk-rose-1600.webp 1600w"
+                sizes="(max-width: 767px) 50vw, (max-width: 1280px) 100vw, 1200px"
+                alt=""
+                fetchPriority="high"
+                className="hero-cine-img hero-cine-a"
+              />
+              <img
+                src="/hero/silk-pearl-960.webp"
+                srcSet="/hero/silk-pearl-480.webp 480w, /hero/silk-pearl-960.webp 960w, /hero/silk-pearl-1600.webp 1600w"
+                sizes="(max-width: 1280px) 100vw, 1200px"
+                alt=""
+                loading="lazy"
+                className="hero-cine-img hero-cine-b max-md:hidden"
+              />
             </>
           )}
           {design.heroVideo && <LoopVideo src={design.heroVideo} />}
@@ -78,6 +94,8 @@ export function HomePage() {
               <a href="#nouveautes" className="lift inline-flex h-12 items-center justify-center rounded-full bg-white px-8 font-semibold text-noir">
                 {t.hero.cta}
               </a>
+              {/* its line is kept from the first paint (it appearing with the products moved the page) */}
+              {!heroProduct && <span className="h-10" aria-hidden="true" />}
               {heroProduct && (
                 <a href={href(`/produit/${heroProduct.slug}`)} className="inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-white/85 underline-offset-4 hover:underline">
                   {ar ? heroProduct.nameAr : heroProduct.nameFr}

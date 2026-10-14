@@ -35,11 +35,18 @@ export function FloatingHelp() {
     } catch {
       /* private mode: no bubble */
     }
-    if (seen) return;
-    const show = setTimeout(() => setHint(true), 5000);
-    const hide = setTimeout(() => setHint(false), 13000);
+    // narrow phones: no bubble (it covered products and prices); others: after a first scroll
+    if (seen || window.innerWidth < 400) return;
+    let hide: ReturnType<typeof setTimeout> | undefined;
+    const onScroll = () => {
+      if (window.scrollY < 300) return;
+      window.removeEventListener("scroll", onScroll);
+      setHint(true);
+      hide = setTimeout(() => setHint(false), 8000);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      clearTimeout(show);
+      window.removeEventListener("scroll", onScroll);
       clearTimeout(hide);
     };
   }, []);
@@ -54,6 +61,8 @@ export function FloatingHelp() {
   if (!path || path.startsWith("/commande") || path === "/liens") return null;
   // pages with a bar fixed at the bottom (buy bar, outfit total): sit above it
   const onProduct = path.startsWith("/produit/") || path.startsWith("/tenue");
+  // pages full of product cards: on a phone the button is the icon only (it covered prices)
+  const compact = onProduct || ["/c/", "/boutique", "/nouveautes", "/promotions", "/recherche", "/collection/"].some((p) => path.startsWith(p));
   return (
     <>
       <div
@@ -80,7 +89,7 @@ export function FloatingHelp() {
             setOpen(true);
           }}
           aria-label={t.plus.assistant.open}
-          className={`assistant-fab lift relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-gradient-to-br from-rose-500 via-plum-600 to-plum-700 ps-1.5 text-sm ${onProduct ? "pe-1.5 md:pe-4" : "pe-4"} font-semibold text-white shadow-[0_12px_30px_-8px_rgb(142_16_72/0.7)] ring-2 ring-white/80`}
+          className={`assistant-fab lift relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-gradient-to-br from-rose-500 via-plum-600 to-plum-700 ps-1.5 text-sm ${compact ? "pe-1.5 md:pe-4" : "pe-4"} font-semibold text-white shadow-[0_12px_30px_-8px_rgb(142_16_72/0.7)] ring-2 ring-white/80`}
         >
           <span className="grid size-9 place-items-center rounded-full bg-white/20" aria-hidden="true">
             <span className="assistant-spark">
@@ -91,7 +100,7 @@ export function FloatingHelp() {
             </span>
           </span>
           {/* on a product page's phone layout: the icon only, the page needs the room */}
-          <span className={`whitespace-nowrap ${onProduct ? "max-md:hidden" : ""}`}>{t.plus.assistant.short}</span>
+          <span className={`whitespace-nowrap ${compact ? "max-md:hidden" : ""}`}>{t.plus.assistant.short}</span>
         </button>
       </div>
       {open && <AssistantPanel onClose={close} locale={locale} />}

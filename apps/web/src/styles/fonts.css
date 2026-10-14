@@ -117,6 +117,12 @@
 @font-face{font-family:Reem Kufi;font-style:normal;font-weight:400 700;font-display:swap;src:url(/fonts/3b6a411fbe2668bb-s.3we2ogajlevfx.woff2)format("woff2");unicode-range:U+??,U+131,U+152-153,U+2BB-2BC,U+2C6,U+2DA,U+2DC,U+304,U+308,U+329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:Reem Kufi Fallback;src:local(Arial);ascent-override:113.51%;descent-override:41.28%;line-gap-override:0.0%;size-adjust:96.9%}
 
+/* The logo's letters only ("Henine Boutique", 3 KB instead of 38 KB): declared after the full italic,
+   so Arabic pages, which have no other Latin italic text, never download the whole font. */
+@font-face{font-family:Playfair Display;font-style:italic;font-weight:500;font-display:swap;src:url(/fonts/henine-logo.woff2)format("woff2");unicode-range:U+20,U+42,U+48,U+65,U+69,U+6E,U+6F,U+71,U+74,U+75}
+@font-face{font-family:Playfair Display;font-style:italic;font-weight:600;font-display:swap;src:url(/fonts/henine-logo.woff2)format("woff2");unicode-range:U+20,U+42,U+48,U+65,U+69,U+6E,U+6F,U+71,U+74,U+75}
+@font-face{font-family:Playfair Display;font-style:italic;font-weight:700;font-display:swap;src:url(/fonts/henine-logo.woff2)format("woff2");unicode-range:U+20,U+42,U+48,U+65,U+69,U+6E,U+6F,U+71,U+74,U+75}
+
 :root {
   --font-playfair: "Playfair Display", "Playfair Display Fallback";
   --font-dm-sans: "DM Sans", "DM Sans Fallback";

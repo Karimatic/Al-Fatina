@@ -1,7 +1,8 @@
 import { Blossom } from "@/components/ui/icons";
 
 /**
- * Brand intro screen, shown once per browser tab (sessionStorage), for ~1 second before it
+ * Brand intro screen, only when the shop is opened as an installed app (in a browser it delayed
+ * the first view of every visit, an ad click included), once per launch, for ~1 second before it
  * fades out. The markup is server-rendered so it is already visible in the very first paint,
  * and the whole 1s-hold-then-fade timing is a single CSS animation (`henine-splash-cycle`,
  * see globals.css) — not a JS setTimeout. CSS animations of opacity run on the compositor
@@ -28,7 +29,8 @@ export function SplashScreen() {
       <script
         dangerouslySetInnerHTML={{
           __html: `(function(){try{
-            if (sessionStorage.getItem("henine.splash")) {
+            var app = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+            if (!app || sessionStorage.getItem("henine.splash")) {
               var s=document.getElementById("henine-splash");
               if (s) s.style.display = "none";
             } else {

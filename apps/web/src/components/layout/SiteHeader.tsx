@@ -25,7 +25,7 @@ export function SiteHeader() {
               <>
                 {/* the smallest phones (< 360 px): no flower and a slightly smaller name, so it is never cut */}
                 <Blossom size={22} className="animate-bloom shrink-0 max-[359px]:hidden" />
-                <span className="brand-mark heading-display whitespace-nowrap text-[1.08rem] italic max-[359px]:text-[0.94rem] leading-none tracking-wide min-[400px]:text-xl sm:text-2xl" dir="ltr">
+                <span className="brand-mark heading-display whitespace-nowrap px-0.5 text-[0.98rem] italic max-[359px]:text-[0.9rem] leading-none tracking-wide min-[400px]:text-xl sm:text-2xl" dir="ltr">
                   Henine Boutique
                 </span>
               </>

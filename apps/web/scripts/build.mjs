@@ -71,6 +71,8 @@ const { renderPage, PAGES, NOT_FOUND, APP_CLASS, BOOT_SCRIPT } = await import(pa
 // 3. pages
 const site = siteUrl();
 const fonts = JSON.parse(readFileSync(join(web, "src/styles/font-preload.json"), "utf8"));
+const HERO_PRELOAD =
+  `<link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(max-width: 767px)" imagesrcset="/hero/silk-rose-480.webp 480w, /hero/silk-rose-960.webp 960w" imagesizes="50vw"/>`;
 const localePath = (locale, path) => (locale === "ar" ? path : path === "/" ? "/fr" : `/fr${path}`);
 
 function writePage(page, locale, file) {
@@ -82,7 +84,10 @@ function writePage(page, locale, file) {
     // light / dark choice and the store's colours before the first paint (no flash)
     `<script>${BOOT_SCRIPT}</script>` +
     head +
-    fonts.map((f) => `<link rel="preload" href="${f}" as="font" type="font/woff2" crossorigin=""/>`).join("") +
+    // the fonts the first view of this language needs (Arabic pages: Tajawal + the logo's italic)
+    fonts[locale].map((f) => `<link rel="preload" href="${f}" as="font" type="font/woff2" crossorigin=""/>`).join("") +
+    // the built-in home banner photo of phones, fetched with the page (≤ 44 KB)
+    (page.view === "HomePage" ? HERO_PRELOAD : "") +
     a.css.map((f) => `<link rel="stylesheet" href="/${f}"/>`).join("") +
     a.preload.map((f) => `<link rel="modulepreload" href="/${f}"/>`).join("") +
     `<script type="module" src="/${a.entry}"></script>` +
