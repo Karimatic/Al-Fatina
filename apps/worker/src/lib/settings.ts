@@ -48,6 +48,8 @@ export interface Settings {
   faq: { q_fr: string; a_fr: string; q_ar: string; a_ar: string }[];
   "shipping.prices_verified": boolean;
   catalog_version: number;
+  /** when the team was last told about contact messages (at most one Telegram per 15 min) */
+  contact_notice: { at: number };
   /** start/end times of published drops: public cache keys change when one passes */
   drop_times: number[];
   reviews: { auto_approve_verified: boolean };
@@ -104,6 +106,7 @@ export const DEFAULTS: Settings = {
   ],
   "shipping.prices_verified": false,
   catalog_version: 0,
+  contact_notice: { at: 0 },
   drop_times: [],
   reviews: { auto_approve_verified: true },
   texts: { ar: {}, fr: {} },

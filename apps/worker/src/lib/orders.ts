@@ -469,7 +469,11 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
     if (q.couponRow) stmts.push(env.DB.prepare("UPDATE coupons SET used_count = used_count + 1 WHERE id = ?").bind(q.couponRow.id));
     if (q.pointsUsed > 0) {
       stmts.push(
-        env.DB.prepare("UPDATE customers SET points_balance = MAX(points_balance - ?, 0) WHERE phone = ?").bind(q.pointsUsed, input.phone),
+        // spent only if still there: two orders sent at the same instant can't both spend them
+        // (NULL breaks the NOT NULL rule and the whole order is refused, nothing written)
+        env.DB.prepare("UPDATE customers SET points_balance = CASE WHEN points_balance >= ? THEN points_balance - ? ELSE NULL END WHERE phone = ?").bind(
+          q.pointsUsed, q.pointsUsed, input.phone,
+        ),
         env.DB.prepare(
           `INSERT INTO loyalty_ledger (customer_id, delta, reason, order_id, actor, note, created_at) VALUES ((SELECT id FROM customers WHERE phone = ?), ?, 'redeem', ${orderRef}, ?, ?, ?)`,
         ).bind(input.phone, -q.pointsUsed, code, actor, `−${q.pointsDiscount} DA`, now),
@@ -516,6 +520,7 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
         });
       }
       if (msg.includes("coupons_usage_ok")) throw new HttpError(422, "coupon_invalid", { reason: "exhausted" });
+      if (msg.includes("customers.points_balance")) throw new HttpError(409, "points_changed");
       // the same checkout sent twice at the same moment: the other request won, answer with its order
       if (msg.includes("orders.idempotency_key")) {
         const won = await findReplay(env, input.idempotencyKey);

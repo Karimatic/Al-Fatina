@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { noticeNewContact } from "../lib/contact-notice";
 import {
   askableSources,
   classifySource,
@@ -312,7 +313,12 @@ publicRoutes.post("/assistant", async (c) => {
 
 /* ───────── Tracking ───────── */
 
-async function trackedOrders(c: Context<AppEnv>, where: string, binds: unknown[], withDetails: boolean): Promise<TrackedOrderDTO[]> {
+/**
+ * `showItems` false: what was bought stays hidden (a lookup by phone number alone: anyone who
+ * knows her number would otherwise see her purchases); the code + phone, or her private link,
+ * show them.
+ */
+async function trackedOrders(c: Context<AppEnv>, where: string, binds: unknown[], withDetails: boolean, showItems = true): Promise<TrackedOrderDTO[]> {
   const { results: orders } = await c.env.DB.prepare(
     `SELECT o.id, o.public_code, o.status, o.created_at, o.subtotal, o.discount_total, o.shipping_price, o.total, o.delivery_type,
             o.tracking_number, o.name, o.phone, o.address, o.wilaya_code, o.commune_text, o.delivered_at, o.received_at, o.receipt_issue,
@@ -373,7 +379,8 @@ async function trackedOrders(c: Context<AppEnv>, where: string, binds: unknown[]
     communeAr: withDetails ? (o.commune_ar ?? o.commune_text) : null,
     deliveryType: o.delivery_type,
     trackingNumber: o.tracking_number,
-    items: (
+    items: showItems
+      ? (
       items!.results as {
         id: number; order_id: number; name_fr: string; name_ar: string; options_label: string | null; qty: number; unit_price: number; product_id: number | null;
         variant_id: number | null; slug: string | null;
@@ -396,7 +403,8 @@ async function trackedOrders(c: Context<AppEnv>, where: string, binds: unknown[]
           orderItemId: withDetails ? i.id : null,
           variantId: withDetails ? i.variant_id : null,
         };
-      }),
+      })
+      : [],
     events: (events!.results as { order_id: number; to_status: string; created_at: number }[])
       .filter((e) => e.order_id === o.id)
       .map((e) => ({ status: e.to_status, at: e.created_at })),
@@ -568,7 +576,7 @@ publicRoutes.post("/track", async (c) => {
   const input = await body(c, trackLookupInput);
   const orders = input.code
     ? await trackedOrders(c, "o.phone = ? AND o.public_code = ?", [input.phone, input.code], false)
-    : await trackedOrders(c, "o.phone = ? AND o.created_at > ?", [input.phone, Date.now() - 180 * 86400_000], false);
+    : await trackedOrders(c, "o.phone = ? AND o.created_at > ?", [input.phone, Date.now() - 180 * 86400_000], false, false);
   return c.json(orders);
 });
 
@@ -696,10 +704,8 @@ publicRoutes.post("/contact", async (c) => {
   await c.env.DB.prepare("INSERT INTO contact_messages (name, phone, subject, message, status, created_at) VALUES (?, ?, ?, ?, 'new', ?)")
     .bind(input.name, input.phone ?? null, input.subject ?? null, input.message, Date.now())
     .run();
-  const notif = await getSetting(c.env, "notifications");
-  if (notif.telegram_contact) {
-    c.executionCtx.waitUntil(sendTelegramText(c.env, `✉️ Nouveau message de ${input.name.replace(/[<>&]/g, "")} — Admin → Contact.`));
-  }
+  // the team's Telegram: at once, or grouped with the next ones (at most one per 15 min)
+  c.executionCtx.waitUntil(noticeNewContact(c.env, input.name).catch(() => undefined));
   return c.json({ ok: true }, 201);
 });
 

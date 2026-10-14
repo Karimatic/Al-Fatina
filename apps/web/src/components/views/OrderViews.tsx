@@ -252,6 +252,8 @@ function OrderCard({ o: initial, token }: { o: TrackedOrderDTO; token?: string }
         <div className="space-y-4">
           <section>
             <h3 className="mb-2 text-sm font-semibold">{T.items}</h3>
+            {/* found by phone number alone: what was bought stays private (code or private link) */}
+            {o.items.length === 0 && <p className="text-sm text-ink-soft">{T.itemsPrivate}</p>}
             <ul className="divide-y divide-line">
               {o.items.map((i, k) => (
                 <li key={k} className="py-2.5">

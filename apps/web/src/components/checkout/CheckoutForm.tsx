@@ -209,7 +209,7 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
         setFormError(L.errors.unsure!);
       } else {
         setFormError(e.code === "maintenance" ? texts.pause : (L.errors[e.code] ?? L.errors.generic!));
-        if (e.code === "stock_problem" || e.code === "coupon_invalid") {
+        if (e.code === "stock_problem" || e.code === "coupon_invalid" || e.code === "points_changed") {
           apiPost<QuoteDTO>("/quote", quoteBody()).then(
             setQuote,
             () => undefined,

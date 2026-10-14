@@ -71,3 +71,15 @@ describe("categories", () => {
     expect(cats.find((c) => c.id === 902)).toBeUndefined();
   });
 });
+
+describe("loyalty points spent twice at the same instant (audit ORD-6)", () => {
+  it("the spend refuses the whole order when the points are no longer there", async () => {
+    const db = shop("UPDATE customers SET points_balance = 50 WHERE id = 1");
+    const spend = (n: number) => db.prepare("UPDATE customers SET points_balance = CASE WHEN points_balance >= ? THEN points_balance - ? ELSE NULL END WHERE phone = ?").bind(n, n, "0554650718");
+    await db.batch([spend(50)]); // the first order spends them
+    await expect(db.batch([db.prepare("INSERT INTO coupons (code, type, value) VALUES ('X', 'percent', 1)"), spend(50)])).rejects.toThrow(/customers\.points_balance/);
+    expect(await db.prepare("SELECT points_balance AS n FROM customers WHERE id = 1").first("n")).toBe(0);
+    expect(await db.prepare("SELECT COUNT(*) AS n FROM coupons WHERE code = 'X'").first("n")).toBe(0); // nothing of that batch kept
+  });
+});
+

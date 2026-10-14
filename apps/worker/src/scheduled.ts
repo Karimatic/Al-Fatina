@@ -3,6 +3,7 @@ import { expirePoints } from "./lib/loyalty";
 import type { Env } from "./env";
 import { recordError } from "./lib/audit";
 import { scanAlerts } from "./lib/alerts";
+import { contactDigest } from "./lib/contact-notice";
 import { algiersDate, algiersDayStart } from "./lib/orders";
 import { dailyReport as buildDailyReport } from "./lib/reports";
 import { processOutbox, sendTelegramText } from "./lib/telegram";
@@ -24,6 +25,8 @@ export async function scheduled(controller: ScheduledController, env: Env, ctx: 
       run("campaign_push", sendCampaignBatch(env, 10));
       // late orders (SLA), parcels ready, critical stock → Admin alerts (one D1 batch)
       run("alerts", scanAlerts(env));
+      // contact messages that arrived after the last Telegram notice, in one message
+      run("contact_digest", contactDigest(env));
       break;
     case "*/30 * * * *":
       run("callbacks", callbackReminder(env));
