@@ -464,15 +464,21 @@ export async function featuredDrop(env: Env): Promise<DropTeaserDTO | null> {
 }
 
 
+/**
+ * Active categories with their published products (a main category also counts its active
+ * sub-categories'). One pass over the products, summed here: a count per category re-read the
+ * products for each one (≈ 30 k rows per call at 200 products).
+ */
 export async function listCategories(env: Env): Promise<CategoryDTO[]> {
-  const { results } = await env.DB.prepare(
-    `SELECT c.id, c.parent_id, c.slug, c.name_fr, c.name_ar, c.image, c.season,
-            (SELECT COUNT(*) FROM products p WHERE p.status = 'published'
-                AND (p.category_id = c.id OR p.category_id IN (SELECT s.id FROM categories s WHERE s.parent_id = c.id AND s.is_active = 1))) AS product_count
-       FROM categories c WHERE c.is_active = 1 ORDER BY c.sort, c.id`,
-  ).all<{ id: number; parent_id: number | null; slug: string; name_fr: string; name_ar: string; image: string | null; season: "summer" | "winter" | null; product_count: number }>();
-  return results.map((c) => ({
-    id: c.id, parentId: c.parent_id, slug: c.slug, nameFr: c.name_fr, nameAr: c.name_ar, image: c.image, season: c.season, productCount: c.product_count,
+  const [cats, counts] = await env.DB.batch([
+    env.DB.prepare("SELECT id, parent_id, slug, name_fr, name_ar, image, season FROM categories WHERE is_active = 1 ORDER BY sort, id"),
+    env.DB.prepare("SELECT category_id, COUNT(*) AS n FROM products WHERE status = 'published' AND category_id IS NOT NULL GROUP BY category_id"),
+  ]);
+  const rows = cats!.results as { id: number; parent_id: number | null; slug: string; name_fr: string; name_ar: string; image: string | null; season: "summer" | "winter" | null }[];
+  const own = new Map((counts!.results as { category_id: number; n: number }[]).map((r) => [r.category_id, r.n]));
+  const total = (c: (typeof rows)[number]) => (own.get(c.id) ?? 0) + rows.filter((s) => s.parent_id === c.id).reduce((sum, s) => sum + (own.get(s.id) ?? 0), 0);
+  return rows.map((c) => ({
+    id: c.id, parentId: c.parent_id, slug: c.slug, nameFr: c.name_fr, nameAr: c.name_ar, image: c.image, season: c.season, productCount: total(c),
   }));
 }
 

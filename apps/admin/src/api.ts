@@ -82,6 +82,7 @@ const MESSAGES: Record<string, string> = {
   stock_below_reserved: "Impossible : du stock est déjà réservé par des commandes.",
   stock_problem: "Stock insuffisant pour un article.",
   stock_insufficient: "Stock insuffisant pour rouvrir la commande.",
+  coupon_exhausted: "Le code promo de cette commande n'a plus d'utilisation : impossible de la rouvrir avec lui.",
   invalid_transition: "Ce changement de statut n'est pas possible.",
   status_changed_meanwhile: "La commande a changé entre-temps. Rechargez.",
   code_taken: "Ce code existe déjà.",

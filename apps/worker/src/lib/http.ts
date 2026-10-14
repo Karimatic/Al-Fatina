@@ -57,6 +57,15 @@ export async function rateLimit(binding: RateLimit | undefined, key: string): Pr
   if (!success) throw new HttpError(429, "rate_limited");
 }
 
+/**
+ * A shared budget: true while under it, false past it (nothing thrown, the caller just skips
+ * the work). Without the binding (tests) always true.
+ */
+export async function withinBudget(binding: RateLimit | undefined, key: string): Promise<boolean> {
+  if (!binding) return true;
+  return (await binding.limit({ key })).success;
+}
+
 export function uaShort(c: Context<AppEnv>): string {
   const ua = c.req.header("User-Agent") ?? "";
   const os = /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "macOS" : "Autre";

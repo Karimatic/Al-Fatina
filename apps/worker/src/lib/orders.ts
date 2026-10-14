@@ -501,8 +501,9 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
     );
 
     try {
-      // the website shows the new stock right away (shop and site share one stock)
-      stmts.push(bumpCatalogStmt(env));
+      // the website's cached pages change only when a size runs out (not on every order: the
+      // cache would be emptied every few minutes); checkout re-checks stock anyway
+      if (q.lines.some((l) => l.available - l.qty <= 0)) stmts.push(bumpCatalogStmt(env));
       await env.DB.batch(stmts);
       const row = await env.DB.prepare("SELECT id FROM orders WHERE public_code = ?").bind(code).first<{ id: number }>();
       return { id: row!.id, code, token, total, status };
@@ -628,16 +629,18 @@ export async function applyStatusChange(
   note?: string,
   reason?: OutcomeReason,
 ): Promise<StatusChangeResult> {
-  const order = await env.DB.prepare("SELECT id, public_code, status, customer_id, total, points_used FROM orders WHERE id = ?")
+  const order = await env.DB.prepare("SELECT id, public_code, status, customer_id, total, points_used, coupon_code FROM orders WHERE id = ?")
     .bind(orderId)
-    .first<{ id: number; public_code: string; status: OrderStatus; customer_id: number; total: number; points_used: number }>();
+    .first<{ id: number; public_code: string; status: OrderStatus; customer_id: number; total: number; points_used: number; coupon_code: string | null }>();
   if (!order) throw new HttpError(404, "order_not_found");
   const from = order.status;
   if (!canTransition(from, to)) throw new HttpError(409, "invalid_transition", { from, to });
 
-  const { results: items } = await env.DB.prepare("SELECT variant_id, qty FROM order_items WHERE order_id = ? AND variant_id IS NOT NULL")
+  const { results: items } = await env.DB.prepare(
+    "SELECT oi.variant_id, oi.qty, v.stock_on_hand - v.stock_reserved AS available FROM order_items oi JOIN variants v ON v.id = oi.variant_id WHERE oi.order_id = ?",
+  )
     .bind(orderId)
-    .all<{ variant_id: number; qty: number }>();
+    .all<{ variant_id: number; qty: number; available: number }>();
 
   const now = Date.now();
   // every follow-up statement only applies if *this* request won the status update
@@ -682,7 +685,8 @@ export async function applyStatusChange(
     }
   }
 
-  if (effect) stmts.push(bumpCatalogStmt(env)); // stock changed: the website follows at once
+  // the website's cached pages change when a size runs out or comes back (not on every move)
+  if (effect && items.some((it) => crossesZero(it.available, effect, it.qty))) stmts.push(bumpCatalogStmt(env));
   stmts.push(
     env.DB.prepare(
       `INSERT INTO order_events (order_id, from_status, to_status, kind, actor, source, note, created_at) SELECT ?, ?, ?, 'status', ?, ?, ?, ? WHERE ${guard}`,
@@ -706,6 +710,17 @@ export async function applyStatusChange(
   } else if (from === "annulee" && to === "nouvelle") {
     stmts.push(
       env.DB.prepare(`UPDATE customers SET cancelled_count = MAX(cancelled_count - 1, 0), orders_count = orders_count + 1 WHERE id = ? AND ${guard}`).bind(order.customer_id, ...g),
+    );
+  }
+
+  // a promo use comes back when the order is cancelled (fake, duplicate…); reopening takes it again
+  // (refused if the promo has none left: the CHECK aborts the whole change)
+  const cancelled = (s: OrderStatus) => s === "annulee" || s === "doublon" || s === "fausse";
+  if (order.coupon_code && cancelled(to) !== cancelled(from)) {
+    stmts.push(
+      cancelled(to)
+        ? env.DB.prepare(`UPDATE coupons SET used_count = MAX(used_count - 1, 0) WHERE code = ? AND ${guard}`).bind(order.coupon_code, ...g)
+        : env.DB.prepare(`UPDATE coupons SET used_count = used_count + 1 WHERE code = ? AND ${guard}`).bind(order.coupon_code, ...g),
     );
   }
 
@@ -746,10 +761,17 @@ export async function applyStatusChange(
     results = await env.DB.batch(stmts);
   } catch (err) {
     if (String((err as Error).message).includes("variants_stock_ok")) throw new HttpError(409, "stock_insufficient");
+    if (String((err as Error).message).includes("coupons_usage_ok")) throw new HttpError(409, "coupon_exhausted", { code: order.coupon_code });
     throw err;
   }
   if (!results[0]!.meta.changes) throw new HttpError(409, "status_changed_meanwhile");
   return { id: orderId, code: order.public_code, from, to, pointsEarned };
+}
+
+/** Does this stock move take a size from "available" to "sold out", or back? */
+export function crossesZero(available: number, effect: "reserve" | "release" | "commit" | "restock", qty: number): boolean {
+  const after = effect === "reserve" ? available - qty : effect === "release" || effect === "restock" ? available + qty : available; // commit: on hand and reserved both drop
+  return available > 0 !== after > 0;
 }
 
 /* ───────────── Delete (owner only) ───────────── */

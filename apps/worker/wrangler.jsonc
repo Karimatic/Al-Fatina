@@ -98,6 +98,16 @@
       }
     },
     {
+      // shop-wide (not per visitor) budget of database writes from counters: visits, error
+      // reports, saved checkouts. Past it they are skipped: the daily D1 write quota stays for orders
+      "name": "RL_BEACON",
+      "namespace_id": "1005",
+      "simple": {
+        "limit": 20,
+        "period": 60
+      }
+    },
+    {
       "name": "RL_AI",
       "namespace_id": "1004",
       "simple": {

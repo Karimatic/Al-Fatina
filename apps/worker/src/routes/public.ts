@@ -40,7 +40,7 @@ import { answer } from "../lib/assistant-intents";
 import { withAiVoice } from "../lib/assistant-ai";
 import { activeFlash, featuredDrop, getCollection, getProductDetail, imageRef, listCategories, listProductCards, reviewPhotos, variantLabels, type ImageRow } from "../lib/catalog";
 import { cached } from "../lib/edge-cache";
-import { body, clientIp, HttpError, ipHash, rateLimit, uaShort, validate } from "../lib/http";
+import { body, clientIp, HttpError, ipHash, rateLimit, uaShort, validate, withinBudget } from "../lib/http";
 import { designOut, putImage } from "../lib/media";
 import { analyticsStmts, applyStatusChange, createOrder, findReplay, quote } from "../lib/orders";
 import { detectDuplicates } from "../lib/duplicates";
@@ -206,7 +206,8 @@ publicRoutes.post("/visit", async (c) => {
   const source = classifySource({ utmSource: v.source, utmMedium: v.medium, referrer: v.referrer, clickId: v.clickId }, sources.custom);
   const metrics: [string, string][] = [["visits", source]];
   if (v.campaign) metrics.push(["visits_campaign", v.campaign.toLowerCase()]);
-  await c.env.DB.batch(analyticsStmts(c.env, Date.now(), metrics, 1));
+  // a flood of visits is counted up to the shop-wide budget, never at the cost of the orders
+  if (await withinBudget(c.env.RL_BEACON, "visit")) await c.env.DB.batch(analyticsStmts(c.env, Date.now(), metrics, 1));
   return c.body(null, 204);
 });
 
@@ -268,6 +269,8 @@ publicRoutes.post("/orders", async (c) => {
 publicRoutes.post("/carts", async (c) => {
   await rateLimit(c.env.RL_LOOKUP, `cart:${clientIp(c)}`);
   const input = await body(c, cartSaveInput);
+  // saved checkouts are a convenience: past the shop-wide budget they are skipped
+  if (!(await withinBudget(c.env.RL_BEACON, "cart"))) return c.json({ ok: true, skipped: true });
   const q = await quote(c.env, { lines: input.lines, wilaya: input.wilaya, communeId: input.communeId, deliveryType: input.deliveryType });
   const now = Date.now();
   await c.env.DB.prepare(
@@ -762,6 +765,8 @@ publicRoutes.post("/push/subscribe", async (c) => {
 publicRoutes.post("/log", async (c) => {
   await rateLimit(c.env.RL_LOOKUP, `log:${clientIp(c)}`);
   const input = await body(c, clientErrorInput);
-  c.executionCtx.waitUntil(recordError(c.env, "client", input.message, { stack: input.stack, url: input.url }));
+  // error reports from browsers: up to the shop-wide budget (a broken page in many phones, or a
+  // flood, must not use the database writes the orders need)
+  if (await withinBudget(c.env.RL_BEACON, "log")) c.executionCtx.waitUntil(recordError(c.env, "client", input.message, { stack: input.stack, url: input.url }));
   return c.json({ ok: true });
 });

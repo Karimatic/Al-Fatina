@@ -5,6 +5,8 @@ export interface Env {
   RL_WRITE: RateLimit;
   RL_LOOKUP: RateLimit;
   RL_AUTH: RateLimit;
+  /** shop-wide budget of the counters' database writes (visits, error reports, saved checkouts) */
+  RL_BEACON?: RateLimit;
   /** AI answers per visitor (beyond it the rules answer alone) */
   RL_AI?: RateLimit;
   /** Cloudflare Images (5,000 free transformations a month): product photos without background */

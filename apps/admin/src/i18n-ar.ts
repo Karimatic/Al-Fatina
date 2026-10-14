@@ -2283,4 +2283,5 @@ export const AR: Record<string, string> = {
   "Le stock d'aujourd'hui bouge seulement de la différence avec le comptage validé.": "يتغير مخزون اليوم بالفرق فقط مقارنة بالعدّ المعتمد.",
   "Enregistrer les corrections": "حفظ التصحيحات",
   "↩️ Retour en stock": "↩️ مرتجع عاد للمخزون",
+  "Le code promo de cette commande n'a plus d'utilisation : impossible de la rouvrir avec lui.": "رمز الخصم لهذه الطلبية لم يعد له استعمال متاح: لا يمكن إعادة فتحها به.",
 };
