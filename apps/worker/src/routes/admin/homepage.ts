@@ -4,12 +4,12 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { ANNOUNCEMENT_ANIMATIONS, cleanText, DEFAULT_DESIGN, HOME_SECTIONS, isHexColor, isSafeLink, type DesignDTO } from "@henine/shared";
+import { ANNOUNCEMENT_ANIMATIONS, cleanText, DEFAULT_DESIGN, FONT_FAMILIES, FONT_PRESETS, HOME_SECTIONS, isHexColor, isSafeLink, OWN_FONT, type DesignDTO, type FontPreset } from "@henine/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { mediaUrl } from "../../lib/catalog";
 import { body, HttpError } from "../../lib/http";
-import { putImage, putVideo } from "../../lib/media";
+import { putFont, putImage, putVideo } from "../../lib/media";
 import { bumpCatalogStmt, getSetting, getSettings, setSettingStmt } from "../../lib/settings";
 import { translate } from "./translate";
 import { actorOf, requirePermission } from "../../middleware/access";
@@ -117,12 +117,18 @@ homepageRoutes.put("/home/texts", requirePermission("marketing.edit"), async (c)
 
 const mediaKey = z.string().trim().max(200).regex(/^design\/[a-z0-9_-]+\.(webp|jpg)$/i);
 const videoKey = z.string().trim().max(200).regex(/^design\/[a-z0-9_-]+\.(mp4|webm)$/i);
+const fontKey = z.string().trim().max(200).regex(/^design\/[a-z0-9_-]+\.(woff2|woff|ttf|otf)$/i);
+const fontName = z.enum([OWN_FONT, ...FONT_FAMILIES.map((f): string => f.name)] as [string, ...string[]]);
 const designInput = z.object({
   logo: mediaKey.nullable(),
   colors: z.object({ accent: z.string().refine(isHexColor, "color"), soft: z.string().refine(isHexColor, "color") }),
-  font: z.enum(["classic", "elegant", "modern", "soft"]),
+  font: z.enum(Object.keys(FONT_PRESETS) as [FontPreset, ...FontPreset[]]),
+  customFont: z.object({ display: fontName, sans: fontName, arabic: fontName, arabicDisplay: fontName }).default(DEFAULT_DESIGN.customFont),
+  fontFile: fontKey.nullable().default(null),
+  fontFileName: cleanText(80).nullable().default(null),
   heroImage: mediaKey.nullable(),
-  productBg: z.string().trim().max(20).default("theme"),
+  // a preset's key, "theme", or a colour of its own
+  productBg: z.string().trim().max(20).refine((v) => !v.startsWith("#") || isHexColor(v), "color").default("theme"),
   heroVideo: videoKey.nullable().default(null),
   banners: z
     .array(
@@ -155,7 +161,8 @@ homepageRoutes.put("/design", requirePermission("marketing.edit"), async (c) => 
   const before = (await getSetting(c.env, "design")) as Partial<DesignDTO>;
   await c.env.DB.batch([setSettingStmt(c.env, "design", input), bumpCatalogStmt(c.env), auditStmt(c.env, actorOf(c.get("member")), "update", "settings", "design")]);
   // videos no longer used (replaced or removed) are deleted from storage: they are heavy
-  const videos = (d: Partial<DesignDTO>) => [d.heroVideo, ...(d.banners ?? []).map((b) => b.video)].filter((k): k is string => !!k && /^design\//.test(k));
+  // (and the shop's font file, once replaced or removed)
+  const videos = (d: Partial<DesignDTO>) => [d.heroVideo, d.fontFile, ...(d.banners ?? []).map((b) => b.video)].filter((k): k is string => !!k && /^design\//.test(k));
   const kept = new Set(videos(input));
   const gone = videos(before).filter((k) => !kept.has(k));
   if (gone.length) c.executionCtx.waitUntil(c.env.MEDIA.delete(gone).catch(() => undefined));
@@ -169,6 +176,15 @@ homepageRoutes.post("/design/video", requirePermission("marketing.edit"), async 
   if (!file || typeof file === "string") throw new HttpError(400, "video_required");
   const key = await putVideo(c.env, "design/video", file);
   return c.json({ key, url: mediaUrl(c.env, key) }, 201);
+});
+
+/** The shop's own font (WOFF2 / WOFF / TTF / OTF, ≤ 2 MB): stored now, used once the design is saved. */
+homepageRoutes.post("/design/font", requirePermission("marketing.edit"), async (c) => {
+  const form = await c.req.formData().catch(() => null);
+  const file = form?.get("font");
+  if (!file || typeof file === "string") throw new HttpError(400, "font_required");
+  const key = await putFont(c.env, "design/font", file);
+  return c.json({ key, url: mediaUrl(c.env, key), name: file.name.slice(0, 80) }, 201);
 });
 
 /** Logo / hero / banner picture (WebP or JPEG made in the browser). */

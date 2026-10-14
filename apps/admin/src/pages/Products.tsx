@@ -70,11 +70,13 @@ export function ProductsPage() {
     else n.add(id);
     return n;
   });
-  // grouped by category (shop order), sorted inside each group
+  // grouped by category (shop order), sorted inside each group; sorted by stock or sales: one
+  // list across every category (the lowest stock first really is first)
   const groups = useMemo(() => {
     const sorted = [...(list.data ?? [])].sort((a, b) =>
       sort === "name" ? a.name_fr.localeCompare(b.name_fr) : sort === "stock" ? a.available - b.available : sort === "sold" ? b.sold - a.sold : b.updated_at - a.updated_at,
     );
+    if (sort === "stock" || sort === "sold") return sorted.length ? [{ name: sort === "stock" ? tr("Du stock le plus bas au plus haut") : tr("Des plus vendus aux moins vendus"), order: 0, rows: sorted }] : [];
     const map = new Map<string, { name: string; order: number; rows: ProductRow[] }>();
     for (const p of sorted) {
       const key = String(p.category_id ?? "none");
@@ -128,7 +130,8 @@ export function ProductsPage() {
         <SearchBox value={q} onChange={setQ} placeholder={tr("Nom, SKU…")} />
         <select className={`${inputCls} h-11 sm:w-44`} value={stock} onChange={(e) => setStock(e.target.value)} aria-label={tr("Stock")}>
           <option value="">{tr("Tout le stock")}</option>
-          <option value="low">{tr("Stock bas")}</option>
+          <option value="low">{tr("Stock bas (le produit)")}</option>
+          <option value="size_out">{tr("Une taille épuisée")}</option>
           <option value="out">{tr("Épuisés")}</option>
         </select>
         <select className={`${inputCls} h-11 sm:w-44`} value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} aria-label={tr("Trier")}>

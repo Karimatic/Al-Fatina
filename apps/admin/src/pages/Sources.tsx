@@ -4,7 +4,7 @@
  * and the shop's own list: built-in sources renamed or hidden, its own sources with their
  * links, and the « How did you hear about us? » question at checkout.
  */
-import { CUSTOM_SOURCE_KEY, ORDER_SOURCE_LABEL, ORDER_SOURCES, sourceLabel, type CustomSource, type OrderSource, type SourceSettings } from "@henine/shared";
+import { CUSTOM_SOURCE_KEY, looksLikeLinkOrPhone, ORDER_SOURCE_LABEL, ORDER_SOURCES, sourceLabel, type CustomSource, type OrderSource, type SourceSettings } from "@henine/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -91,7 +91,7 @@ function Results({ data }: { data: SourcesData }) {
                   className="w-full rounded-xl border border-line bg-surface p-3 text-start transition hover:border-plum-600/40"
                 >
                   <span className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="font-semibold">
+                    <span className="min-w-0 flex-1 truncate font-semibold">
                       {l.emoji} {l.name}
                     </span>
                     <span className="font-semibold tabular-nums">{da(r.revenue)}</span>
@@ -134,6 +134,9 @@ function Results({ data }: { data: SourcesData }) {
     </>
   );
 }
+
+/** built-in sources a link can bring (?utm_source=<key> counts for them): the bio links */
+const LINKABLE: readonly string[] = ["instagram", "facebook", "tiktok", "google", "whatsapp", "telegram"];
 
 /** a link code from a name: "Influenceuse Lina" → "influenceuse-lina" (Arabic names get a short code) */
 function keyFrom(name: string, taken: string[]): string {
@@ -234,12 +237,16 @@ function SourcesEditor({ settings }: { settings: SourceSettings }) {
         <Button onClick={add} disabled={!newName.trim()}>{tr("+ Ajouter")}</Button>
       </div>
 
-      <p className="mb-2 mt-6 text-sm font-semibold">{tr("Sources détectées automatiquement")}</p>
+      <p className="mt-6 text-sm font-semibold">{tr("Sources détectées automatiquement")}</p>
+      <p className="mb-2 text-xs text-ink-soft">
+        {tr("Le nom affiché dans les statistiques (pas un lien). Pour compter les commandes venues de votre page Instagram, Facebook… mettez son lien de suivi dans votre bio.")}
+      </p>
       <ul className="divide-y divide-line rounded-xl border border-line">
         {ORDER_SOURCES.map((k) => {
           const o = draft.builtIn[k] ?? {};
+          const wrong = !!o.name && looksLikeLinkOrPhone(o.name);
           return (
-            <li key={k} className={`flex items-center gap-2 p-2.5 ${o.hidden ? "opacity-50" : ""}`}>
+            <li key={k} className={`flex flex-wrap items-center gap-2 p-2.5 ${o.hidden ? "opacity-50" : ""}`}>
               <input className={`${inputCls} w-14! shrink-0 px-1 text-center`} value={o.emoji ?? ""} placeholder={ORDER_SOURCE_LABEL[k].emoji} maxLength={4} onChange={(e) => setBuiltIn(k, { emoji: e.target.value || undefined })} aria-label={tr("Emoji")} />
               <input
                 className={`${inputCls} min-w-0 flex-1`}
@@ -248,11 +255,22 @@ function SourcesEditor({ settings }: { settings: SourceSettings }) {
                 maxLength={40}
                 onChange={(e) => setBuiltIn(k, { name: e.target.value || undefined })}
                 aria-label={tr("Nom de {0}", { 0: ORDER_SOURCE_LABEL[k][lang()] })}
+                aria-invalid={wrong || undefined}
               />
+              {LINKABLE.includes(k) && (
+                <Button size="sm" variant="ghost" onClick={() => void copy(k)}>
+                  {tr("📋 Lien de suivi")}
+                </Button>
+              )}
               <label className="flex shrink-0 items-center gap-1.5 text-xs">
                 <input type="checkbox" className="size-4 accent-plum-600" checked={!o.hidden} onChange={(e) => setBuiltIn(k, { hidden: !e.target.checked })} />
                 {tr("Visible")}
               </label>
+              {wrong && (
+                <p className="w-full text-xs font-medium text-amber-700">
+                  {tr("C'est un lien ou un numéro, pas un nom : il n'est pas affiché. Écrivez un nom (ex. « Instagram »), ou videz le champ.")}
+                </p>
+              )}
             </li>
           );
         })}

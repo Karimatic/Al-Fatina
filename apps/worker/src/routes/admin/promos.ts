@@ -47,6 +47,18 @@ promoRoutes.get("/coupons", requirePermission("promos.edit"), async (c) => {
   return c.json({ coupons: results, freeShippingOver: checkout.free_shipping_over });
 });
 
+/** Free delivery from a basket amount (Promos), null = never. */
+promoRoutes.put("/coupons/free-shipping", requirePermission("promos.edit"), async (c) => {
+  const { over } = await body(c, z.object({ over: z.number().int().min(0).max(10_000_000).nullable() }));
+  const { checkout } = await getSettings(c.env, ["checkout"]);
+  await c.env.DB.batch([
+    setSettingStmt(c.env, "checkout", { ...checkout, free_shipping_over: over }),
+    bumpCatalogStmt(c.env),
+    auditStmt(c.env, actorOf(c.get("member")), "update", "settings", "checkout.free_shipping_over", { over }),
+  ]);
+  return c.json({ over });
+});
+
 /**
  * Influencer report for a period: what each one's codes brought. The commission is due on
  * delivered orders only, on the items (after discount, delivery excluded).

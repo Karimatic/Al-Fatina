@@ -10,13 +10,14 @@ import type { StockProduct, StockVariant } from "./Stock";
 import { variantLabel } from "../lib/variants";
 
 type Line = { variantId: number; qty: number; name: string; label: string; price: number; max: number };
-type Channel = "boutique" | "telephone" | "whatsapp" | "instagram";
+type Channel = "boutique" | "telephone" | "whatsapp" | "instagram" | "facebook";
 
 const CHANNELS: { value: Channel; label: string; hint: string }[] = [
   { value: "boutique", label: tr("🏪 Au magasin"), hint: tr("La cliente est là : la vente est terminée tout de suite, le stock baisse.") },
   { value: "telephone", label: tr("📞 Téléphone"), hint: tr("Commande à livrer : elle rejoint les commandes du site, déjà confirmée.") },
   { value: "whatsapp", label: tr("💬 WhatsApp"), hint: tr("Commande à livrer : elle rejoint les commandes du site, déjà confirmée.") },
   { value: "instagram", label: tr("📸 Instagram"), hint: tr("Commande à livrer : elle rejoint les commandes du site, déjà confirmée.") },
+  { value: "facebook", label: tr("👍 Facebook"), hint: tr("Commande à livrer : elle rejoint les commandes du site, déjà confirmée.") },
 ];
 
 /**
@@ -52,7 +53,8 @@ export function SaleDesk() {
   const ship = inShop ? 0 : (shipping ?? (deliveryType === "bureau" ? w?.desk : w?.home) ?? 0);
   const subtotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
   const phoneOk = inShop ? !phone.trim() || !!normalizeDzPhone(phone) : !!normalizeDzPhone(phone);
-  const valid = lines.length > 0 && phoneOk && (inShop || (name.trim().length >= 2 && (deliveryType === "bureau" || address.trim().length >= 4)));
+  // the address is optional (the team often only has the town, or calls to get it)
+  const valid = lines.length > 0 && phoneOk && (inShop || name.trim().length >= 2);
 
   const save = useMutation({
     mutationFn: () =>
@@ -64,7 +66,7 @@ export function SaleDesk() {
         lines: lines.map((l) => ({ variantId: l.variantId, qty: l.qty })),
         ...(inShop
           ? {}
-          : { wilaya, communeId: null, deliveryType, address: deliveryType === "domicile" ? address : undefined, shipping: ship }),
+          : { wilaya, communeId: null, deliveryType, address: deliveryType === "domicile" && address.trim() ? address : undefined, shipping: ship }),
       }),
     onSuccess: (r) => {
       toast(inShop ? tr("Vente {0} enregistrée · {1} · stock du site mis à jour ✓", { 0: r.code, 1: da(r.total) }) : tr("Commande {0} créée (confirmée) · {1} ✓", { 0: r.code, 1: da(r.total) }));
@@ -91,7 +93,7 @@ export function SaleDesk() {
   return (
     <div>
       {/* where the sale comes from */}
-      <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
         {CHANNELS.map((c) => (
           <button
             key={c.value}
@@ -177,7 +179,7 @@ export function SaleDesk() {
                     </button>
                   ))}
                 </div>
-                {deliveryType === "domicile" && <input className={`${inputCls} h-10`} placeholder={tr("Adresse")} value={address} onChange={(e) => setAddress(e.target.value)} />}
+                {deliveryType === "domicile" && <input className={`${inputCls} h-10`} placeholder={tr("Adresse (facultatif)")} value={address} onChange={(e) => setAddress(e.target.value)} />}
                 <label className="flex items-center justify-between gap-2 text-sm">
                   {tr("Livraison")}
                   <input className={`${inputCls} h-10 w-32 text-end`} type="number" min={0} value={shipping ?? ship} onChange={(e) => setShipping(Number(e.target.value) || 0)} aria-label={tr("Frais de livraison (DA)")} />

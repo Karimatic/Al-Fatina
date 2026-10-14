@@ -41,7 +41,7 @@ const pagePolicy = (hashes) =>
     "default-src 'self'",
     [SCRIPT_SRC, ...hashes].join(" "),
     "style-src 'self' 'unsafe-inline'",
-    "font-src 'self' data:",
+    `font-src 'self' data:${MEDIA ? ` ${MEDIA}` : ""}`,
     `img-src 'self' data: blob:${MEDIA ? ` ${MEDIA}` : ""}`,
     `media-src 'self' blob:${MEDIA ? ` ${MEDIA}` : ""}`,
     "connect-src 'self'",

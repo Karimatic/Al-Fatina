@@ -131,7 +131,7 @@ export async function scanAlerts(env: Env): Promise<void> {
   const readyN = (ready!.results[0] as { n: number }).n;
   if (readyN > 0) {
     add({
-      kind: "ready_to_ship", priority: "low", entity: "orders", entityId: "en_cours", dedupeKey: "ready_to_ship",
+      kind: "ready_to_ship", priority: "low", entity: "orders", entityId: "en_preparation", dedupeKey: "ready_to_ship",
       message: `${readyN} commande${readyN > 1 ? "s sont prêtes" : " est prête"} à expédier.`,
     });
   }

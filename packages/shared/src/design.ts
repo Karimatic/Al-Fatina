@@ -44,14 +44,61 @@ export const HOME_SECTION_LABEL: Record<HomeSectionKey, { fr: string; icon: stri
   newsletter: { fr: "Recevoir les nouveautés", icon: "🔔" },
 };
 
-/** Font pairs: Latin display + Latin text + Arabic text + Arabic display (Google Fonts, free). */
+/**
+ * Every font the store hosts itself (styles/fonts.css, OFL from Google Fonts), by the script it
+ * is made for. Presets and the "custom" choice only pick among these (plus the shop's own file).
+ */
+export const FONT_FAMILIES = [
+  { name: "Playfair Display", script: "latin" },
+  { name: "Cormorant Garamond", script: "latin" },
+  { name: "Lora", script: "latin" },
+  { name: "Montserrat", script: "latin" },
+  { name: "DM Sans", script: "latin" },
+  { name: "Jost", script: "latin" },
+  { name: "Inter", script: "latin" },
+  { name: "Nunito", script: "latin" },
+  { name: "Tajawal", script: "arabic" },
+  { name: "El Messiri", script: "arabic" },
+  { name: "Amiri", script: "arabic" },
+  { name: "Cairo", script: "arabic" },
+  { name: "Almarai", script: "arabic" },
+  { name: "Noto Kufi Arabic", script: "arabic" },
+  { name: "Reem Kufi", script: "arabic" },
+] as const;
+export type FontFamily = (typeof FONT_FAMILIES)[number]["name"];
+/** The shop's own font file (Apparence → Police personnalisée), usable in any of the 4 places. */
+export const OWN_FONT = "upload";
+
+/** Font pairs: Latin display + Latin text + Arabic text + Arabic display (all self-hosted). */
 export const FONT_PRESETS = {
   classic: { label: "Classique (Playfair)", display: null, sans: null, arabic: null, arabicDisplay: null },
   elegant: { label: "Élégant (Cormorant)", display: "Cormorant Garamond", sans: "Jost", arabic: "Noto Kufi Arabic", arabicDisplay: "Amiri" },
   modern: { label: "Moderne (Montserrat)", display: "Montserrat", sans: "Inter", arabic: "Cairo", arabicDisplay: "Cairo" },
   soft: { label: "Doux (Lora)", display: "Lora", sans: "Nunito", arabic: "Almarai", arabicDisplay: "Reem Kufi" },
+  luxe: { label: "Luxe (Playfair + Jost)", display: "Playfair Display", sans: "Jost", arabic: "Almarai", arabicDisplay: "Amiri" },
+  editorial: { label: "Magazine (Cormorant + DM Sans)", display: "Cormorant Garamond", sans: "DM Sans", arabic: "Tajawal", arabicDisplay: "El Messiri" },
+  minimal: { label: "Épuré (Inter)", display: "Inter", sans: "Inter", arabic: "Noto Kufi Arabic", arabicDisplay: "Noto Kufi Arabic" },
+  rounded: { label: "Arrondi (Nunito)", display: "Nunito", sans: "Nunito", arabic: "Almarai", arabicDisplay: "Reem Kufi" },
+  kufi: { label: "Coufique (Reem Kufi)", display: "Montserrat", sans: "Jost", arabic: "Noto Kufi Arabic", arabicDisplay: "Reem Kufi" },
+  custom: { label: "Personnalisé", display: null, sans: null, arabic: null, arabicDisplay: null },
 } as const;
 export type FontPreset = keyof typeof FONT_PRESETS;
+
+/** The 4 fonts of the store; a family name of FONT_FAMILIES, or OWN_FONT. */
+export interface FontChoice {
+  display: string;
+  sans: string;
+  arabic: string;
+  arabicDisplay: string;
+}
+export const DEFAULT_FONTS: FontChoice = { display: "Playfair Display", sans: "DM Sans", arabic: "Tajawal", arabicDisplay: "El Messiri" };
+
+/** The 4 fonts a design uses: its preset's, or its own choice ("Personnalisé"). */
+export function designFonts(d: Pick<DesignDTO, "font" | "customFont">): FontChoice {
+  if (d.font === "custom") return { ...DEFAULT_FONTS, ...d.customFont };
+  const p = FONT_PRESETS[d.font] ?? FONT_PRESETS.classic;
+  return p.display ? { display: p.display, sans: p.sans!, arabic: p.arabic!, arabicDisplay: p.arabicDisplay! } : DEFAULT_FONTS;
+}
 
 /** Ready-made colour themes. `accent` carries white text (buttons): every preset is ≥ 4.5:1. */
 export const COLOR_PRESETS = [
@@ -82,11 +129,17 @@ export interface DesignDTO {
   logo: string | null;
   colors: { accent: string; soft: string };
   font: FontPreset;
+  /** the 4 fonts chosen one by one (used when `font` is "custom") */
+  customFont: FontChoice;
+  /** media URL of the shop's own font file (WOFF2 / WOFF / TTF / OTF), null = none */
+  fontFile: string | null;
+  /** its name as uploaded ("MaPolice.ttf"), shown in the admin */
+  fontFileName: string | null;
   /** media URL of the home page photo, null = the built-in one */
   heroImage: string | null;
   /** media URL of the big home page video (plays over the photo, muted, in a loop), null = none */
   heroVideo: string | null;
-  /** background behind product pictures: "theme" (the soft colour) or a key of PRODUCT_BACKGROUNDS */
+  /** background behind product pictures: "theme" (the soft colour), a key of PRODUCT_BACKGROUNDS or a colour "#rrggbb" */
   productBg: string;
   banners: BannerDTO[];
   featured: { titleFr: string; titleAr: string; productIds: number[] };
@@ -99,6 +152,9 @@ export const DEFAULT_DESIGN: DesignDTO = {
   logo: null,
   colors: { accent: "#8e1048", soft: "#fbe4ec" },
   font: "classic",
+  customFont: { display: "Playfair Display", sans: "DM Sans", arabic: "Tajawal", arabicDisplay: "El Messiri" },
+  fontFile: null,
+  fontFileName: null,
   heroImage: null,
   heroVideo: null,
   productBg: "theme",
@@ -189,6 +245,11 @@ export const PRODUCT_BACKGROUNDS: { key: string; label: string; accent: string; 
 
 /** CSS variables of the product background (none for "theme": the soft colour is used). */
 export function productBgVars(key: string | undefined, dark: boolean): Record<string, string> {
+  // a colour chosen freely: a light wash of it (a deep tint of it in dark mode)
+  if (key && isHexColor(key))
+    return dark
+      ? { "--tile-from": mixHex(key, "#1a1015", 0.9), "--tile-to": mixHex(key, "#140c10", 0.75) }
+      : { "--tile-from": mixHex(key, "#ffffff", 0.45), "--tile-to": key };
   const bg = PRODUCT_BACKGROUNDS.find((b) => b.key === key);
   if (!bg) return {};
   if (bg.key === "white") return dark ? { "--tile-from": "#211b1e", "--tile-to": "#2a2327" } : { "--tile-from": "#ffffff", "--tile-to": "#f6f3f4" };
@@ -197,23 +258,11 @@ export function productBgVars(key: string | undefined, dark: boolean): Record<st
     : { "--tile-from": mixHex(bg.soft, "#ffffff", 0.45), "--tile-to": bg.soft };
 }
 
-/** Google Fonts stylesheet for a font preset (null = the self-hosted default). */
-export function fontStylesheet(font: FontPreset): string | null {
-  const f = FONT_PRESETS[font];
-  if (!f || !f.display) return null;
-  const fam = [...new Set([f.display, f.sans, f.arabic, f.arabicDisplay])]
-    .map((n) => `family=${n!.replace(/ /g, "+")}:wght@400;500;600;700`)
+/** Google Fonts stylesheet with these families (admin previews; the store hosts its own). */
+export function fontStylesheet(families: readonly string[]): string | null {
+  const fam = [...new Set(families)]
+    .filter((n) => n && n !== OWN_FONT)
+    .map((n) => `family=${n.replace(/ /g, "+")}:wght@400;500;600;700`)
     .join("&");
-  return `https://fonts.googleapis.com/css2?${fam}&display=swap`;
-}
-
-export function fontVars(font: FontPreset): Record<string, string> {
-  const f = FONT_PRESETS[font];
-  if (!f || !f.display) return {};
-  return {
-    "--font-display": `"${f.display}", Georgia, serif`,
-    "--font-sans": `"${f.sans}", system-ui, sans-serif`,
-    "--font-arabic": `"${f.arabic}", "Segoe UI", Tahoma, sans-serif`,
-    "--font-arabic-display": `"${f.arabicDisplay}", "${f.arabic}", serif`,
-  };
+  return fam ? `https://fonts.googleapis.com/css2?${fam}&display=swap` : null;
 }

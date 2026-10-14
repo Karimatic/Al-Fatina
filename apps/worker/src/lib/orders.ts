@@ -270,7 +270,7 @@ export interface NewOrder {
   coupon?: string;
   usePoints?: boolean;
   lines: { variantId: number; qty: number }[];
-  channel: "web" | "express" | "instagram" | "whatsapp" | "boutique" | "telephone";
+  channel: "web" | "express" | "instagram" | "facebook" | "whatsapp" | "boutique" | "telephone";
   locale: "fr" | "ar";
   utm?: { source?: string; medium?: string; campaign?: string; referrer?: string; landing?: string; clickId?: "fb" | "google" | "tiktok" };
   /** her answer to « How did you hear about us? » (a source key), when the shop asks it */

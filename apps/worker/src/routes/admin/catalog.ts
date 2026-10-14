@@ -42,7 +42,13 @@ catalogRoutes.get("/products", requirePermission("products.view"), async (c) => 
   }
   const stock = c.req.query("stock");
   if (stock === "out") where.push("NOT EXISTS (SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = 1 AND v.stock_on_hand - v.stock_reserved > 0)");
-  if (stock === "low") where.push("EXISTS (SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = 1 AND v.stock_on_hand - v.stock_reserved <= v.low_stock_threshold)");
+  // low: the product as a whole (what is left ≤ the alert levels of its sizes added up), not
+  // one size of a product that still has plenty; a sold-out size has its own filter
+  const left = "SELECT COALESCE(SUM(v.stock_on_hand - v.stock_reserved), 0) FROM variants v WHERE v.product_id = p.id AND v.is_active = 1";
+  const alertAt = "SELECT COALESCE(SUM(v.low_stock_threshold), 0) FROM variants v WHERE v.product_id = p.id AND v.is_active = 1";
+  if (stock === "low") where.push(`(${left}) > 0 AND (${left}) <= (${alertAt})`);
+  if (stock === "size_out")
+    where.push(`(${left}) > 0 AND EXISTS (SELECT 1 FROM variants v WHERE v.product_id = p.id AND v.is_active = 1 AND v.stock_on_hand - v.stock_reserved <= 0)`);
   const { results } = await c.env.DB.prepare(
     `SELECT p.id, p.slug, p.name_fr, p.name_ar, p.status, p.price, p.compare_at_price, p.updated_at, c.name_fr AS category, p.category_id, c.sort AS category_sort,
             (SELECT base_key FROM product_images i WHERE i.product_id = p.id ORDER BY sort, id LIMIT 1) AS image_key,

@@ -217,12 +217,14 @@ stockRoutes.post("/stock/:variantId/adjust", requirePermission("stock.edit"), as
 stockRoutes.get("/stock/movements", requirePermission("stock.view"), async (c) => {
   const variantId = c.req.query("variant");
   const { results } = await c.env.DB.prepare(
-    `SELECT m.id, m.variant_id, m.delta, m.reason, m.note, m.actor, m.created_at, v.sku, p.name_fr, o.public_code
+    `SELECT m.id, m.variant_id, m.delta, m.reason, m.note, m.actor, m.created_at, v.sku, p.name_fr, p.name_ar, o.public_code
        FROM stock_movements m JOIN variants v ON v.id = m.variant_id JOIN products p ON p.id = v.product_id
        LEFT JOIN orders o ON o.id = m.order_id
       ${variantId ? "WHERE m.variant_id = ?" : ""} ORDER BY m.id DESC LIMIT 100`,
   )
     .bind(...(variantId ? [Number(variantId)] : []))
-    .all();
-  return c.json(results);
+    .all<{ variant_id: number } & Record<string, unknown>>();
+  // "Rose / M": which size and colour moved
+  const labels = await variantLabels(c.env, [...new Set(results.map((r) => r.variant_id))]);
+  return c.json(results.map((r) => ({ ...r, label_fr: labels.get(r.variant_id)?.fr ?? null, label_ar: labels.get(r.variant_id)?.ar ?? null })));
 });

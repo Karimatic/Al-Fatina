@@ -204,6 +204,12 @@ export function StockCountPage() {
   const [draft, setDraft] = useState<Record<number, { countedQty: number | null; reason: CountReason | null; note?: string }>>({});
   const pending = useRef<Record<number, { countedQty: number | null; reason: CountReason | null; note?: string }>>({});
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // correcting an approved count: changes stay here until "Enregistrer les corrections"
+  const [amending, setAmending] = useState(false);
+  const amendingRef = useRef(false);
+  useEffect(() => {
+    amendingRef.current = amending;
+  }, [amending]);
   const save = useMutation({
     mutationFn: (lines: { variantId: number; countedQty: number | null; reason: CountReason | null; note?: string }[]) => put(`/stock-counts/${id}/lines`, { lines }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["stock-count", id] }),
@@ -219,6 +225,7 @@ export function StockCountPage() {
     const cur = draft[l.variant_id] ?? { countedQty: l.counted_qty, reason: l.reason, note: l.note ?? undefined };
     const next = { ...cur, ...patch };
     setDraft((d) => ({ ...d, [l.variant_id]: next }));
+    if (amendingRef.current) return;
     pending.current[l.variant_id] = next;
     clearTimeout(timer.current);
     timer.current = setTimeout(flush, 700);
@@ -230,6 +237,22 @@ export function StockCountPage() {
       toast(msg[v.action]);
       void qc.invalidateQueries({ queryKey: ["stock-count", id] });
       void qc.invalidateQueries({ queryKey: ["stock-counts"] });
+      void qc.invalidateQueries({ queryKey: ["stock-products"] });
+    },
+    onError: (e) => toast(errorMessage(e), "error"),
+  });
+  const amend = useMutation({
+    mutationFn: () =>
+      post(`/stock-counts/${id}/amend`, {
+        lines: Object.entries(draft)
+          .filter(([, v]) => v.countedQty != null)
+          .map(([variantId, v]) => ({ variantId: Number(variantId), countedQty: v.countedQty, reason: v.reason })),
+      }),
+    onSuccess: () => {
+      toast(tr("Corrections enregistrées : le stock est corrigé"));
+      setDraft({});
+      setAmending(false);
+      void qc.invalidateQueries({ queryKey: ["stock-count", id] });
       void qc.invalidateQueries({ queryKey: ["stock-products"] });
     },
     onError: (e) => toast(errorMessage(e), "error"),
@@ -249,7 +272,9 @@ export function StockCountPage() {
   }, [d, draft, filter, search]);
   if (q.error) return <ErrorState error={q.error} onRetry={q.refetch} />;
   if (!d) return <ListSkeleton rows={6} />;
-  const editing = d.status === "counting" && can("stock.edit");
+  const editing = (d.status === "counting" && can("stock.edit")) || (amending && d.status === "approved" && can("stock.approve"));
+  const canAmend = d.status === "approved" && can("stock.approve");
+  const hasActions = (d.status === "counting" && can("stock.edit")) || (d.status === "submitted" && can("stock.edit")) || d.status === "submitted" || canAmend;
   const missingReason = d.lines.some((l) => {
     const dr = draft[l.variant_id];
     const counted = dr ? dr.countedQty : l.counted_qty;
@@ -360,6 +385,7 @@ export function StockCountPage() {
         </ul>
       </Card>
 
+      {hasActions && (
       <div className="sticky bottom-20 z-10 flex flex-wrap items-center justify-end gap-2 rounded-2xl border border-line bg-surface p-3 shadow-xl md:bottom-4">
         {save.isPending && <span className="me-auto text-xs text-ink-soft">{tr("Enregistrement…")}</span>}
         {d.status === "counting" && can("stock.edit") && (
@@ -380,7 +406,27 @@ export function StockCountPage() {
         {d.status === "submitted" && can("stock.edit") && <Button onClick={() => decide.mutate({ action: "reopen" })}>{tr("Rouvrir le comptage")}</Button>}
         {d.status === "submitted" && can("stock.approve") && <ApproveButtons onDecide={(action, note) => decide.mutate({ action, note })} busy={decide.isPending} />}
         {d.status === "submitted" && !can("stock.approve") && <span className="text-sm text-ink-soft">{tr("En attente de validation par une personne autorisée.")}</span>}
+        {canAmend && !amending && (
+          <Button onClick={() => setAmending(true)}>{tr("✏️ Modifier le comptage")}</Button>
+        )}
+        {canAmend && amending && (
+          <>
+            <span className="me-auto text-xs text-ink-soft">{tr("Le stock d'aujourd'hui bouge seulement de la différence avec le comptage validé.")}</span>
+            <Button
+              onClick={() => {
+                setDraft({});
+                setAmending(false);
+              }}
+            >
+              {tr("Annuler")}
+            </Button>
+            <Button variant="primary" loading={amend.isPending} disabled={!Object.keys(draft).length} onClick={() => amend.mutate()}>
+              {tr("Enregistrer les corrections")}
+            </Button>
+          </>
+        )}
       </div>
+      )}
     </div>
   );
 }

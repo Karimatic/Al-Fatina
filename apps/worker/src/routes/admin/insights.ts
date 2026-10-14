@@ -118,7 +118,7 @@ const RETURNED = "('retour','retour_recu')";
 insightRoutes.get("/stats/returns", requirePermission("stats.view"), async (c) => {
   const { since, until } = statsRange((k) => c.req.query(k));
   const range = "o.created_at >= ?1 AND o.created_at < ?2";
-  const [reasons, totals, sizes, products] = await c.env.DB.batch([
+  const [reasons, totals, sizes, products, productSizes] = await c.env.DB.batch([
     c.env.DB.prepare(`SELECT COALESCE(o.outcome_reason, 'unknown') AS reason, COUNT(*) AS n FROM orders o WHERE ${range} AND o.status IN ${RETURNED} GROUP BY 1 ORDER BY n DESC`).bind(since, until),
     c.env.DB.prepare(
       `SELECT COUNT(*) AS shipped, SUM(CASE WHEN o.status IN ${RETURNED} THEN 1 ELSE 0 END) AS returned FROM orders o WHERE ${range} AND o.status IN ${SHIPPED}`,
@@ -140,6 +140,15 @@ insightRoutes.get("/stats/returns", requirePermission("stats.view"), async (c) =
               SUM(CASE WHEN o.status IN ${RETURNED} AND o.outcome_reason IN ('defect','product_issue') THEN oi.qty ELSE 0 END) AS defects
          FROM order_items oi JOIN orders o ON o.id = oi.order_id
         WHERE ${range} AND o.status IN ${SHIPPED} AND oi.product_id IS NOT NULL GROUP BY oi.product_id HAVING returned > 0 ORDER BY returned DESC LIMIT 20`,
+    ).bind(since, until),
+    // each size of each product that came back (pieces), so the team sees which model runs small
+    c.env.DB.prepare(
+      `SELECT oi.product_id, MAX(oi.name_fr) AS name, ov.label_fr AS size, SUM(oi.qty) AS shipped,
+              SUM(CASE WHEN o.status IN ${RETURNED} THEN oi.qty ELSE 0 END) AS returned
+         FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN variants v ON v.id = oi.variant_id, json_each(v.option_value_ids) je
+         JOIN option_values ov ON ov.id = je.value JOIN product_options po ON po.id = ov.option_id AND po.kind = 'taille'
+        WHERE ${range} AND o.status IN ${SHIPPED} AND oi.product_id IS NOT NULL
+        GROUP BY oi.product_id, ov.label_fr HAVING returned > 0 ORDER BY returned DESC, shipped DESC LIMIT 40`,
     ).bind(since, until),
   ]);
   const t = (totals!.results[0] ?? { shipped: 0, returned: 0 }) as { shipped: number; returned: number };
@@ -169,6 +178,10 @@ insightRoutes.get("/stats/returns", requirePermission("stats.view"), async (c) =
       share: returnedOrders ? r.n / returnedOrders : 0,
     })),
     sizes: sizeRows.map((r) => ({ ...r, rate: r.shipped ? r.returned / r.shipped : 0 })),
+    productSizes: (productSizes!.results as { product_id: number; name: string; size: string; shipped: number; returned: number }[]).map((r) => ({
+      ...r,
+      rate: r.shipped ? r.returned / r.shipped : 0,
+    })),
     averageRate: avg,
     alerts,
     products: (products!.results as { product_id: number; name: string; shipped: number; returned: number; size_returns: number; defects: number }[]).map((p) => ({

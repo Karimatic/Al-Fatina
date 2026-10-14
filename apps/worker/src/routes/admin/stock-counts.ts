@@ -235,6 +235,77 @@ stockCountRoutes.post("/stock-counts/:id/approve", requirePermission("stock.appr
   return c.json({ ok: true, corrected: changes.length });
 });
 
+/**
+ * Correcting an approved count (a number typed wrong, a box found later): each changed line
+ * moves today's stock by the change only (the count already applied its first difference), in
+ * the stock history as "Inventaire #N · correction"; refused if it would take pieces reserved by
+ * pending orders. Lines without a count before count from the system's figure.
+ */
+stockCountRoutes.post("/stock-counts/:id/amend", requirePermission("stock.approve"), async (c) => {
+  const id = intParam(c, "id");
+  const input = await body(
+    c,
+    z.object({
+      lines: z
+        .array(z.object({ variantId: z.number().int().positive(), countedQty: z.number().int().min(0).max(100_000), reason: z.enum(COUNT_REASONS).nullable().optional() }))
+        .min(1)
+        .max(MAX_LINES),
+      note: cleanText(500).optional(),
+    }),
+  );
+  const { count, lines } = await loadCount(c, id);
+  if (count.status !== "approved") throw new HttpError(409, "invalid_transition");
+  const byVariant = new Map(lines.map((l) => [l.variant_id, l]));
+  const unknown = input.lines.filter((l) => !byVariant.has(l.variantId)).map((l) => l.variantId);
+  if (unknown.length) throw new HttpError(422, "not_in_count", { variantIds: unknown });
+
+  const changes = input.lines
+    .map((l) => {
+      const line = byVariant.get(l.variantId)!;
+      const before = line.counted_qty ?? line.system_qty;
+      return { line, counted: l.countedQty, reason: l.reason ?? line.reason ?? "count_error", extra: l.countedQty - before };
+    })
+    .filter((x) => x.extra !== 0);
+  if (!changes.length) return c.json({ ok: true, corrected: 0 });
+  const blocked = changes.filter((x) => x.line.stock_on_hand + x.extra < x.line.stock_reserved || x.line.stock_on_hand + x.extra < 0);
+  if (blocked.length)
+    throw new HttpError(409, "stock_below_reserved", {
+      lines: blocked.map((x) => ({ variantId: x.line.variant_id, sku: x.line.sku, reserved: x.line.stock_reserved, after: x.line.stock_on_hand + x.extra })),
+    });
+
+  const actor = actorOf(c.get("member"));
+  const now = Date.now();
+  const restocked: number[] = [];
+  const stmts: D1PreparedStatement[] = [];
+  for (const x of changes) {
+    const l = x.line;
+    if (l.stock_on_hand - l.stock_reserved <= 0 && l.stock_on_hand + x.extra - l.stock_reserved > 0) restocked.push(l.variant_id);
+    const why = [`Inventaire #${id} · correction`, COUNT_REASON_LABEL[x.reason as CountReason] ?? x.reason, input.note].filter(Boolean).join(" · ");
+    stmts.push(
+      c.env.DB.prepare("UPDATE variants SET stock_on_hand = stock_on_hand + ?, updated_at = ? WHERE id = ?").bind(x.extra, now, l.variant_id),
+      c.env.DB.prepare("INSERT INTO stock_movements (variant_id, delta, reason, note, actor, created_at) VALUES (?, ?, 'inventaire', ?, ?, ?)").bind(l.variant_id, x.extra, why, actor, now),
+      c.env.DB.prepare(
+        "UPDATE stock_count_lines SET counted_qty = ?, reason = ?, applied_delta = COALESCE(applied_delta, 0) + ?, counted_by = ?, counted_at = ? WHERE count_id = ? AND variant_id = ?",
+      ).bind(x.counted, x.counted === l.system_qty ? null : x.reason, x.extra, actor, now, id, l.variant_id),
+    );
+  }
+  stmts.push(
+    auditStmt(c.env, actor, "amend", "stock_count", id, { corrections: changes.map((x) => ({ variantId: x.line.variant_id, sku: x.line.sku, from: x.line.counted_qty, to: x.counted, applied: x.extra })) }),
+    bumpCatalogStmt(c.env),
+  );
+  try {
+    await c.env.DB.batch(stmts);
+  } catch (err) {
+    if (/CHECK constraint/i.test(String((err as Error).message))) throw new HttpError(409, "stock_below_reserved");
+    throw err;
+  }
+  if (restocked.length) {
+    c.executionCtx.waitUntil(notifyRestocked(c.env, restocked).catch(() => undefined));
+    c.executionCtx.waitUntil(sendRestockPushes(c.env, restocked).catch(() => undefined));
+  }
+  return c.json({ ok: true, corrected: changes.length });
+});
+
 /** Not approved: nothing changes in the stock (the count can be reopened to correct it). */
 stockCountRoutes.post("/stock-counts/:id/reject", requirePermission("stock.approve"), async (c) => {
   const id = intParam(c, "id");

@@ -3,8 +3,11 @@ import {
   contrastRatio,
   PRODUCT_BACKGROUNDS,
   DEFAULT_DESIGN,
+  designFonts,
+  FONT_FAMILIES,
   FONT_PRESETS,
   fontStylesheet,
+  OWN_FONT,
   HOME_SECTION_LABEL,
   isHexColor,
   resolveSections,
@@ -13,12 +16,13 @@ import {
   type FontPreset,
 } from "@henine/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { api, errorMessage, put, upload } from "../api";
 import { tr } from "../i18n";
 import { processImage } from "../lib/images";
 import { ProductPicker } from "../lib/pickers";
-import { Button, Card, ErrorState, ListSkeleton, TextArea, TextField, useToast } from "../ui";
+import { Grip, ReorderControls, useReorder } from "../lib/reorder";
+import { Button, Card, ErrorState, inputCls, ListSkeleton, TextArea, TextField, useToast } from "../ui";
 
 /** Picture made in the browser (WebP, ≤ 1440 px), then stored; returns its key. */
 /** The big home page video: MP4 / WebM straight from the phone, 40 MB at most. */
@@ -145,15 +149,24 @@ export function DesignEditor() {
   });
   // font previews
   useEffect(() => {
-    for (const key of Object.keys(FONT_PRESETS) as FontPreset[]) {
-      const href = fontStylesheet(key);
-      if (!href || document.querySelector(`link[data-font="${key}"]`)) continue;
-      // dataset is read-only: set the attribute itself (assigning it threw and broke the page)
-      const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href });
-      link.dataset.font = key;
-      document.head.appendChild(link);
-    }
+    const href = fontStylesheet(FONT_FAMILIES.map((f) => f.name));
+    if (!href || document.querySelector('link[data-font="all"]')) return;
+    const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href });
+    link.dataset.font = "all";
+    document.head.appendChild(link);
   }, []);
+  // the shop's own font file, for the previews
+  const ownFontUrl = d?.fontFile ? (/^(https?:)?\//.test(d.fontFile) ? d.fontFile : (q.data?.mediaBase ?? "") + d.fontFile) : null;
+  useEffect(() => {
+    if (!ownFontUrl) return;
+    const css = `@font-face{font-family:"Henine Custom";src:url("${ownFontUrl}");font-display:swap}`;
+    let style = document.getElementById("own-font-preview");
+    if (!style) {
+      style = Object.assign(document.createElement("style"), { id: "own-font-preview" });
+      document.head.appendChild(style);
+    }
+    style.textContent = css;
+  }, [ownFontUrl]);
 
   if (q.error) return <ErrorState error={q.error} onRetry={q.refetch} />;
   if (!q.data || !d) return <ListSkeleton />;
@@ -241,6 +254,20 @@ export function DesignEditor() {
                 </button>
               );
             })}
+            {/* any colour: picked freely */}
+            <label
+              className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium ${isHexColor(d.productBg ?? "") ? "border-ink ring-2 ring-ink/10" : "border-line bg-surface"}`}
+            >
+              <input
+                type="color"
+                value={isHexColor(d.productBg ?? "") ? d.productBg : "#f3e6ea"}
+                onChange={(e) => set({ productBg: e.target.value })}
+                className="size-6 cursor-pointer rounded-lg border border-line bg-surface p-0"
+                aria-label={tr("Couleur personnalisée")}
+              />
+              {tr("Personnalisée")}
+              {isHexColor(d.productBg ?? "") && <code className="text-xs text-ink-soft">{d.productBg}</code>}
+            </label>
           </div>
           {!colorOk && (
             <p className="mt-2 text-sm font-medium text-danger">
@@ -253,7 +280,8 @@ export function DesignEditor() {
           <p className="mb-2 text-sm font-medium">{tr("Polices")}</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {(Object.keys(FONT_PRESETS) as FontPreset[]).map((key) => {
-              const f = FONT_PRESETS[key];
+              const f = designFonts({ font: key, customFont: d.customFont ?? DEFAULT_DESIGN.customFont });
+              const label = FONT_PRESETS[key].label;
               const on = d.font === key;
               return (
                 <button
@@ -263,17 +291,18 @@ export function DesignEditor() {
                   aria-pressed={on}
                   className={`rounded-xl border p-3 text-start ${on ? "border-ink ring-2 ring-ink/10" : "border-line bg-surface"}`}
                 >
-                  <span className="block text-xs font-semibold text-ink-soft">{tr(f.label)}</span>
-                  <span className="mt-1 block text-2xl italic" style={{ fontFamily: f.display ? `"${f.display}", serif` : '"Playfair Display", Georgia, serif' }}>
+                  <span className="block text-xs font-semibold text-ink-soft">{key === "custom" ? tr("✏️ Personnalisé : choisissez chaque police") : tr(label)}</span>
+                  <span className="mt-1 block text-2xl italic" style={{ fontFamily: `${fam(f.display)}, Georgia, serif` }}>
                     Henine Boutique
                   </span>
-                  <span className="block text-lg" dir="rtl" style={{ fontFamily: f.arabicDisplay ? `"${f.arabicDisplay}", serif` : '"El Messiri", serif' }}>
+                  <span className="block text-lg" dir="rtl" style={{ fontFamily: `${fam(f.arabicDisplay)}, serif` }}>
                     الأناقة والجودة بأفضل سعر
                   </span>
                 </button>
               );
             })}
           </div>
+          {d.font === "custom" && <CustomFontEditor d={d} set={set} />}
         </div>
       </Card>
 
@@ -310,15 +339,7 @@ export function DesignEditor() {
 
 /** Home page sections: drag to reorder (or the arrows on a phone), switch each one on/off. */
 function SectionsCard({ d, set }: { d: DesignDTO; set: (p: Partial<DesignDTO>) => void }) {
-  const dragFrom = useRef<number | null>(null);
-  const [over, setOver] = useState<number | null>(null);
-  const move = (from: number, to: number) => {
-    if (to < 0 || to >= d.sections.length || from === to) return;
-    const list = [...d.sections];
-    const [item] = list.splice(from, 1);
-    list.splice(to, 0, item!);
-    set({ sections: list });
-  };
+  const { move, rowProps, over } = useReorder(d.sections, (sections) => set({ sections }));
   return (
     <Card title={tr("🧱 Sections de la page d'accueil")}>
       <p className="mb-3 text-sm text-ink-soft">{tr("Glissez pour changer l'ordre (ou les flèches sur téléphone). Décochez pour cacher une section.")}</p>
@@ -328,35 +349,14 @@ function SectionsCard({ d, set }: { d: DesignDTO; set: (p: Partial<DesignDTO>) =
           return (
             <li
               key={s.key}
-              draggable
-              onDragStart={(e) => {
-                dragFrom.current = i;
-                e.dataTransfer.effectAllowed = "move";
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setOver(i);
-              }}
-              onDragLeave={() => setOver((o) => (o === i ? null : o))}
-              onDrop={(e) => {
-                e.preventDefault();
-                if (dragFrom.current != null) move(dragFrom.current, i);
-                dragFrom.current = null;
-                setOver(null);
-              }}
-              onDragEnd={() => setOver(null)}
+              {...rowProps(i)}
               className={`flex items-center gap-2 rounded-xl border bg-surface px-2.5 py-2 transition ${over === i ? "border-plum-600 bg-rose-100/40" : "border-line"} ${s.on ? "" : "opacity-55"}`}
             >
-              <span className="cursor-grab select-none px-1 text-lg text-ink-soft" aria-hidden="true">⠿</span>
+              <Grip />
               <span className="w-6 text-center text-xs tabular-nums text-ink-soft">{i + 1}</span>
               <span aria-hidden="true">{meta.icon}</span>
               <span className="min-w-0 flex-1 truncate text-sm font-medium">{tr(meta.fr)}</span>
-              <button type="button" onClick={() => move(i, i - 1)} disabled={i === 0} className="grid size-8 place-items-center rounded-lg border border-line text-sm disabled:opacity-30" aria-label={tr("Monter")}>
-                ↑
-              </button>
-              <button type="button" onClick={() => move(i, i + 1)} disabled={i === d.sections.length - 1} className="grid size-8 place-items-center rounded-lg border border-line text-sm disabled:opacity-30" aria-label={tr("Descendre")}>
-                ↓
-              </button>
+              <ReorderControls i={i} count={d.sections.length} move={move} />
               <label className="flex cursor-pointer items-center gap-1.5 ps-1 text-xs font-semibold">
                 <input type="checkbox" className="size-4 accent-plum-600" checked={s.on} onChange={(e) => set({ sections: d.sections.map((x, j) => (j === i ? { ...x, on: e.target.checked } : x)) })} />
                 <span className="hidden sm:inline">{s.on ? tr("Visible") : tr("Cachée")}</span>
@@ -444,5 +444,112 @@ function BannersCard({ d, set, media }: { d: DesignDTO; set: (p: Partial<DesignD
         </div>
       )}
     </Card>
+  );
+}
+
+/** CSS font-family of a choice (the shop's own file has its preview name). */
+const fam = (name: string) => (name === OWN_FONT ? '"Henine Custom"' : `"${name}"`);
+
+const FONT_SLOTS: { key: keyof DesignDTO["customFont"]; label: string; sample: string; script: "latin" | "arabic" }[] = [
+  { key: "display", label: "Titres (français)", sample: "Henine Boutique", script: "latin" },
+  { key: "sans", label: "Texte (français)", sample: "La nouvelle collection est arrivée.", script: "latin" },
+  { key: "arabicDisplay", label: "Titres (arabe)", sample: "الأناقة والجودة بأفضل سعر", script: "arabic" },
+  { key: "arabic", label: "Texte (arabe)", sample: "وصلت التشكيلة الجديدة، التوصيل إلى 69 ولاية.", script: "arabic" },
+];
+
+/**
+ * "Personnalisé": a font for each of the 4 places, among the store's fonts (those made for the
+ * language first) or the shop's own file (WOFF2, WOFF, TTF or OTF, 2 MB at most).
+ */
+function CustomFontEditor({ d, set }: { d: DesignDTO; set: (patch: Partial<DesignDTO>) => void }) {
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const choice = { ...DEFAULT_DESIGN.customFont, ...d.customFont };
+  const pick = (k: keyof DesignDTO["customFont"], v: string) => set({ customFont: { ...choice, [k]: v } });
+  async function uploadFont(file: File) {
+    setBusy(true);
+    try {
+      const form = new FormData();
+      form.append("font", file);
+      const r = await upload<{ key: string; name: string }>("/design/font", form);
+      set({ fontFile: r.key, fontFileName: r.name });
+      toast(tr("Police ajoutée : choisissez où l'utiliser, puis enregistrez."));
+    } catch (e) {
+      toast(errorMessage(e), "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mt-3 space-y-3 rounded-xl border border-line p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="inline-flex h-9 cursor-pointer items-center rounded-lg border border-line px-3 text-sm font-semibold">
+          {busy ? tr("Envoi…") : d.fontFile ? tr("🔁 Remplacer ma police") : tr("⬆️ Ajouter ma police (fichier)")}
+          <input
+            type="file"
+            accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
+            className="sr-only"
+            disabled={busy}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (f) void uploadFont(f);
+            }}
+          />
+        </label>
+        {d.fontFile && (
+          <>
+            <span className="text-sm text-ink-soft" dir="ltr">{d.fontFileName ?? tr("Ma police")}</span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                const back = (v: string) => (v === OWN_FONT ? undefined : v);
+                set({
+                  fontFile: null,
+                  fontFileName: null,
+                  customFont: {
+                    display: back(choice.display) ?? DEFAULT_DESIGN.customFont.display,
+                    sans: back(choice.sans) ?? DEFAULT_DESIGN.customFont.sans,
+                    arabic: back(choice.arabic) ?? DEFAULT_DESIGN.customFont.arabic,
+                    arabicDisplay: back(choice.arabicDisplay) ?? DEFAULT_DESIGN.customFont.arabicDisplay,
+                  },
+                });
+              }}
+            >
+              {tr("Retirer")}
+            </Button>
+          </>
+        )}
+      </div>
+      <p className="text-xs text-ink-soft">{tr("WOFF2, WOFF, TTF ou OTF, 2 Mo maximum. Pour l'arabe, la police doit contenir les lettres arabes.")}</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {FONT_SLOTS.map((slot) => {
+          const mine = FONT_FAMILIES.filter((f) => f.script === slot.script);
+          const others = FONT_FAMILIES.filter((f) => f.script !== slot.script);
+          return (
+            <label key={slot.key} className="block">
+              <span className="text-sm font-medium">{tr(slot.label)}</span>
+              <select className={`${inputCls} mt-1`} value={choice[slot.key]} onChange={(e) => pick(slot.key, e.target.value)}>
+                {d.fontFile && <option value={OWN_FONT}>{tr("✨ Ma police")} ({d.fontFileName ?? "…"})</option>}
+                <optgroup label={slot.script === "latin" ? tr("Polices latines") : tr("Polices arabes")}>
+                  {mine.map((f) => (
+                    <option key={f.name} value={f.name}>{f.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label={tr("Autres")}>
+                  {others.map((f) => (
+                    <option key={f.name} value={f.name}>{f.name}</option>
+                  ))}
+                </optgroup>
+              </select>
+              <span className={`mt-1 block truncate ${slot.key === "display" || slot.key === "arabicDisplay" ? "text-xl" : "text-sm"}`} dir={slot.script === "arabic" ? "rtl" : "ltr"} style={{ fontFamily: `${fam(choice[slot.key])}, serif` }}>
+                {slot.sample}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
   );
 }

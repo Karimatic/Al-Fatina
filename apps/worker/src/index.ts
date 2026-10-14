@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { formatDA, imageUrl, isSafeLink, type ImageRef } from "@henine/shared";
+import { formatDA, imageUrl, type ImageRef } from "@henine/shared";
 import type { AppEnv } from "./env";
 import { recordError } from "./lib/audit";
 import { getCollection, getProductDetail, listCategories } from "./lib/catalog";
@@ -132,15 +132,9 @@ app.get("/feeds/meta.csv", (c) => {
   return catalogCached(c, 3600, "text/csv; charset=utf-8", () => metaFeedCsv(c.env, lang));
 });
 
-/* ─── Short links: /l/<slug> ─── */
-app.get("/l/:slug", async (c) => {
-  const row = await c.env.DB.prepare("SELECT id, target FROM links WHERE kind = 'short' AND slug = ? AND is_active = 1")
-    .bind(c.req.param("slug").toLowerCase())
-    .first<{ id: number; target: string }>();
-  if (!row || !isSafeLink(row.target)) return c.redirect("/", 302);
-  c.executionCtx.waitUntil(c.env.DB.prepare("UPDATE links SET clicks = clicks + 1 WHERE id = ?").bind(row.id).run());
-  return c.redirect(row.target, 302);
-});
+/* ─── /l/<slug>: the old short links (removed: tracking links in Statistiques → Sources replace
+   them) open the home page rather than an error ─── */
+app.get("/l/:slug", (c) => c.redirect("/", 302));
 
 /* ─── Dynamic pages served from a pre-built "_" shell ───
  * /produit/<slug>, /c/<slug>, /p/<slug> (and /fr/…) exist as one static shell each; the page

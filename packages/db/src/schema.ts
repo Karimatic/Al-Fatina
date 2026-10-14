@@ -289,7 +289,7 @@ export const orders = sqliteTable(
     trackTokenHash: text("track_token_hash").notNull(),
     idempotencyKey: text("idempotency_key").notNull().unique(),
     status: text("status").notNull().default("nouvelle"), // see @henine/shared ORDER_STATUSES
-    channel: text("channel", { enum: ["web", "express", "instagram", "whatsapp", "boutique", "telephone"] })
+    channel: text("channel", { enum: ["web", "express", "instagram", "facebook", "whatsapp", "boutique", "telephone"] })
       .notNull()
       .default("web"),
     locale: text("locale").notNull().default("fr"),

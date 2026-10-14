@@ -8,6 +8,7 @@ import {
   type OutcomeReason,
   type RiskAssessment,
   type RiskLevel,
+  ORDER_STATUSES,
 } from "@henine/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
@@ -89,6 +90,17 @@ const TABS = [
   { value: "all", label: tr("Toutes") },
 ];
 
+/** The statuses behind each tab (same groups as the server's filter). */
+const TAB_STATUSES: Record<string, string[]> = {
+  active: ["nouvelle", "injoignable", "confirmee", "en_preparation"],
+  a_confirmer: ["nouvelle", "injoignable"],
+  en_cours: ["expediee", "en_livraison"],
+  termine: ["livree"],
+  annule: ["annulee", "doublon", "fausse"],
+  retours: ["retour", "retour_recu"],
+  all: [...ORDER_STATUSES],
+};
+
 export function OrdersPage() {
   const search = useSearch({ strict: false }) as { status?: string; o?: number; attention?: string; q?: string | number; source?: string };
   const navigate = useNavigate();
@@ -146,6 +158,8 @@ export function OrdersPage() {
   const setOpen = (id: number | null) => void navigate({ to: "/commandes", search: (s: Record<string, unknown>) => ({ ...s, o: id ?? undefined }) });
   const counts = list.data?.counts ?? {};
   const toConfirm = (counts.nouvelle ?? 0) + (counts.injoignable ?? 0);
+  // how many orders each tab holds (the server counts every status)
+  const tabCount = (tab: string) => (TAB_STATUSES[tab] ?? [tab]).reduce((sum, st) => sum + (counts[st] ?? 0), 0);
   // several orders at once: tick them, then one button
   const [picked, setPicked] = useState<number[]>([]);
   useEffect(() => setPicked([]), [status, debounced, attention, extra]);
@@ -172,7 +186,7 @@ export function OrdersPage() {
           <button type="button" onClick={clearAttention} className="rounded-full bg-white/15 px-3 py-1 font-semibold">{tr("Tout afficher ✕")}</button>
         </div>
       ) : (
-        <Pills value={status} onChange={setStatus} options={TABS.map((t) => ({ value: t.value, label: t.value === "a_confirmer" && toConfirm ? `${t.label} (${toConfirm})` : t.label }))} />
+        <Pills value={status} onChange={setStatus} options={TABS.map((t) => ({ value: t.value, label: list.data && tabCount(t.value) ? `${t.label} (${tabCount(t.value)})` : t.label }))} />
       )}
       <SearchBox value={q} onChange={setQ} placeholder={tr("N° de commande, nom, téléphone…")} />
       <div className="-mt-2 mb-4 flex flex-wrap items-center gap-2">
@@ -227,7 +241,7 @@ export function OrdersPage() {
                     <p className="text-sm text-ink-soft">
                       {o.wilaya_code} · {o.wilaya} · {o.delivery_type === "bureau" ? tr("Bureau") : tr("Domicile")}
                     </p>
-                    <p className="text-xs text-ink-soft">{sourceText(o.source, sources.data)}</p>
+                    <p className="truncate text-xs text-ink-soft">{sourceText(o.source, sources.data)}</p>
                   </div>
                   <div className="text-end">
                     <p className="font-semibold tabular-nums">{da(o.total)}</p>

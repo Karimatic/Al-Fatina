@@ -50,13 +50,21 @@ export const CUSTOM_SOURCE_KEY = /^[a-z0-9][a-z0-9-]{1,29}$/;
 export const ASKABLE_SOURCES: OrderSource[] = ["instagram", "facebook", "tiktok", "google", "whatsapp", "word_of_mouth", "other"];
 
 /** Name and emoji of a source in a language (the shop's renaming and own sources first). */
+/** A link or a phone number typed where a source's *name* goes: not shown as its name. */
+export function looksLikeLinkOrPhone(text: string): boolean {
+  const t = text.trim();
+  return /^(https?:\/\/|www\.)/i.test(t) || /^[\w-]+(\.[\w-]+)+\/\S*$/i.test(t) || /^\+?\d[\d\s.-]{6,}$/.test(t);
+}
+
 export function sourceLabel(key: string, settings: SourceSettings | null | undefined, lang: "fr" | "ar"): { name: string; emoji: string; custom: boolean } {
   const own = settings?.custom.find((c) => c.key === key);
   if (own) return { name: own.name, emoji: own.emoji || "🏷️", custom: true };
   const base = (ORDER_SOURCE_LABEL as Record<string, { fr: string; ar: string; emoji: string }>)[key];
   const over = settings?.builtIn[key as OrderSource];
   if (!base) return { name: key, emoji: "🏷️", custom: true };
-  return { name: over?.name || base[lang], emoji: over?.emoji || base.emoji, custom: false };
+  // a link or number typed as the name (the source's page, the shop's WhatsApp…) keeps the usual name
+  const name = over?.name && !looksLikeLinkOrPhone(over.name) ? over.name : base[lang];
+  return { name, emoji: over?.emoji || base.emoji, custom: false };
 }
 
 /** The checkout question's answers: the shop's own sources, then the visible built-in ones. */
@@ -122,6 +130,7 @@ function classifyBuiltIn(t: Touch): OrderSource {
 /** The team's orders (Caisse, manual orders): the channel says where it came from. */
 export function sourceOfChannel(channel: string): OrderSource | null {
   if (channel === "instagram") return "instagram";
+  if (channel === "facebook") return "facebook";
   if (channel === "whatsapp") return "whatsapp";
   if (channel === "boutique") return "boutique";
   if (channel === "telephone") return "other";

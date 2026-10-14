@@ -9,13 +9,44 @@ import { usePauseOffscreen } from "@/lib/pauseOffscreen";
  * Admin → Page d'accueil → Textes: scrolling endlessly (marquee, pauses on hover), one at a
  * time fading or sliding up, or still. Static when the visitor prefers reduced motion.
  * Messages: built in for each language, editable in Admin → Page d'accueil → Textes.
+ *
+ * The pages are built in advance, without the shop's settings: until they arrive, the bar shows
+ * the movement remembered from the visitor's last page (else the first message, still), never
+ * a default that then switches (a scrolling bar turning into "one at a time" on every page).
  */
+const REMEMBER = "henine.announce";
+
 export function AnnouncementBar() {
   const { data } = useApi<SiteConfigDTO>("/site");
   const messages = useStoreTexts().announcement; // built-in or edited in the admin, in the language of the page
-  const animation = data?.announcement.animation ?? "scroll";
+  const [remembered, setRemembered] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setRemembered(localStorage.getItem(REMEMBER));
+    } catch {
+      /* private mode: the still first message until the settings arrive */
+    }
+  }, []);
+  useEffect(() => {
+    if (!data) return;
+    try {
+      localStorage.setItem(REMEMBER, data.announcement.active ? data.announcement.animation : "off");
+    } catch {
+      /* private mode */
+    }
+  }, [data]);
+  const animation = data?.announcement.animation ?? remembered ?? "waiting";
   const ref = usePauseOffscreen<HTMLDivElement>();
-  if (data && !data.announcement.active) return null;
+  if (data ? !data.announcement.active : remembered === "off") return null;
+  if (animation === "waiting") {
+    return (
+      <div ref={ref} className="announce overflow-hidden text-[13px] font-medium text-white" role="region" aria-label={messages.join(" · ")}>
+        <p aria-hidden="true" className="truncate px-4 py-2 text-center">
+          {messages[0]}
+        </p>
+      </div>
+    );
+  }
   if (animation === "fade" || animation === "slide") return <OneAtATime messages={messages} slide={animation === "slide"} />;
   if (animation === "static") {
     return (
@@ -50,15 +81,20 @@ export function AnnouncementBar() {
 /** One message at a time, changing every few seconds (fading, or sliding up). */
 function OneAtATime({ messages, slide }: { messages: string[]; slide: boolean }) {
   const [i, setI] = useState(0);
+  // the first message is already on screen (still, while the page loaded): it doesn't animate in
+  const [moved, setMoved] = useState(false);
   const ref = usePauseOffscreen<HTMLDivElement>();
   useEffect(() => {
     if (messages.length < 2) return;
-    const t = setInterval(() => setI((n) => (n + 1) % messages.length), 3800);
+    const t = setInterval(() => {
+      setMoved(true);
+      setI((n) => (n + 1) % messages.length);
+    }, 3800);
     return () => clearInterval(t);
   }, [messages.length]);
   return (
     <div ref={ref} className="announce overflow-hidden text-[13px] font-medium text-white" role="region" aria-label={messages.join(" · ")}>
-      <p key={i} aria-hidden="true" className={`truncate px-4 py-2 text-center ${slide ? "announce-slide" : "announce-fade"}`}>
+      <p key={i} aria-hidden="true" className={`truncate px-4 py-2 text-center ${!moved ? "" : slide ? "announce-slide" : "announce-fade"}`}>
         {messages[i % messages.length]}
       </p>
     </div>

@@ -1,14 +1,15 @@
 /** The settings tabs and every setting in them: used by Paramètres and by the search bar at the top. */
 import type { Permission } from "@henine/shared";
-import { BellRing, KeyRound, Plug, Phone, ShoppingBag, Store, type LucideIcon } from "lucide-react";
+import { BellRing, KeyRound, Plug, Phone, ShoppingBag, Store, Wallet, type LucideIcon } from "lucide-react";
 import { tr } from "../i18n";
 
-export type TabKey = "boutique" | "commandes" | "alertes" | "textes" | "contact" | "compte" | "connexions";
+export type TabKey = "boutique" | "commandes" | "alertes" | "couts" | "textes" | "contact" | "compte" | "connexions";
 
 export const SETTINGS_TABS: { key: TabKey; label: string; icon: LucideIcon; perm: Permission }[] = [
   { key: "boutique", label: tr("Boutique"), icon: Store, perm: "marketing.edit" },
   { key: "commandes", label: tr("Commandes & livraison"), icon: ShoppingBag, perm: "marketing.edit" },
   { key: "alertes", label: tr("Alertes & délais"), icon: BellRing, perm: "orders.view" },
+  { key: "couts", label: tr("Coûts"), icon: Wallet, perm: "cost.view" },
   { key: "contact", label: tr("Contact & réseaux"), icon: Phone, perm: "marketing.edit" },
   { key: "compte", label: tr("Mon compte"), icon: KeyRound, perm: "dashboard.view" },
   { key: "connexions", label: tr("Connexions"), icon: Plug, perm: "integrations.manage" },
@@ -24,11 +25,10 @@ export const SETTINGS_INDEX: { tab: TabKey; find: string; label: string; words: 
   { tab: "boutique", find: "Bandeau d'annonces", label: tr("Bandeau d'annonces"), words: "bandeau annonce bannière message haut شريط إعلان" },
   { tab: "boutique", find: "Mettre les commandes en pause", label: tr("Mettre les commandes en pause"), words: "pause vacances fermer maintenance inventaire عطلة إيقاف الطلبات" },
   { tab: "commandes", find: "Livraison au bureau (stop-desk)", label: tr("Livraison au bureau (stop-desk)"), words: "bureau stop desk livraison relais مكتب توصيل" },
-  { tab: "commandes", find: "Livraison offerte", label: tr("Livraison offerte"), words: "livraison gratuite offerte franco توصيل مجاني" },
   { tab: "commandes", find: "Protection contre les fausses commandes", label: tr("Protection contre les fausses commandes"), words: "fausses commandes limite spam protection طلبات وهمية حماية" },
   { tab: "alertes", find: "🔔 Nouvelles commandes", label: tr("Son et notifications des nouvelles commandes"), words: "son sonnerie volume notification alerte nouvelle commande fichier mp3 personnalisé صوت تنبيه إشعار رنة ملف" },
   { tab: "alertes", find: "⏰ Délais de traitement (SLA)", label: tr("Délais de traitement (retards)"), words: "délai retard sla temps confirmation préparation expédition آجال تأخير" },
-  { tab: "alertes", find: "💰 Coûts de chaque commande", label: tr("Coûts de chaque commande (bénéfice réel)"), words: "emballage coût coûts bénéfice profit charges تغليف تكلفة تكاليف ربح مصاريف" },
+  { tab: "couts", find: "💰 Coûts de chaque commande", label: tr("Coûts de chaque commande (bénéfice réel)"), words: "emballage coût coûts bénéfice profit charges تغليف تكلفة تكاليف ربح مصاريف" },
   { tab: "textes", find: "", label: tr("Textes de la boutique (accueil, FAQ, annonces)"), words: "texte accueil hero titre faq question message نصوص الأسئلة" },
   { tab: "contact", find: "Coordonnées affichées sur la boutique", label: tr("Téléphone, WhatsApp et réseaux"), words: "téléphone whatsapp instagram tiktok facebook maps abonnés contact هاتف واتساب انستغرام متابعين" },
   { tab: "compte", find: "👤 Mon compte", label: tr("Mon compte et mot de passe"), words: "compte mot de passe password profil حسابي كلمة السر" },

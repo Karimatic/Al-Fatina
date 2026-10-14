@@ -8,7 +8,8 @@ import { CategoryPicker, ProductPicker } from "../lib/pickers";
 import {
   Badge, Button, Card, Empty, ErrorState, Field, inputCls, ListSkeleton, NumberField, PageHeader, Pills, Select, Sheet, TextArea, TextField, Toggle, useToast,
 } from "../ui";
-import { tr } from "../i18n";
+import { isAr, tr } from "../i18n";
+import { Grip, ReorderControls, useReorder } from "../lib/reorder";
 import { SubNav } from "../lib/subnav";
 
 function useSave<T>(fn: (v: T) => Promise<unknown>, invalidate: string[], ok = "Enregistré ✓") {
@@ -52,13 +53,47 @@ const couponLabel = (c: Pick<Coupon, "type" | "value">) => (c.type === "percent"
 const toDateInput = (ts: number | null) => (ts ? new Date(ts + 3600_000).toISOString().slice(0, 10) : "");
 const fromDateInput = (s: string, end = false) => (s ? new Date(`${s}T${end ? "23:59:59" : "00:00:00"}+01:00`).getTime() : null);
 
+/** Free delivery from a basket amount (empty = never). */
+function FreeShippingCard({ saved }: { saved: number | null }) {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [value, setValue] = useState(saved == null ? "" : String(saved));
+  useEffect(() => setValue(saved == null ? "" : String(saved)), [saved]);
+  const over = value.trim() === "" ? null : Math.max(0, Math.round(Number(value.replace(/\D/g, "")) || 0));
+  const save = useMutation({
+    mutationFn: () => put("/coupons/free-shipping", { over }),
+    onSuccess: () => {
+      toast(over == null ? tr("Livraison offerte désactivée") : tr("Livraison offerte dès {0}", { 0: da(over) }));
+      void qc.invalidateQueries({ queryKey: ["coupons"] });
+      void qc.invalidateQueries({ queryKey: ["home"] });
+    },
+    onError: (e) => toast(errorMessage(e), "error"),
+  });
+  return (
+    <Card title={tr("🚚 Livraison offerte")} className="mb-4">
+      <p className="mb-3 text-sm text-ink-soft">
+        {tr("La livraison devient gratuite à partir de ce montant de panier. Laissez vide pour ne jamais l'offrir.")}
+        {saved != null && <Badge tone="ms-1 bg-emerald-100 text-emerald-800">{tr("actuellement dès")} {da(saved)}</Badge>}
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <input className={`${inputCls} w-48`} inputMode="numeric" placeholder={tr("ex : 10000")} value={value} onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))} aria-label={tr("Montant du panier")} />
+        <span className="text-sm text-ink-soft">{tr("DA")}</span>
+        <Button variant="primary" loading={save.isPending} disabled={over === saved} onClick={() => save.mutate()}>
+          {tr("Enregistrer")}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 export function PromosPage() {
   const q = useQuery({ queryKey: ["coupons"], queryFn: () => api<{ coupons: Coupon[]; freeShippingOver: number | null }>("/coupons") });
   const [edit, setEdit] = useState<Partial<Coupon> | null>(null);
   return (
     <div>
-      <PageHeader group={tr("Commandes")} title={tr("Promos")} subtitle={tr("Codes promo et codes influenceuses. La livraison offerte automatique se règle dans Paramètres → Commandes & livraison.")} actions={<Button variant="primary" onClick={() => setEdit({ type: "percent", value: 10, is_active: 1 })}>{tr("+ Nouveau code")}</Button>} />
+      <PageHeader group={tr("Commandes")} title={tr("Promos")} subtitle={tr("Livraison offerte, ventes flash, codes promo et codes influenceuses.")} actions={<Button variant="primary" onClick={() => setEdit({ type: "percent", value: 10, is_active: 1 })}>{tr("+ Nouveau code")}</Button>} />
       <SubNav of="promos" />
+      {q.data && <FreeShippingCard saved={q.data.freeShippingOver} />}
       <FlashSales />
       <InfluencerReport />
       {q.error ? <ErrorState error={q.error} onRetry={q.refetch} /> : !q.data ? <ListSkeleton /> : q.data.coupons.length === 0 ? <Empty title={tr("Aucun code promo")} icon="🏷" /> : (
@@ -719,62 +754,58 @@ export function NotifierPage() {
 
 interface LinkRow {
   id: number;
-  kind: "bio" | "short";
-  slug: string | null;
+  kind: "bio";
   label_fr: string | null;
   label_ar: string | null;
   target: string;
   icon: string | null;
   sort: number;
   is_active: number;
-  clicks: number;
 }
 
+/** The bio page's links: drag to reorder (saved at once), tap to edit. */
 export function LinksPage() {
+  const qc = useQueryClient();
+  const toast = useToast();
   const q = useQuery({ queryKey: ["links"], queryFn: () => api<LinkRow[]>("/links") });
   const [edit, setEdit] = useState<Partial<LinkRow> | null>(null);
-  const bio = q.data?.filter((l) => l.kind === "bio") ?? [];
-  const short = q.data?.filter((l) => l.kind === "short") ?? [];
+  const bio = q.data ?? [];
+  const order = useMutation({
+    mutationFn: (ids: number[]) => put("/links/order", { ids }),
+    onError: (e) => {
+      toast(errorMessage(e), "error");
+      void qc.invalidateQueries({ queryKey: ["links"] });
+    },
+  });
+  const { move, rowProps, over } = useReorder(bio, (next) => {
+    qc.setQueryData(["links"], next.map((l, i) => ({ ...l, sort: i })));
+    order.mutate(next.map((l) => l.id));
+  });
   const origin = location.origin;
   return (
     <div className="space-y-4">
-      <PageHeader group={tr("Marketing")} title={tr("Liens")} subtitle={tr("Page « lien en bio » Instagram et liens courts avec compteur de clics.")} />
+      <PageHeader group={tr("Marketing")} title={tr("Liens")} subtitle={tr("La page « lien en bio » Instagram.")} />
       {q.error ? <ErrorState error={q.error} onRetry={q.refetch} /> : !q.data ? <ListSkeleton /> : (
-        <>
-          <Card title={tr("🌸 Page lien en bio")} actions={<Button size="sm" variant="primary" onClick={() => setEdit({ kind: "bio", is_active: 1, sort: bio.length })}>{tr("+ Lien")}</Button>}>
-            <p className="mb-3 text-sm text-ink-soft">{tr("À mettre dans la bio Instagram :")} <a href="/liens" target="_blank" rel="noreferrer" className="font-mono font-semibold text-plum-600">{origin}/liens</a></p>
-            <ul className="divide-y divide-line">
-              {bio.map((l) => (
-                <li key={l.id}>
-                  <button type="button" onClick={() => setEdit(l)} className="flex w-full items-center justify-between gap-2 py-2.5 text-start">
-                    <span className={`min-w-0 ${l.is_active ? "" : "opacity-50"}`}>
-                      <span className="block truncate text-sm font-medium">{l.label_fr}</span>
-                      <span className="block truncate text-xs text-ink-soft">{l.target}</span>
-                    </span>
-                    <span className="text-ink-soft">›</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </Card>
-          <Card title={tr("🔗 Liens courts (suivi des clics)")} actions={<Button size="sm" variant="primary" onClick={() => setEdit({ kind: "short", is_active: 1 })}>{tr("+ Lien court")}</Button>}>
-            {short.length === 0 ? <p className="text-sm text-ink-soft">{tr("Ex :")} {origin}/l/ete25 → une page, avec le nombre de clics.</p> : (
-              <ul className="divide-y divide-line">
-                {short.map((l) => (
-                  <li key={l.id}>
-                    <button type="button" onClick={() => setEdit(l)} className="flex w-full items-center justify-between gap-2 py-2.5 text-start">
-                      <span className="min-w-0">
-                        <span className="block truncate font-mono text-sm font-semibold text-plum-700">/l/{l.slug}</span>
-                        <span className="block truncate text-xs text-ink-soft">→ {l.target}</span>
-                      </span>
-                      <Badge tone="bg-stone-100 text-stone-700">{l.clicks} {tr("clic(s)")}</Badge>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        </>
+        <Card title={tr("🌸 Page lien en bio")} actions={<Button size="sm" variant="primary" onClick={() => setEdit({ kind: "bio", is_active: 1, sort: bio.length })}>{tr("+ Lien")}</Button>}>
+          <p className="mb-1 text-sm text-ink-soft">{tr("À mettre dans la bio Instagram :")} <a href="/liens" target="_blank" rel="noreferrer" className="font-mono font-semibold text-plum-600">{origin}/liens</a></p>
+          <p className="mb-3 text-xs text-ink-soft">{tr("Glissez pour changer l'ordre (ou les flèches sur téléphone) : il est enregistré tout de suite.")}</p>
+          <ol className="space-y-1.5">
+            {bio.map((l, i) => (
+              <li
+                key={l.id}
+                {...rowProps(i)}
+                className={`flex items-center gap-2 rounded-xl border bg-surface px-2.5 py-2 transition ${over === i ? "border-plum-600 bg-rose-100/40" : "border-line"} ${l.is_active ? "" : "opacity-55"}`}
+              >
+                <Grip />
+                <button type="button" onClick={() => setEdit(l)} className="min-w-0 flex-1 text-start">
+                  <span className="block truncate text-sm font-medium">{(isAr ? l.label_ar || l.label_fr : l.label_fr) ?? l.target}</span>
+                  <span className="block truncate text-xs text-ink-soft" dir="ltr">{l.target}</span>
+                </button>
+                <ReorderControls i={i} count={bio.length} move={move} />
+              </li>
+            ))}
+          </ol>
+        </Card>
       )}
       {edit && <LinkSheet link={edit} onClose={() => setEdit(null)} />}
     </div>
@@ -784,7 +815,7 @@ export function LinksPage() {
 function LinkSheet({ link, onClose }: { link: Partial<LinkRow>; onClose: () => void }) {
   const [f, setF] = useState(link);
   const save = useSave(() => {
-    const body = { kind: f.kind, slug: f.slug || null, labelFr: f.label_fr || null, labelAr: f.label_ar || null, target: f.target ?? "", icon: f.icon || null, sort: f.sort ?? 0, isActive: !!f.is_active };
+    const body = { labelFr: f.label_fr || null, labelAr: f.label_ar || null, target: f.target ?? "", icon: f.icon || null, sort: f.sort ?? 0, isActive: !!f.is_active };
     return link.id ? put(`/links/${link.id}`, body) : post("/links", body);
   }, ["links"]);
   const remove = useSave(() => del(`/links/${link.id}`), ["links"], tr("Lien supprimé"));
@@ -792,7 +823,7 @@ function LinkSheet({ link, onClose }: { link: Partial<LinkRow>; onClose: () => v
     <Sheet
       open
       onClose={onClose}
-      title={link.id ? tr("Modifier le lien") : f.kind === "short" ? tr("Nouveau lien court") : tr("Nouveau lien")}
+      title={link.id ? tr("Modifier le lien") : tr("Nouveau lien")}
       footer={
         <div className="flex justify-between gap-2">
           {link.id ? <Button ownerOnly variant="danger" onClick={() => confirm(tr("Supprimer ce lien ?")) && remove.mutate(undefined, { onSuccess: onClose })}>{tr("Supprimer")}</Button> : <span />}
@@ -801,11 +832,9 @@ function LinkSheet({ link, onClose }: { link: Partial<LinkRow>; onClose: () => v
       }
     >
       <div className="grid gap-3">
-        {f.kind === "short" && <TextField label={tr("Adresse courte")} hint={`${location.origin}/l/…`} value={f.slug ?? ""} onChange={(e) => setF({ ...f, slug: e.target.value.toLowerCase() })} placeholder={tr("ete25")} />}
         <TextField label={tr("Texte du bouton (FR)")} value={f.label_fr ?? ""} onChange={(e) => setF({ ...f, label_fr: e.target.value })} placeholder={tr("🛍️ Voir la boutique")} />
         <TextField label={tr("Texte du bouton (AR)")} dir="rtl" value={f.label_ar ?? ""} onChange={(e) => setF({ ...f, label_ar: e.target.value })} />
         <TextField label={tr("Destination")} hint="/page de la boutique ou https://…" value={f.target ?? ""} onChange={(e) => setF({ ...f, target: e.target.value })} placeholder="/c/robes ou https://wa.me/213…" />
-        {f.kind === "bio" && <NumberField label={tr("Ordre")} value={f.sort ?? 0} onChange={(v) => setF({ ...f, sort: v ?? 0 })} />}
         <Toggle label={tr("Actif")} checked={!!f.is_active} onChange={(v) => setF({ ...f, is_active: v ? 1 : 0 })} />
       </div>
     </Sheet>

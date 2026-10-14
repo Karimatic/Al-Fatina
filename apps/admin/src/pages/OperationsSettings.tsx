@@ -6,7 +6,7 @@ import { DEFAULT_DUPLICATE_SETTINGS, DEFAULT_SLA, type DuplicateSettings, type O
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api, del, errorMessage, put, upload } from "../api";
-import { tr } from "../i18n";
+import { isAr, tr } from "../i18n";
 import { isInstalled, useInstallOffer } from "../lib/install";
 import { loadPrefs, playTone, savePrefs, setShopSound, SHOP_SOUND_DEFAULT_SECONDS, SOUNDS, unlockSound, useSoundReady, type SoundKey, type SoundPrefs } from "../lib/live";
 import { useCan } from "../Shell";
@@ -17,7 +17,6 @@ export function OperationsSettings() {
   return (
     <div className="space-y-4">
       <OrderAlertsCard />
-      {can("orders.edit") && can("cost.view") && <OrderCostsCard />}
       {can("orders.edit") && <SlaCard />}
     </div>
   );
@@ -254,7 +253,8 @@ const COST_IDEAS = ["Emballage (sachet, boîte)", "Carte de remerciement", "Stic
  * from the courier's rates): the shop names its own lines, their total comes off every order's
  * real profit (Finance, the order page, Statistiques). In-store sales pay none of it.
  */
-function OrderCostsCard() {
+/** Paramètres → Coûts: what every parcel costs besides the pieces (its own tab). */
+export function OrderCostsCard() {
   const qc = useQueryClient();
   const toast = useToast();
   const q = useQuery({ queryKey: ["operations-settings"], queryFn: () => api<OpsSettings>("/operations/settings") });
@@ -350,17 +350,26 @@ function SlaCard() {
     },
     onError: (e) => toast(errorMessage(e), "error"),
   });
+  // typed in hours (0.5 = 30 min), kept in minutes; the text stays as typed while editing
+  const [typed, setTyped] = useState<Partial<Record<keyof SlaSettings, string>>>({});
+  const hours = (m: number) => String(Math.round((m / 60) * 100) / 100).replace(".", isAr ? "٫" : ",");
   const field = (key: keyof SlaSettings, label: string, hint: string) => (
     <label className="text-sm font-medium">
       {label}
       <span className="mt-1 flex items-center gap-2">
         <input
           className={`${inputCls} w-28`}
-          inputMode="numeric"
-          value={sla[key]}
-          onChange={(e) => setSla((s) => ({ ...s, [key]: Math.max(0, Number(e.target.value.replace(/\D/g, "")) || 0) }))}
+          inputMode="decimal"
+          value={typed[key] ?? hours(sla[key])}
+          onChange={(e) => {
+            const text = e.target.value.replace(/[^\d.,٫]/g, "");
+            setTyped((t) => ({ ...t, [key]: text }));
+            const h = Number(text.replace(/[,٫]/, "."));
+            if (Number.isFinite(h)) setSla((s) => ({ ...s, [key]: Math.max(0, Math.round(h * 60)) }));
+          }}
+          onBlur={() => setTyped((t) => ({ ...t, [key]: undefined }))}
         />
-        <span className="text-ink-soft">{tr("minutes")}</span>
+        <span className="text-ink-soft">{tr("heures")}</span>
       </span>
       <span className="mt-1 block text-xs font-normal text-ink-soft">{hint}</span>
     </label>
@@ -371,9 +380,9 @@ function SlaCard() {
         {tr("Au-delà, la commande passe « en retard » : badge rouge, filtre « En retard », alerte dans la cloche.")}
       </p>
       <div className="grid gap-4 sm:grid-cols-3">
-        {field("confirmMinutes", tr("Nouvelle → confirmée"), tr("ex. 30 min"))}
-        {field("prepareMinutes", tr("Confirmée → en préparation"), tr("ex. 120 min (2 h)"))}
-        {field("shipMinutes", tr("En préparation → expédiée"), tr("ex. 1440 min (24 h)"))}
+        {field("confirmMinutes", tr("Nouvelle → confirmée"), tr("ex. 0,5 = une demi-heure"))}
+        {field("prepareMinutes", tr("Confirmée → en préparation"), tr("ex. 2 heures"))}
+        {field("shipMinutes", tr("En préparation → expédiée"), tr("ex. 24 = un jour"))}
       </div>
       <div className="mt-5 border-t border-line pt-4">
         <p className="text-sm font-semibold">{tr("⚠️ Doublons possibles")}</p>

@@ -66,7 +66,8 @@ function orderFilters(q: (k: string) => string | undefined, sla: Parameters<type
   const groups: Record<string, string[]> = {
     active: ["nouvelle", "injoignable", "confirmee", "en_preparation"],
     a_confirmer: ["nouvelle", "injoignable"],
-    en_cours: ["confirmee", "en_preparation", "expediee", "en_livraison"],
+    // the "Expédiées" tab: on their way (confirmed and in-preparation orders have their own tabs)
+    en_cours: ["expediee", "en_livraison"],
     termine: ["livree"],
     annule: ["annulee", "doublon", "fausse"],
     retours: ["retour", "retour_recu"],

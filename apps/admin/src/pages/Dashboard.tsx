@@ -12,6 +12,7 @@ import {
   ChevronUp,
   Globe,
   Camera,
+  ThumbsUp,
   MessageCircle,
   Phone,
   ShoppingBag,
@@ -123,7 +124,7 @@ const PIPELINE: [string, string][] = [
   ["retour", tr("Retours")],
 ];
 
-const CHANNEL_ICON: Record<string, LucideIcon> = { web: Globe, express: Zap, instagram: Camera, whatsapp: MessageCircle, boutique: Store, telephone: Phone };
+const CHANNEL_ICON: Record<string, LucideIcon> = { web: Globe, express: Zap, instagram: Camera, facebook: ThumbsUp, whatsapp: MessageCircle, boutique: Store, telephone: Phone };
 
 /** "+18,2 %" vs the previous period; null when there is nothing to compare with. */
 function change(cur: number, prev: number): { text: string; up: boolean } | null {

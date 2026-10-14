@@ -66,6 +66,28 @@ export async function putAudio(env: Env, prefix: string, file: File): Promise<st
   return key;
 }
 
+export const FONT_TYPES = { woff2: "font/woff2", woff: "font/woff", ttf: "font/ttf", otf: "font/otf" } as const;
+/** A font file by its first bytes, whatever its name says. */
+export function sniffFont(b: Uint8Array): keyof typeof FONT_TYPES | null {
+  const tag = String.fromCharCode(b[0] ?? 0, b[1] ?? 0, b[2] ?? 0, b[3] ?? 0);
+  if (tag === "wOF2") return "woff2";
+  if (tag === "wOFF") return "woff";
+  if (tag === "OTTO") return "otf";
+  if ((b[0] === 0 && b[1] === 1 && b[2] === 0 && b[3] === 0) || tag === "true") return "ttf";
+  return null;
+}
+
+/** Stores the shop's own font (WOFF2 / WOFF / TTF / OTF, ≤ 2 MB); returns its R2 key. */
+export async function putFont(env: Env, prefix: string, file: File): Promise<string> {
+  if (file.size > 2_000_000) throw new HttpError(413, "file_too_large");
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const kind = sniffFont(bytes);
+  if (!kind) throw new HttpError(415, "font_type");
+  const key = `${prefix}-${Date.now().toString(36)}${rand()}.${kind}`;
+  await env.MEDIA.put(key, bytes, { httpMetadata: { contentType: FONT_TYPES[kind], cacheControl: "public, max-age=31536000, immutable" } });
+  return key;
+}
+
 /** Saved design (R2 keys) → what the storefront gets (media URLs, every section listed). */
 export function designOut(env: Env, d: Partial<DesignDTO>): DesignDTO {
   const url = (k: string | null | undefined) => (!k ? null : /^(https?:)?\//.test(k) ? k : mediaUrl(env, k));
@@ -77,6 +99,8 @@ export function designOut(env: Env, d: Partial<DesignDTO>): DesignDTO {
     logo: url(d.logo),
     heroImage: url(d.heroImage),
     heroVideo: url(d.heroVideo),
+    customFont: { ...DEFAULT_DESIGN.customFont, ...d.customFont },
+    fontFile: url(d.fontFile),
     banners: (d.banners ?? []).filter((b) => b.image || b.video).map((b) => ({ ...b, image: url(b.image) ?? "", video: url(b.video) })),
     sections: resolveSections(d.sections),
   };

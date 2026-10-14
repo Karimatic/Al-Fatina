@@ -2,14 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { api, errorMessage, put } from "../api";
-import { da } from "../lib/format";
 import { useCan } from "../Shell";
-import { Badge, Button, ErrorState, inputCls, ListSkeleton, PageHeader, SearchBox, useToast } from "../ui";
+import { Button, ErrorState, inputCls, ListSkeleton, PageHeader, SearchBox, useToast } from "../ui";
 import { ContactSettingsCard, StoreTextsEditor, type ContactSettings, type Overrides } from "./Marketing";
 import { BoutiqueSettingsCard } from "./BoutiqueSettings";
 import { DesignEditor } from "./Design";
 import { IntegrationsSection, MyAccount } from "./System";
-import { OperationsSettings } from "./OperationsSettings";
+import { OperationsSettings, OrderCostsCard } from "./OperationsSettings";
 import { tr } from "../i18n";
 import { fold, SETTINGS_INDEX, SETTINGS_TABS as TABS, type TabKey } from "../lib/settingsIndex";
 
@@ -109,6 +108,8 @@ export function SettingsPage() {
         <MyAccount />
       ) : tab === "alertes" ? (
         <OperationsSettings />
+      ) : tab === "couts" ? (
+        <OrderCostsCard />
       ) : tab === "connexions" ? (
         <div className="space-y-4">
           <IntegrationsSection />
@@ -184,12 +185,10 @@ function StoreSettings({ tab, goTo }: { tab: TabKey; goTo: (t: TabKey) => void }
   const toast = useToast();
   const q = useQuery({ queryKey: ["home"], queryFn: () => api<HomeSettings>("/home") });
   const [name, setName] = useState("");
-  const [freeOver, setFreeOver] = useState("");
   const [maxOrders, setMaxOrders] = useState("");
   useEffect(() => {
     if (!q.data) return;
     setName(q.data.store.name);
-    setFreeOver(q.data.checkout.free_shipping_over == null ? "" : String(q.data.checkout.free_shipping_over));
     setMaxOrders(String(q.data.checkout.max_orders_per_phone_per_hour));
   }, [q.data]);
 
@@ -268,33 +267,11 @@ function StoreSettings({ tab, goTo }: { tab: TabKey; goTo: (t: TabKey) => void }
     );
 
   if (tab === "commandes") {
-    const free = freeOver.trim() === "" ? null : Math.max(0, Math.round(Number(freeOver)));
     const max = Math.max(1, Math.min(20, Math.round(Number(maxOrders) || 3)));
     return (
       <Panel>
         <Row title={tr("Livraison au bureau (stop-desk)")} help={tr("Proposer le retrait au bureau ZR Express, moins cher que la livraison à domicile.")}>
           <Switch checked={h.checkout.desk_enabled} onChange={(v) => apply({ checkout: { desk_enabled: v } })} on={tr("Proposée aux clientes")} off={tr("Non proposée (domicile seulement)")} />
-        </Row>
-        <Row
-          title={tr("Livraison offerte")}
-          help={
-            <>
-              {tr("La livraison devient gratuite à partir de ce montant de panier. Laissez vide pour ne jamais l'offrir.")}
-              {h.checkout.free_shipping_over != null && <Badge tone="ms-1 bg-emerald-100 text-emerald-800">{tr("actuellement dès")} {da(h.checkout.free_shipping_over)}</Badge>}
-            </>
-          }
-        >
-          <SaveBox
-            type="number"
-            suffix={tr("DA")}
-            width="w-48"
-            placeholder={tr("ex : 10000")}
-            value={freeOver}
-            saved={h.checkout.free_shipping_over == null ? "" : String(h.checkout.free_shipping_over)}
-            onChange={setFreeOver}
-            busy={saveHome.isPending}
-            onSave={() => apply({ checkout: { free_shipping_over: free } })}
-          />
         </Row>
         <Row title={tr("Protection contre les fausses commandes")} help={tr("Nombre maximum de commandes qu'un même numéro de téléphone peut passer en une heure (entre 1 et 20).")}>
           <SaveBox

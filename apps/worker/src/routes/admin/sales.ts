@@ -19,7 +19,7 @@ salesRoutes.post("/sales/manual", requirePermission("sales.create"), async (c) =
   const input = await body(
     c,
     z.object({
-      channel: z.enum(["boutique", "instagram", "whatsapp", "telephone"]),
+      channel: z.enum(["boutique", "instagram", "facebook", "whatsapp", "telephone"]),
       name: cleanText(80).pipe(z.string().min(2)).optional(),
       /** optional for a boutique sale (walk-in customer) */
       phone: dzPhone.optional(),
@@ -76,7 +76,7 @@ salesRoutes.get("/sales", requirePermission("sales.view"), async (c) => {
     c.env.DB.prepare(`SELECT o.channel, COUNT(*) AS orders, SUM(o.total) AS revenue FROM orders o WHERE o.created_at > ? AND ${valid} GROUP BY o.channel ORDER BY revenue DESC`).bind(since),
     c.env.DB.prepare(`SELECT COUNT(*) AS orders, COALESCE(SUM(o.total), 0) AS revenue, COALESCE(SUM(o.subtotal - o.discount_total), 0) AS merch FROM orders o WHERE o.created_at > ? AND ${valid}`).bind(since),
     c.env.DB.prepare(
-      `SELECT o.id, o.public_code, o.channel, o.name, o.total, o.status, o.created_at FROM orders o WHERE o.channel IN ('boutique','instagram','whatsapp','telephone') ORDER BY o.id DESC LIMIT 15`,
+      `SELECT o.id, o.public_code, o.channel, o.name, o.total, o.status, o.created_at FROM orders o WHERE o.channel IN ('boutique','instagram','facebook','whatsapp','telephone') ORDER BY o.id DESC LIMIT 15`,
     ),
   ]);
   return c.json({

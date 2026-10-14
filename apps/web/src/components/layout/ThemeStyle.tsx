@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { DEFAULT_DESIGN, productBgVars, themeVars, themeVarsDark } from "@henine/shared";
-import { presetFontVars } from "@/lib/fontPresets";
+import { designFontVars, ownFontFace } from "@/lib/fontPresets";
 import { DESIGN_KEY as KEY } from "@/lib/boot";
 import { useDesign } from "@/lib/site";
 
@@ -15,11 +15,14 @@ export function ThemeStyle() {
   const design = useDesign();
   const { accent, soft } = design.colors;
   const font = design.font;
+  const customFont = design.customFont;
+  const fontFile = design.fontFile;
   const productBg = design.productBg;
+  const fontKey = JSON.stringify([font, customFont, fontFile]);
   useEffect(() => {
     const isDefault = accent.toLowerCase() === DEFAULT_DESIGN.colors.accent && soft.toLowerCase() === DEFAULT_DESIGN.colors.soft;
-    const fonts = presetFontVars(font);
-    let css = Object.keys(fonts).length ? `:root:root{${rules(fonts)}}` : "";
+    const fonts = designFontVars({ font, customFont });
+    let css = ownFontFace({ font, customFont, fontFile }) + (Object.keys(fonts).length ? `:root:root{${rules(fonts)}}` : "");
     if (!isDefault) {
       const dark = rules(themeVarsDark({ accent, soft }));
       css +=
@@ -49,6 +52,6 @@ export function ThemeStyle() {
     } catch {
       /* private mode */
     }
-  }, [accent, soft, font, productBg]);
+  }, [accent, soft, fontKey, productBg]); // eslint-disable-line react-hooks/exhaustive-deps
   return null;
 }

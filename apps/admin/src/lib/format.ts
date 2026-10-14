@@ -54,10 +54,19 @@ export const CHANNEL_LABEL: Record<string, string> = {
   web: tr("Site"),
   express: tr("Express"),
   instagram: "Instagram",
+  facebook: "Facebook",
   whatsapp: "WhatsApp",
   boutique: tr("Boutique"),
   telephone: tr("Téléphone"),
 };
+
+/** A duration in minutes, as hours and minutes: 6354 → "105 h 54 min", 45 → "45 min". */
+export function hoursMinutes(minutes: number): string {
+  const m = Math.max(0, Math.round(minutes));
+  if (m < 60) return tr("{0} min", { 0: m });
+  const h = Math.floor(m / 60);
+  return m % 60 ? tr("{0} h {1} min", { 0: h, 1: m % 60 }) : tr("{0} h", { 0: h });
+}
 
 export function waLink(phone: string, text: string): string {
   const e164 = toE164(phone)?.replace("+", "") ?? phone;

@@ -17,6 +17,7 @@ interface ReturnsData {
   averageRate: number;
   alerts: { size: string; rate: number; average: number; hint: "too_small" | "too_large" | null }[];
   products: { product_id: number; name: string; shipped: number; returned: number; rate: number; size_returns: number; defects: number }[];
+  productSizes: { product_id: number; name: string; size: string; shipped: number; returned: number; rate: number }[];
 }
 
 /** One bar per row, the value written next to it (no colour carries meaning alone). */
@@ -74,12 +75,12 @@ export function ReturnsSection({ query }: { query: string }) {
               ))}
             </ul>
           )}
-          {d.sizes.length > 0 && (
+          {(d.productSizes ?? []).length > 0 && (
             <section>
-              <h3 className="mb-2 text-sm font-semibold">{tr("Retours par taille (pièces)")}</h3>
+              <h3 className="mb-2 text-sm font-semibold">{tr("Retours par produit et taille (pièces)")}</h3>
               <ul className="space-y-1.5">
-                {d.sizes.map((s) => (
-                  <BarRow key={s.size} label={s.size} value={pct(s.rate)} share={s.rate} hint={tr("{0}/{1}", { 0: s.returned, 1: s.shipped })} />
+                {d.productSizes.map((s) => (
+                  <BarRow key={`${s.product_id}-${s.size}`} label={`${s.name} · ${s.size}`} value={pct(s.rate)} share={s.rate} hint={tr("{0}/{1}", { 0: s.returned, 1: s.shipped })} />
                 ))}
               </ul>
             </section>

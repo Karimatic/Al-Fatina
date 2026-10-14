@@ -3,8 +3,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { PackagePlus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { api, errorMessage, post } from "../api";
-import { tr } from "../i18n";
-import { dateTime } from "../lib/format";
+import { isAr, tr } from "../i18n";
 import { useCan } from "../Shell";
 import { Button, Empty, ErrorState, inputCls, ListSkeleton, PageHeader, Pills, SearchBox, Sheet, Stat, TextField, useToast } from "../ui";
 
@@ -33,7 +32,7 @@ export interface StockProduct {
 }
 
 const REASON: Record<string, string> = {
-  reception: tr("📥 Réception"), ajustement: "✏️ Ajustement", casse: tr("💔 Casse / défaut"), retour: tr("↩️ Retour"), inventaire: tr("📋 Inventaire"),
+  reception: tr("📥 Réception"), ajustement: tr("✏️ Ajustement"), casse: tr("💔 Casse / défaut"), retour: tr("↩️ Retour en stock"), inventaire: tr("📋 Inventaire"),
   reservation: tr("🔒 Réservé (commande)"), liberation: tr("🔓 Libéré (annulation)"), vente: tr("🛍 Vendu (expédié)"),
 };
 
@@ -431,20 +430,64 @@ export function ReceptionPage() {
 
 /* ───────────── History ───────────── */
 
-function MovementList({ rows }: { rows: { id: number; delta: number; reason: string; note: string | null; actor: string; created_at: number; public_code: string | null; name_fr?: string; sku?: string }[] }) {
+type Movement = {
+  id: number; delta: number; reason: string; note: string | null; actor: string; created_at: number; public_code: string | null;
+  name_fr?: string; name_ar?: string | null; sku?: string; label_fr?: string | null; label_ar?: string | null;
+};
+
+/** who did it: "member:3:Karim" → "Karim", "customer" → the customer */
+const actorName = (a: string) => (a === "customer" ? tr("La cliente") : a.split(":").slice(2).join(":") || a);
+const dayKey = (t: number) => new Date(t).toLocaleDateString(isAr ? "ar-DZ" : "fr-FR", { weekday: "long", day: "numeric", month: "long" });
+
+/**
+ * One movement per card: the piece (name, size / colour), why it moved (a coloured label, the
+ * order number), who and when; the quantity apart, large, green in / red out. Grouped by day.
+ */
+function MovementList({ rows }: { rows: Movement[] }) {
   if (!rows.length) return <p className="text-sm text-ink-soft">{tr("Aucun mouvement.")}</p>;
+  const days: { day: string; items: Movement[] }[] = [];
+  for (const m of rows) {
+    const day = dayKey(m.created_at);
+    if (days.at(-1)?.day !== day) days.push({ day, items: [] });
+    days.at(-1)!.items.push(m);
+  }
   return (
-    <ul className="space-y-1.5 text-sm">
-      {rows.map((m) => (
-        <li key={m.id} className="flex items-baseline justify-between gap-2">
-          <span className="min-w-0">
-            <span className="block">{REASON[m.reason] ?? m.reason}{m.public_code ? ` · ${m.public_code}` : ""}{m.name_fr ? ` · ${m.name_fr} (${m.sku})` : ""}</span>
-            <span className="text-xs text-ink-soft">{dateTime(m.created_at)} · {m.actor.split(":").slice(2).join(":") || m.actor}{m.note ? ` · ${m.note}` : ""}</span>
-          </span>
-          <b className={`tabular-nums ${m.delta < 0 ? "text-red-700" : "text-emerald-700"}`}>{m.delta > 0 ? `+${m.delta}` : m.delta}</b>
-        </li>
+    <div className="space-y-4">
+      {days.map((d) => (
+        <section key={d.day}>
+          <h3 className="mb-1.5 text-xs font-semibold text-ink-soft">{d.day}</h3>
+          <ul className="space-y-1.5">
+            {d.items.map((m) => {
+              const name = isAr ? m.name_ar || m.name_fr : m.name_fr;
+              const label = isAr ? m.label_ar || m.label_fr : m.label_fr;
+              return (
+                <li key={m.id} className="flex items-center gap-3 rounded-xl border border-line bg-surface p-2.5">
+                  <span className={`grid min-w-12 shrink-0 place-items-center rounded-lg px-2 py-1.5 text-lg font-bold tabular-nums ${m.delta < 0 ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"}`} dir="ltr">
+                    {m.delta > 0 ? `+${m.delta}` : m.delta}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    {name && (
+                      <span className="block truncate text-sm font-semibold">
+                        {name}
+                        {label && <span className="ms-1.5 rounded-md bg-ivory-deep px-1.5 py-0.5 text-xs font-medium">{label}</span>}
+                      </span>
+                    )}
+                    <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="rounded-full bg-rose-100 px-2 py-0.5 font-medium text-plum-700">{REASON[m.reason] ?? m.reason}</span>
+                      {m.public_code && <span className="font-mono text-ink-soft" dir="ltr">{m.public_code}</span>}
+                    </span>
+                    <span className="mt-0.5 block truncate text-xs text-ink-soft">
+                      {new Date(m.created_at).toLocaleTimeString(isAr ? "ar-DZ" : "fr-FR", { hour: "2-digit", minute: "2-digit" })} · {actorName(m.actor)}
+                      {m.note ? ` · ${m.note}` : ""}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       ))}
-    </ul>
+    </div>
   );
 }
 

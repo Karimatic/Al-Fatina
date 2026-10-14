@@ -91,4 +91,30 @@ describe("stock count", () => {
     expect(await stock(db, 1)).toBe(17);
     expect((await app.call("DELETE", `/stock-counts/${id}`)).status).toBe(404);
   });
+
+  it("an approved count can be corrected: the stock moves by the change only, with history", async () => {
+    const { db, app } = setup();
+    const { body } = await app.call<{ id: number }>("POST", "/stock-counts", { scope: "product", productId: 1 });
+    await app.call("PUT", `/stock-counts/${body.id}/lines`, { lines: [{ variantId: 1, countedQty: 17, reason: "missing" }] });
+    await app.call("POST", `/stock-counts/${body.id}/submit`);
+    await app.call("POST", `/stock-counts/${body.id}/approve`, {});
+    expect(await stock(db, 1)).toBe(17);
+
+    // 17 was a typo: there were 19 → +2 today, not +2 on top of the first −3 twice
+    expect(await app.call("POST", `/stock-counts/${body.id}/amend`, { lines: [{ variantId: 1, countedQty: 19 }] })).toMatchObject({ status: 200, body: { corrected: 1 } });
+    expect(await stock(db, 1)).toBe(19);
+    expect(await db.prepare("SELECT counted_qty AS q, applied_delta AS d FROM stock_count_lines WHERE count_id = ? AND variant_id = 1").bind(body.id).first()).toEqual({ q: 19, d: -1 });
+    expect(await db.prepare("SELECT note FROM stock_movements WHERE variant_id = 1 ORDER BY id DESC").first("note")).toMatch(/correction/);
+    // a line not counted before counts from the system figure (5 → 4 = −1)
+    await app.call("POST", `/stock-counts/${body.id}/amend`, { lines: [{ variantId: 3, countedQty: 4, reason: "damaged" }] });
+    expect(await stock(db, 3)).toBe(4);
+    // never below the pieces reserved by orders (variant 2: 10 on hand, 2 reserved)
+    expect(await app.call("POST", `/stock-counts/${body.id}/amend`, { lines: [{ variantId: 2, countedQty: 1 }] })).toMatchObject({ status: 409, body: { error: "stock_below_reserved" } });
+    // only approved counts: the others are edited the usual way
+    const { body: other } = await app.call<{ id: number }>("POST", "/stock-counts", { scope: "product", productId: 1 });
+    expect((await app.call("POST", `/stock-counts/${other.id}/amend`, { lines: [{ variantId: 1, countedQty: 1 }] })).status).toBe(409);
+    // approving permission needed
+    const counter = testApp(stockCountRoutes, db, member(["stock.view", "stock.edit"]));
+    expect((await counter.call("POST", `/stock-counts/${body.id}/amend`, { lines: [{ variantId: 1, countedQty: 1 }] })).status).toBe(403);
+  });
 });
