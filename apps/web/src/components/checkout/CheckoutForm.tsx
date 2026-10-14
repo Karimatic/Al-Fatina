@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormGuard } from "@/lib/formGuard";
 import { CONTACT_TIME_LABEL, CONTACT_TIMES, formatDA, normalizeDzPhone, type CommuneDTO, type ContactTime, type CreatedOrderDTO, type QuoteDTO, type SiteConfigDTO, type WilayaDTO } from "@henine/shared";
 import { inputCls, ProductImage, Spinner } from "@/components/ui/kit";
-import { ApiError, apiGet, apiPost, useApi } from "@/lib/api";
+import { ApiError, apiGet, apiPost, isUnsure, useApi, withRetry } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { useStoreTexts } from "@/lib/storeTexts";
 import { cart, checkoutMemory, pendingCoupon, saveOrder, takePendingCoupon, useSavedOrders } from "@/lib/stores";
@@ -156,7 +156,8 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
     setSubmitting(true);
     try {
       const params = new URLSearchParams(location.search);
-      const order = await guard.send((g) => apiPost<CreatedOrderDTO>("/orders", {
+      // the same checkout key on every try: a retry after a lost answer returns the same order
+      const order = await guard.send((g) => withRetry(() => apiPost<CreatedOrderDTO>("/orders", {
         guard: g,
         idempotencyKey: idem.current,
         cartId: normalizedPhone ? cartId(channel) : undefined,
@@ -180,7 +181,12 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
         utm: params.get("utm_source")
           ? { source: params.get("utm_source") ?? undefined, medium: params.get("utm_medium") ?? undefined, campaign: params.get("utm_campaign") ?? undefined, landing: location.pathname }
           : visitAttribution(),
-      }));
+      })));
+      // (an order sent before tracking links could be given again comes back without one)
+      if (!order.token) {
+        location.href = href("/suivi");
+        return;
+      }
       saveOrder({ code: order.code, token: order.token, total: order.total, createdAt: Date.now() });
       if (coupon) pendingCoupon.set(null); // used: not offered again
       try {
@@ -198,6 +204,9 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
         setFieldErrors(Object.fromEntries(Object.entries(d).map(([k, v]) => [k, L.errors[v] ?? L.errors.generic!])));
       } else if (e.code === "duplicate_order") {
         location.href = href("/suivi");
+      } else if (isUnsure(e)) {
+        // maybe sent, maybe not: say so, and keep the same key so pressing again is safe
+        setFormError(L.errors.unsure!);
       } else {
         setFormError(e.code === "maintenance" ? texts.pause : (L.errors[e.code] ?? L.errors.generic!));
         if (e.code === "stock_problem" || e.code === "coupon_invalid") {
@@ -207,7 +216,9 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
           );
         }
       }
-      idem.current = newIdempotencyKey();
+      // a real answer (refused, changed, closed): the next press is a new checkout; no answer at
+      // all: the same key, so a second press can never make a second order
+      if (!isUnsure(e)) idem.current = newIdempotencyKey();
     } finally {
       setSubmitting(false);
     }

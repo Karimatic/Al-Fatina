@@ -197,6 +197,7 @@ export const fr = {
       rate_limited: "Trop de tentatives, patientez une minute.",
       maintenance: STORE_TEXTS.fr.pause,
       network: "Connexion impossible. Vérifiez votre internet.",
+      unsure: "Nous n'avons pas pu confirmer votre commande. Vous pouvez réessayer sans risque : elle ne sera pas enregistrée deux fois.",
       generic: "Une erreur est survenue, réessayez.",
     } as Record<string, string>,
   },

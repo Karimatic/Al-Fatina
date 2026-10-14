@@ -9,8 +9,8 @@ import { askableSources, classifySource, sourceOfChannel, timingSafeEqual,
   computeTotals,
   HIGH_VALUE_DA,
   imageUrl,
+  base64url,
   newOrderCode,
-  newSecretToken,
   pointsFor,
   sha256Hex,
   stockEffect,
@@ -294,7 +294,38 @@ export interface CreatedOrder {
   status: OrderStatus;
 }
 
+/**
+ * The private tracking link of an order, derived from its checkout key: only her browser knows
+ * the key (a random UUID), so the link stays unguessable, and a retry of the same checkout can be
+ * given the same link again. Only its peppered hash is stored, as before.
+ */
+export async function orderTokenFor(env: Env, idempotencyKey: string): Promise<string> {
+  // (the pepper is a required secret in production; local tests may run without it)
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.TRACK_TOKEN_PEPPER || "track-token"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`track|${idempotencyKey}`)));
+  return base64url(mac.slice(0, 16));
+}
+
+/**
+ * The order this checkout key already created, if any (a retry after a lost answer): its code,
+ * total, status and private link. Orders from before derived links get no link (the store then
+ * opens order tracking instead).
+ */
+export async function findReplay(env: Env, idempotencyKey: string): Promise<(CreatedOrder & { replayed: true }) | null> {
+  const row = await env.DB.prepare("SELECT id, public_code, total, status, track_token_hash FROM orders WHERE idempotency_key = ?")
+    .bind(idempotencyKey)
+    .first<{ id: number; public_code: string; total: number; status: OrderStatus; track_token_hash: string }>();
+  if (!row) return null;
+  const token = await orderTokenFor(env, idempotencyKey);
+  const matches = timingSafeEqual(await sha256Hex(token, env.TRACK_TOKEN_PEPPER), row.track_token_hash);
+  return { id: row.id, code: row.public_code, token: matches ? token : "", total: row.total, status: row.status, replayed: true };
+}
+
 export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrder> {
+  // the same checkout again (an answer lost on the way): her first order, before any check that
+  // her own first order could now fail (last piece, last promo use, limits)
+  const replay = await findReplay(env, input.idempotencyKey);
+  if (replay) return replay;
   const isAdmin = !!input.actor;
   const q = await quote(env, {
     lines: input.lines,
@@ -367,7 +398,7 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
   }
 
   const status: OrderStatus = input.initialStatus ?? "nouvelle";
-  const token = newSecretToken();
+  const token = await orderTokenFor(env, input.idempotencyKey);
   const tokenHash = await sha256Hex(token, env.TRACK_TOKEN_PEPPER);
   const now = Date.now();
   const actor = input.actor ?? "customer";
@@ -484,9 +515,11 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
         });
       }
       if (msg.includes("coupons_usage_ok")) throw new HttpError(422, "coupon_invalid", { reason: "exhausted" });
+      // the same checkout sent twice at the same moment: the other request won, answer with its order
       if (msg.includes("orders.idempotency_key")) {
-        const existing = await env.DB.prepare("SELECT public_code, total, status FROM orders WHERE idempotency_key = ?").bind(input.idempotencyKey).first<{ public_code: string; total: number; status: OrderStatus }>();
-        throw new HttpError(409, "duplicate_order", existing ? { code: existing.public_code } : undefined);
+        const won = await findReplay(env, input.idempotencyKey);
+        if (won) return won;
+        throw new HttpError(409, "duplicate_order");
       }
       if (msg.includes("orders.public_code") && attempt === 0) continue; // astronomically rare collision
       throw err;

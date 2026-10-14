@@ -10,19 +10,48 @@ export class ApiError extends Error {
   }
 }
 
+/** A stalled mobile connection never leaves a spinner turning for minutes. */
+const TIMEOUT_MS = { read: 8_000, send: 15_000 };
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), init?.method && init.method !== "GET" ? TIMEOUT_MS.send : TIMEOUT_MS.read);
   try {
     res = await fetch(`/api${path}`, {
       ...init,
+      signal: ctrl.signal,
       headers: init?.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json", ...init.headers } : init?.headers,
     });
   } catch {
-    throw new ApiError(0, "network");
+    throw new ApiError(0, ctrl.signal.aborted ? "timeout" : "network");
+  } finally {
+    clearTimeout(timer);
   }
   const body = (await res.json().catch(() => null)) as { error?: string; details?: unknown } | null;
   if (!res.ok) throw new ApiError(res.status, body?.error ?? "generic", body?.details);
   return body as T;
+}
+
+/**
+ * No answer from the shop (connection lost, timeout, Cloudflare 502–504): the request may or may
+ * not have arrived. A business answer (4xx, "closed") is a real answer.
+ */
+export const isUnsure = (e: unknown) => e instanceof ApiError && (e.status === 0 || ([502, 503, 504].includes(e.status) && e.code !== "maintenance"));
+
+/**
+ * Tries again (1 s, then 3 s later) when the answer was lost: only for requests that are safe
+ * to send twice (the order carries its checkout key: a second send returns the same order).
+ */
+export async function withRetry<T>(send: () => Promise<T>, waits: readonly number[] = [1_000, 3_000]): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await send();
+    } catch (err) {
+      if (!isUnsure(err) || attempt >= waits.length) throw err;
+      await new Promise((r) => setTimeout(r, waits[attempt]));
+    }
+  }
 }
 
 export const apiGet = <T,>(path: string) => request<T>(path);

@@ -199,6 +199,7 @@ export const ar: Dictionary = {
       rate_limited: "محاولات كثيرة، انتظري دقيقة.",
       maintenance: STORE_TEXTS.ar.pause,
       network: "تعذر الاتصال. تحققي من الإنترنت.",
+      unsure: "لم نتمكن من تأكيد طلبك. الضغط مرة أخرى آمن: لن يُسجَّل الطلب مرتين.",
       generic: "حدث خطأ، حاولي مجددا.",
     },
   },

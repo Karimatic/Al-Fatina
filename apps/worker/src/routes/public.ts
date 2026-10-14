@@ -42,7 +42,7 @@ import { activeFlash, featuredDrop, getCollection, getProductDetail, imageRef, l
 import { cached } from "../lib/edge-cache";
 import { body, clientIp, HttpError, ipHash, rateLimit, uaShort, validate } from "../lib/http";
 import { designOut, putImage } from "../lib/media";
-import { analyticsStmts, applyStatusChange, createOrder, quote } from "../lib/orders";
+import { analyticsStmts, applyStatusChange, createOrder, findReplay, quote } from "../lib/orders";
 import { detectDuplicates } from "../lib/duplicates";
 import { bumpCatalogStmt, getSetting, getSettings } from "../lib/settings";
 import { notifyNewOrder, sendTelegramText, syncOrderMessage } from "../lib/telegram";
@@ -218,8 +218,12 @@ publicRoutes.get("/form-ticket", async (c) => {
 });
 
 publicRoutes.post("/orders", async (c) => {
-  await rateLimit(c.env.RL_WRITE, `order:${clientIp(c)}`);
   const input = await body(c, createOrderInput);
+  // a retry of a checkout that already went through (answer lost on a weak network): her order,
+  // before the rate limit, the bot check or "closed" could refuse what was already accepted
+  const replay = await findReplay(c.env, input.idempotencyKey);
+  if (replay) return c.json({ code: replay.code, token: replay.token, total: replay.total, status: replay.status } satisfies CreatedOrderDTO, 200);
+  await rateLimit(c.env.RL_WRITE, `order:${clientIp(c)}`);
   await checkFormGuard(c, input.guard);
   const maintenance = await getSetting(c.env, "maintenance");
   if (maintenance.active) throw new HttpError(503, "maintenance");
@@ -231,6 +235,8 @@ publicRoutes.post("/orders", async (c) => {
     ipHash: await ipHash(c),
     uaShort: uaShort(c),
   });
+  // sent twice at the same moment: the other request created it and notified the team
+  if ("replayed" in order) return c.json({ code: order.code, token: order.token, total: order.total, status: order.status } satisfies CreatedOrderDTO, 200);
   // a possible duplicate (same customer, same items, minutes apart…) is flagged for the team
   c.executionCtx.waitUntil(detectDuplicates(c.env, order.id).catch(() => undefined));
   // open admin tabs hear about it right away (sound, notification, counter)
