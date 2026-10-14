@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Env } from "../../env";
 import { createOrder } from "../../lib/orders";
-import { addOrder, member, seedShop, testApp, testDb, type TestDb } from "../../test/db";
+import { addOrder, seedShop, testApp, testDb, type TestDb } from "../../test/db";
 import { orderRoutes } from "./orders";
 import { sourceRoutes } from "./sources";
 
@@ -52,14 +52,11 @@ describe("where customers come from (Statistiques → Sources)", () => {
     expect((await app.call("PUT", "/sources/settings", { ...SETTINGS, custom: [{ key: "a b", name: "x", emoji: "" }] })).status).toBe(422);
   });
 
-  it("the team corrects an order's source; the orders list filters by source", async () => {
+  it("an order's source is fixed (nobody changes it); the orders list filters by source", async () => {
     const db = shop();
-    const id = addOrder(db, { status: "nouvelle", source: "direct" });
+    const id = addOrder(db, { status: "nouvelle", source: "instagram" });
     addOrder(db, { status: "nouvelle", source: "facebook" });
-    const app = testApp(sourceRoutes, db);
-    expect((await app.call("PATCH", `/orders/${id}/source`, { source: "instagram" })).status).toBe(200);
-    expect((await app.call("PATCH", `/orders/${id}/source`, { source: "nimporte" })).status).toBe(422);
-    expect((await app.as(member(["orders.view"])).call("PATCH", `/orders/${id}/source`, { source: "facebook" })).status).toBe(403);
+    expect((await testApp(sourceRoutes, db).raw("PATCH", `/orders/${id}/source`)).status).toBe(404);
     const list = await testApp(orderRoutes, db).call<{ rows: { id: number; source: string }[] }>("GET", "/orders?status=all&source=instagram");
     expect(list.body.rows.map((o) => o.id)).toEqual([id]);
   });

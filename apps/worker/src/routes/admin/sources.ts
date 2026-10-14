@@ -5,10 +5,10 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { askableSources, cleanText, CUSTOM_SOURCE_KEY, ORDER_SOURCES, type OrderSource } from "@henine/shared";
+import { cleanText, CUSTOM_SOURCE_KEY, ORDER_SOURCES, type OrderSource } from "@henine/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
-import { body, HttpError, intParam } from "../../lib/http";
+import { body, HttpError } from "../../lib/http";
 import { CANCELLED_SQL } from "../../lib/orders";
 import { bumpCatalogStmt, getSettings, setSettingStmt } from "../../lib/settings";
 import { actorOf, requirePermission } from "../../middleware/access";
@@ -93,20 +93,4 @@ sourceRoutes.put("/sources/settings", requirePermission("marketing.edit"), async
     auditStmt(c.env, actorOf(c.get("member")), "update", "settings", "sources", next),
   ]);
   return c.json(next);
-});
-
-/** The team corrects where an order came from (she said so on the phone). */
-sourceRoutes.patch("/orders/:id/source", requirePermission("orders.edit"), async (c) => {
-  const id = intParam(c, "id");
-  const { source } = await body(c, z.object({ source: z.string().trim().max(30) }));
-  const { sources } = await getSettings(c.env, ["sources"]);
-  const allowed = new Set<string>([...ORDER_SOURCES, ...askableSources(sources), ...sources.custom.map((s) => s.key)]);
-  if (!allowed.has(source)) throw new HttpError(422, "unknown_source");
-  const before = await c.env.DB.prepare("SELECT source FROM orders WHERE id = ?").bind(id).first<{ source: string | null }>();
-  if (!before) throw new HttpError(404, "not_found");
-  await c.env.DB.batch([
-    c.env.DB.prepare("UPDATE orders SET source = ? WHERE id = ?").bind(source, id),
-    auditStmt(c.env, actorOf(c.get("member")), "update", "order", id, { source: { from: before.source, to: source } }),
-  ]);
-  return c.json({ ok: true, source });
 });

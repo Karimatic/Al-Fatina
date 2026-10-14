@@ -423,40 +423,13 @@ const ACTION: Partial<Record<OrderStatus, { label: string; variant: "primary" | 
 };
 
 
-/**
- * Where the customer came from (her link, the site, Instagram…). The team can correct it when
- * she says so on the phone; Statistiques → Sources counts it.
- */
-function OrderSourceLine({ orderId, source, editable, onChanged }: { orderId: number; source: string | null; editable: boolean; onChanged: () => void }) {
-  const toast = useToast();
+/** Where the customer came from (her link, the site, Instagram…): recorded with the order, fixed. */
+function OrderSourceLine({ source }: { source: string | null }) {
   const settings = useSourceSettings();
-  const save = useMutation({
-    mutationFn: (to: string) => patch(`/orders/${orderId}/source`, { source: to }),
-    onSuccess: () => {
-      toast(tr("Source mise à jour"));
-      onChanged();
-    },
-    onError: (e) => toast(errorMessage(e), "error"),
-  });
-  const current = source || "direct";
   return (
     <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
       <span className="text-ink-soft">{tr("📍 Venue de :")}</span>
-      {editable ? (
-        <select
-          className="h-8 rounded-lg border border-line bg-surface px-2 text-sm font-medium"
-          value={current}
-          disabled={save.isPending}
-          onChange={(e) => save.mutate(e.target.value)}
-          aria-label={tr("Source de la commande")}
-        >
-          {[...new Set([current, ...pickableSources(settings.data)])].map((k) => (
-            <option key={k} value={k}>{sourceText(k, settings.data)}</option>
-          ))}
-        </select>
-      ) : (
-        <b>{sourceText(current, settings.data)}</b>
-      )}
+      <b>{sourceText(source || "direct", settings.data)}</b>
     </div>
   );
 }
@@ -581,7 +554,7 @@ function OrderSheet({ id, onClose }: { id: number | null; onClose: () => void })
                 <Link to="/facture" search={{ id: String(o.id) }} className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg border border-line bg-surface px-3 text-sm font-semibold">{tr("🧾 Facture PDF")}</Link>
               </div>
             </div>
-            <OrderSourceLine orderId={o.id} source={(o.source as string | null) ?? null} editable={can("orders.edit")} onChanged={refresh} />
+            <OrderSourceLine source={(o.source as string | null) ?? null} />
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
               <ContactTimeBadge value={o.contact_time} />
               <span className="text-ink-soft">{d.lastContactAt ? tr("Dernier contact : {0}", { 0: ago(d.lastContactAt) }) : tr("Pas encore contactée")}</span>

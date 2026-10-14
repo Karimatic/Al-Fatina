@@ -121,9 +121,11 @@ function SidebarNav({ groups, collapsed, onNavigate }: { groups: NavGroup[]; col
       // pages opened from inside this tab keep it highlighted
       className={`${also.some((a) => path === a || path.startsWith(`${a}/`)) ? "active " : ""}group flex h-9 items-center gap-2.5 rounded-lg text-sm text-ink hover:bg-ivory-deep [&.active]:bg-plum-600/10 [&.active]:text-plum-600 ${collapsed ? "justify-center px-0" : "px-2.5"}`}
     >
-      <span className="relative">
+      {/* a block of the icon's exact size, centred on the label (an inline icon sat on the text
+          baseline, a few pixels above the words) */}
+      <span className="relative grid size-[18px] shrink-0 place-items-center">
         {/* icon and text change together, at once: no fade of one before the other */}
-        <Icon className="size-[18px] shrink-0 text-ink-soft group-hover:text-plum-600 group-[.active]:text-plum-600" strokeWidth={1.8} />
+        <Icon className="block size-[18px] text-ink-soft group-hover:text-plum-600 group-[.active]:text-plum-600" strokeWidth={1.8} />
         {collapsed && to === "/commandes" && <NewBadge className="absolute -end-2.5 -top-2" />}
       </span>
       {!collapsed && <span className="truncate">{label}</span>}
