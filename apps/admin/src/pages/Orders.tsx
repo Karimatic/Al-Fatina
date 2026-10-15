@@ -74,6 +74,7 @@ export const ATTENTION_LABEL: Record<string, string> = {
   stale_confirmed: tr("Confirmées depuis plus de 24 h"),
   stale_preparing: tr("En préparation depuis plus de 48 h"),
   stale_shipped: tr("Expédiées depuis plus de 7 jours"),
+  stale_unconfirmed: tr("Site : non confirmées depuis plus de 48 h"),
   returns: tr("Retours à réceptionner"),
   duplicates: tr("Doublons possibles à vérifier"),
 };
@@ -100,6 +101,48 @@ const TAB_STATUSES: Record<string, string[]> = {
   retours: ["retour", "retour_recu"],
   all: [...ORDER_STATUSES],
 };
+
+/**
+ * Site orders nobody could confirm in 48 h hold stock — fake orders do it on purpose (there is
+ * no captcha). One tap cancels them as unreachable and gives the pieces back; never automatic.
+ */
+function StaleHolds() {
+  const qc = useQueryClient();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const q = useQuery({ queryKey: ["orders", "stale-holds"], queryFn: () => api<{ hours: number; orders: number; pieces: number; ids: number[] }>("/orders/stale-holds"), refetchInterval: 300_000 });
+  const free = useMutation({
+    mutationFn: (ids: number[]) => post<{ done: string[]; failed: { id: number; error: string }[] }>("/orders/bulk-status", { ids, to: "annulee", reason: "unreachable" }),
+    onSuccess: (r) => {
+      toast(r.failed.length ? tr("{0} libérées, {1} non modifiables", { 0: r.done.length, 1: r.failed.length }) : tr("{0} commande(s) annulée(s), stock libéré ✓", { 0: r.done.length }), r.failed.length ? "error" : undefined);
+      void qc.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (e) => toast(errorMessage(e), "error"),
+  });
+  const d = q.data;
+  if (!d?.orders) return null;
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+      <span className="min-w-0 flex-1">
+        🧊 {tr("{0} commande(s) du site non confirmée(s) depuis {1} h retiennent {2} pièce(s).", { 0: d.orders, 1: d.hours, 2: d.pieces })}
+      </span>
+      <button type="button" onClick={() => void navigate({ to: "/commandes", search: (s: Record<string, unknown>) => ({ ...s, attention: "stale_unconfirmed" }) })} className="rounded-full bg-white/70 px-3 py-1.5 font-semibold dark:bg-white/10">
+        {tr("Voir")}
+      </button>
+      <Button
+        size="sm"
+        variant="danger"
+        loading={free.isPending}
+        onClick={() =>
+          confirm(tr("Annuler ces {0} commande(s) (motif : injoignable) et remettre leurs pièces en vente ? Faites-le seulement si l'équipe a déjà essayé de les appeler.", { 0: d.ids.length })) &&
+          free.mutate(d.ids)
+        }
+      >
+        {tr("Libérer le stock")}
+      </Button>
+    </div>
+  );
+}
 
 export function OrdersPage() {
   const search = useSearch({ strict: false }) as { status?: string; o?: number; attention?: string; q?: string | number; source?: string };
@@ -180,6 +223,7 @@ export function OrdersPage() {
         }
       />
       <SubNav of="orders" />
+      <StaleHolds />
       {attention ? (
         <div className="mb-3 flex items-center justify-between gap-3 rounded-xl bg-plum-600 px-4 py-3 text-sm text-white">
           <span>{tr("Filtre :")} <b>{tr(ATTENTION_LABEL[attention])}</b></span>

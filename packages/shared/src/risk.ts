@@ -27,6 +27,8 @@ export const RISK_WEIGHTS = {
   repeat_24h: 15,
   /** 3+ other phone numbers ordered from the same connection within 2 h (weak: mobile networks share IPs) */
   ip_burst: 15,
+  /** 12+ unconfirmed orders from the same connection today (blocked only from 40: shared mobile IPs) */
+  ip_pending: 20,
   /** commune typed by hand instead of picked from the list */
   commune_text: 5,
   /** unusually large basket for COD (see HIGH_VALUE_DA) */
@@ -41,7 +43,7 @@ export const RISK_LEVELS = { medium: 20, high: 50 } as const;
 /** Total (DA) above which an order gets the high_value flag. */
 export const HIGH_VALUE_DA = 20_000;
 
-export const RISK_FLAGS = ["recent_cancel", "repeat_24h", "ip_burst", "commune_text", "high_value"] as const;
+export const RISK_FLAGS = ["recent_cancel", "repeat_24h", "ip_burst", "ip_pending", "commune_text", "high_value"] as const;
 export type RiskFlag = (typeof RISK_FLAGS)[number];
 export type RiskLevel = "low" | "medium" | "high";
 export type RiskReasonCode = keyof typeof RISK_WEIGHTS;
@@ -116,6 +118,7 @@ export const RISK_REASON_LABEL: Record<RiskReasonCode, string> = {
   recent_cancel: "annulation dans les 7 derniers jours",
   repeat_24h: "autre commande dans les 24 h",
   ip_burst: "plusieurs numéros depuis la même connexion",
+  ip_pending: "beaucoup de commandes non confirmées depuis la même connexion aujourd'hui",
   commune_text: "commune saisie à la main",
   high_value: "panier inhabituellement élevé",
 };

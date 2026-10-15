@@ -3,11 +3,13 @@ import { expirePoints } from "./lib/loyalty";
 import type { Env } from "./env";
 import { recordError } from "./lib/audit";
 import { scanAlerts } from "./lib/alerts";
+import { quotaCheck } from "./lib/quota";
 import { contactDigest } from "./lib/contact-notice";
 import { algiersDate, algiersDayStart } from "./lib/orders";
 import { dailyReport as buildDailyReport } from "./lib/reports";
 import { processOutbox, sendTelegramText } from "./lib/telegram";
 import { sendCampaignBatch, sendRestockPushes } from "./lib/webpush";
+import { STALE_HOLD_HOURS, staleHoldSql } from "./routes/admin/orders";
 
 /**
  * Cron dispatcher (3 triggers on the free plan, see wrangler.jsonc).
@@ -30,6 +32,8 @@ export async function scheduled(controller: ScheduledController, env: Env, ctx: 
       break;
     case "*/30 * * * *":
       run("callbacks", callbackReminder(env));
+      // the database's daily free quota: Telegram at 50 % and 80 % (needs CF_ANALYTICS_TOKEN)
+      run("quota", quotaCheck(env));
       break;
     case "0 20 * * *":
       run("daily_report", dailyReport(env));
@@ -52,6 +56,10 @@ async function callbackReminder(env: Env) {
 
 async function dailyReport(env: Env) {
   const r = await buildDailyReport(env, algiersDayStart());
+  // site orders nobody could confirm in 48 h hold stock (fake orders do it on purpose): say so daily
+  const held = await env.DB.prepare(
+    `SELECT COUNT(*) AS orders, COALESCE(SUM((SELECT SUM(oi.qty) FROM order_items oi WHERE oi.order_id = o.id)), 0) AS pieces FROM orders o WHERE ${staleHoldSql(Date.now())}`,
+  ).first<{ orders: number; pieces: number }>();
   const diff = r.previous.orders ? Math.round(((r.orders - r.previous.orders) / r.previous.orders) * 100) : null;
   await sendTelegramText(
     env,
@@ -64,6 +72,9 @@ async function dailyReport(env: Env) {
       ...(r.topProduct ? [`🏆 Produit du jour : ${r.topProduct.name} (${r.topProduct.units})`] : []),
       ...(r.topWilaya ? [`📍 Wilaya du jour : ${r.topWilaya.name} (${r.topWilaya.orders})`] : []),
       `⏳ À confirmer : ${r.pending}${r.late ? ` · 🔴 en retard : ${r.late}` : ""}`,
+      ...(held?.orders
+        ? [`🧊 ${held.orders} commande(s) du site non confirmée(s) depuis ${STALE_HOLD_HOURS} h retiennent ${held.pieces} pièce(s) : Commandes → « Libérer le stock »`]
+        : []),
     ].join("\n"),
   );
 }

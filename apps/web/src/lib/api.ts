@@ -65,7 +65,8 @@ export async function withRetry<T>(send: () => Promise<T>, waits: readonly numbe
   }
 }
 
-export const apiGet = <T,>(path: string) => request<T>(path);
+/** Reading is safe to repeat: no answer (dropped mobile connection) → once more after 1.5 s (audit REL-1). */
+export const apiGet = <T,>(path: string) => withRetry(() => request<T>(path), [1_500]);
 export const apiPost = <T,>(path: string, data: unknown) => request<T>(path, { method: "POST", body: JSON.stringify(data) });
 /** multipart form (files): the browser sets the Content-Type with its boundary */
 /** one key per checkout: a double tap or a retry never creates two orders */

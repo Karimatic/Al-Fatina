@@ -62,6 +62,30 @@ describe("erasing a customer's personal data", () => {
     expect(s.prepare("SELECT old_value, new_value FROM order_changes WHERE field = 'discount'").get()).toEqual({ old_value: "0", new_value: "300" });
   });
 
+  // audit round 3 (R3-2): storage failing must not leave photos nobody can find any more
+  it("the parcel photos go first: if storage fails, nothing is wiped and it can be tried again", async () => {
+    const db = testDb();
+    seedShop(db);
+    const mine = addOrder(db, { customerId: 1 });
+    db.sqlite.exec(`UPDATE orders SET pack_photo = 'private/packing/${mine}-abc.jpg' WHERE id = ${mine}`);
+    let fail = true;
+    const deleted: string[] = [];
+    const MEDIA = {
+      delete: async (k: string | string[]) => {
+        if (fail) throw new Error("R2 unavailable");
+        deleted.push(...[k].flat());
+      },
+    };
+    const app = testApp(customerRoutes, db, undefined, { MEDIA } as never);
+    await expect(app.call("DELETE", "/customers/1?erase=1")).rejects.toThrow(/R2 unavailable/);
+    expect(db.sqlite.prepare("SELECT name, pack_photo FROM orders WHERE id = ?").get(mine)).toEqual({ name: "Amina", pack_photo: `private/packing/${mine}-abc.jpg` });
+
+    fail = false; // tried again
+    expect((await app.call("DELETE", "/customers/1?erase=1")).status).toBe(200);
+    expect(deleted).toEqual([`private/packing/${mine}-abc.jpg`]);
+    expect(db.sqlite.prepare("SELECT name, pack_photo FROM orders WHERE id = ?").get(mine)).toEqual({ name: "Cliente effacée", pack_photo: null });
+  });
+
   it("a plain delete still keeps her orders as they were", async () => {
     const db = testDb();
     seedShop(db);

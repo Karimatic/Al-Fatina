@@ -36,6 +36,10 @@ export interface Env {
   SETTINGS_KEY: string;
 
   /** "console" (dev: codes shown on screen/logs) | "resend" */
+  /** optional: the daily database-quota warning (lib/quota.ts); token with Account Analytics: Read only */
+  CF_ACCOUNT_ID?: string;
+  CF_ANALYTICS_TOKEN?: string;
+
   MAIL_PROVIDER?: string;
   MAIL_API_KEY?: string;
   MAIL_FROM?: string;

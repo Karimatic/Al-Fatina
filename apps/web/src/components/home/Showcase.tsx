@@ -105,16 +105,27 @@ export function Stories({ categories, products }: { categories: CategoryDTO[] | 
       .map((c) => ({ key: c.slug, label: ar ? c.nameAr : c.nameFr, href: href(`/c/${c.slug}`), category: c.slug, art: artKey(c.slug), count: c.productCount })),
     ...(onSale ? [{ key: "promo", label: S.promo, href: href("/promotions"), art: "promo", count: onSale }] : []),
   ];
-  // while the categories load: the row's own height (it appearing pushed the products down)
+  // while the categories load: the same heading and card boxes as the real row, empty (a
+  // skeleton of another height moved everything below it when the row arrived)
   if (!categories)
     return (
       <div className="mx-auto max-w-6xl px-4" aria-hidden="true">
-        <div className="skeleton mb-3 h-8 w-40 rounded-lg" />
-        <div className="flex gap-3 overflow-hidden pb-2 md:grid md:grid-cols-6">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="skeleton aspect-[132/203] w-[8.25rem] shrink-0 rounded-[1.4rem] md:w-auto" />
-          ))}
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <p className="heading-display text-[1.45rem] leading-tight md:text-3xl">{t.categories.title}</p>
         </div>
+        <ul className="-mx-4 flex gap-3 overflow-hidden px-4 pb-2 md:mx-0 md:grid md:grid-cols-6 md:px-0">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <li key={i} className="w-[8.25rem] shrink-0 md:w-auto">
+              <span className="flex flex-col overflow-hidden rounded-[1.4rem] border border-line bg-surface">
+                <span className="skeleton block aspect-square rounded-none" />
+                <span className="flex flex-col gap-1 px-2.5 pb-2.5 pt-2">
+                  <span className="block min-h-[2.25rem]" />
+                  <span className="block text-[11px]">&nbsp;</span>
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   if (!stories.length) return null;
@@ -141,7 +152,8 @@ export function Stories({ categories, products }: { categories: CategoryDTO[] | 
                 )}
               </span>
               <span className="flex flex-1 flex-col justify-between gap-1 px-2.5 pb-2.5 pt-2">
-                <span className="line-clamp-2 text-[13px] font-semibold leading-snug">{s.label}</span>
+                {/* two lines kept for every name: all cards (and the loading ones) the same height */}
+                <span className="line-clamp-2 min-h-[2.25rem] text-[13px] font-semibold leading-snug">{s.label}</span>
                 {s.count != null && (
                   <span className="text-[11px] text-ink-soft">
                     {t.categories.products(s.count)}
@@ -169,7 +181,7 @@ export function PromiseBand() {
             <li key={item.title} className={i ? "border-s border-white/10" : ""}>
               <a
                 href={href(item.icon === "truck" ? "/p/livraison-retours" : item.icon === "swap" ? "/p/livraison-retours" : "/p/cgv")}
-                className="flex h-full flex-col items-center gap-1.5 px-2 py-4 text-center transition hover:bg-white/5 md:flex-row md:justify-center md:gap-3 md:py-5"
+                className="flex h-full flex-col items-center gap-1 px-2 py-3 text-center transition hover:bg-white/5 md:flex-row md:justify-center md:gap-3 md:py-5"
               >
                 <Icon size={22} className="shrink-0 text-[#e9c98f]" />
                 <span className="text-[11.5px] font-semibold leading-tight md:text-sm">{item.title}</span>

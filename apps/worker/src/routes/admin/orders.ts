@@ -39,6 +39,10 @@ const riskOf = (r: RiskCounters) =>
  * "Needs attention" filters, shared by the orders list and the dashboard command center.
  * Each is a condition on `orders o` (+ `customers c`); `now` is generated server-side.
  */
+/** Hours after which an unconfirmed site order is offered for « free the stock » (audit SEC-1, no captcha). */
+export const STALE_HOLD_HOURS = 48;
+export const staleHoldSql = (now: number) => `o.channel IN ('web','express') AND o.status IN ('nouvelle','injoignable') AND o.created_at < ${now - STALE_HOLD_HOURS * 3600_000}`;
+
 export function attentionSql(now: number, sla: SlaSettings = DEFAULT_SLA): Record<string, string> {
   const h = 3600_000;
   return {
@@ -50,6 +54,8 @@ export function attentionSql(now: number, sla: SlaSettings = DEFAULT_SLA): Recor
     stale_confirmed: `o.status = 'confirmee' AND COALESCE(o.confirmed_at, o.updated_at) < ${now - 24 * h}`,
     stale_preparing: `o.status = 'en_preparation' AND o.updated_at < ${now - 48 * h}`,
     stale_shipped: `o.status IN ('expediee','en_livraison') AND COALESCE(o.shipped_at, o.updated_at) < ${now - 7 * 24 * h}`,
+    // site orders nobody could confirm in 48 h: they hold stock (fake orders do this on purpose)
+    stale_unconfirmed: staleHoldSql(now),
     returns: "o.status = 'retour'",
     // flagged as a possible duplicate, not decided yet
     duplicates: OPEN_DUPLICATE_SQL("o"),
@@ -135,6 +141,19 @@ orderRoutes.get("/orders", requirePermission("orders.view"), async (c) => {
     }),
     counts: Object.fromEntries((counts!.results as { status: string; n: number }[]).map((r) => [r.status, r.n])),
   });
+});
+
+/**
+ * Site orders unconfirmed for 48 h and the pieces they hold. Freeing them is a manual choice
+ * (« Libérer le stock » → cancelled as unreachable, through the bulk change below): no customer
+ * is ever cancelled by surprise, and a flood of fake orders can't keep the stock for long.
+ */
+orderRoutes.get("/orders/stale-holds", requirePermission("orders.view"), async (c) => {
+  const { results } = await c.env.DB.prepare(
+    `SELECT o.id, (SELECT COALESCE(SUM(oi.qty), 0) FROM order_items oi WHERE oi.order_id = o.id) AS pieces
+       FROM orders o WHERE ${staleHoldSql(Date.now())} ORDER BY o.created_at LIMIT 200`,
+  ).all<{ id: number; pieces: number }>();
+  return c.json({ hours: STALE_HOLD_HOURS, orders: results.length, pieces: results.reduce((n, r) => n + r.pieces, 0), ids: results.slice(0, 50).map((r) => r.id) });
 });
 
 /**

@@ -56,6 +56,21 @@ describe("assistant AI voice", () => {
     expect(await withAiVoice(env, input("prix ?"), ruled, "ip")).toBe(ruled);
   });
 
+  // audit R3-4: promises without a number (free delivery, refund, discount) must come from the facts too
+  it("keeps the rules' answer when the model promises something the shop doesn't offer", async () => {
+    for (const reply of ["La livraison est gratuite 🌸", "التوصيل مجاني لكل الولايات", "On vous rembourse sans problème", "Profitez d'une remise sur ce pyjama"]) {
+      const { env } = envWith(JSON.stringify({ reply, showProducts: true }));
+      expect(await withAiVoice(env, input("livraison ?"), ruled, "ip"), reply).toBe(ruled);
+    }
+  });
+
+  it("lets the promise through when the shop's facts make it", async () => {
+    // a product on sale: « remise » is true
+    const onSale = { ...ruled, products: [{ ...product(3500), compareAtPrice: 4500 }] };
+    const { env } = envWith('{"reply":"Il est en promo : 3 500 DA au lieu de 4 500 DA","showProducts":true}');
+    expect((await withAiVoice(env, input("promo ?"), onSale, "ip")).ai).toBe(true);
+  });
+
   it("falls back to the rules on an error or without the binding", async () => {
     expect(await withAiVoice(envWith(new Error("4006: daily free allocation used")).env, input("pyjama"), ruled, "ip")).toBe(ruled);
     expect(await withAiVoice({ DB: testDb() } as unknown as Env, input("pyjama"), ruled, "ip")).toBe(ruled);

@@ -177,6 +177,10 @@ customerRoutes.delete("/customers/:id", requireOwner, async (c) => {
     ? ((await c.env.DB.prepare("SELECT id, pack_photo FROM orders WHERE customer_id = ?1 OR phone = ?2").bind(id, cust.phone).all<{ id: number; pack_photo: string | null }>())
         .results)
     : [];
+  // the parcel photos (her label, her address) leave the storage first: if that fails nothing
+  // is wiped yet and the erase can simply be done again (deleting twice is harmless)
+  const photos = mine.map((o) => o.pack_photo).filter((k): k is string => !!k);
+  if (photos.length) await c.env.MEDIA.delete(photos);
   const ids = JSON.stringify(mine.map((o) => o.id));
   const inMine = "IN (SELECT value FROM json_each(?))";
   const wipe = erase
@@ -210,8 +214,5 @@ customerRoutes.delete("/customers/:id", requireOwner, async (c) => {
     c.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(id),
     auditStmt(c.env, actorOf(c.get("member")), erase ? "erase" : "delete", "customer", id, erase ? { erased: true } : { name: cust.name, phone: cust.phone }),
   ]);
-  // the parcel photos (her label, her address) leave the storage too
-  const photos = mine.map((o) => o.pack_photo).filter((k): k is string => !!k);
-  if (photos.length) await c.env.MEDIA.delete(photos);
   return c.json({ ok: true });
 });

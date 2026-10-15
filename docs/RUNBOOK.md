@@ -88,7 +88,11 @@ The Worker refuses to start (503) when one of these four is missing.
 2. `curl -s https://…/api/health` → `{"ok":true,…}` means the Worker and D1 answer.
 3. Cloudflare dashboard → Workers & Pages → henine-boutique → Logs (every request is kept 3 days).
 4. **D1 daily limit** (5 M rows read, 100 k written on the free plan): every query fails until
-   01:00 Algiers. D1 → henine-boutique-db → Metrics shows it. Visit counters and error reports
+   01:00 Algiers. D1 → henine-boutique-db → Metrics shows it. Warning on Telegram at 50 % and
+   80 % (checked every 30 min): create an API token with only *Account → Account Analytics →
+   Read*, then `npx wrangler secret put CF_ANALYTICS_TOKEN` and `npx wrangler secret put
+   CF_ACCOUNT_ID` (the id shown by `npx wrangler whoami`). A wrong token shows up in Admin →
+   Erreurs as « cron quota: … ». Visit counters and error reports
    already stop writing past a shop-wide budget (`RL_BEACON`); if orders still hit the limit, the
    Workers Paid plan ($5/month) removes it.
 5. A bad deploy → §2.

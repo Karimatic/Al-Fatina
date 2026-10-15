@@ -53,6 +53,38 @@ export function amountsIn(text: string): string[] {
   return [...latin.matchAll(/\d{1,3}(?:[\s  .,]\d{3})+|\d+/g)].map((m) => m[0].replace(/\D/g, "")).filter((n) => n.length >= 3);
 }
 
+/**
+ * Promises that carry no number (audit R3-4): free delivery, money back, a discount, returns.
+ * French, Arabic and Darija words; the model may only make one the shop's facts make.
+ */
+const PROMISES = {
+  free: /gratuit|offert|مجان|بلاش|فابور|sans frais/i,
+  refund: /rembours|استرجاع (?:المال|الدراهم|الفلوس)|استرداد|نرجعو(?:لك|ك) (?:الدراهم|دراهمك|الفلوس)/i,
+  discount: /remise|réduction|promo|soldes?|تخفيض|خصم|ريميز|بروموسيون/i,
+  returns: /retour|échange|إرجاع|استبدال|ترجيع|نبدل|تبديل/i,
+} as const;
+export type Promise_ = keyof typeof PROMISES;
+
+export function promisesIn(text: string): Promise_[] {
+  return (Object.keys(PROMISES) as Promise_[]).filter((k) => PROMISES[k].test(text));
+}
+
+/** Every text value of the facts (not their key names: "freeShippingFromDA" is not a promise). */
+function factText(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (Array.isArray(v)) return v.map(factText).join(" ");
+  if (v && typeof v === "object") return Object.values(v).map(factText).join(" ");
+  return "";
+}
+
+/** The promises the shop's facts allow. */
+function allowedPromises(facts: { shop: Awaited<ReturnType<typeof shopFacts>>; found: ReturnType<typeof ruleFacts> }): Set<Promise_> {
+  const allowed = new Set(promisesIn(factText(facts)));
+  if (facts.shop.delivery.freeShippingFromDA) allowed.add("free");
+  if (facts.found.products.some((p) => p.usualPriceDA)) allowed.add("discount");
+  return allowed;
+}
+
 /** The model's text as {reply, showProducts}, tolerant of fences or plain text. */
 export function parseModelReply(raw: string): { reply: string; showProducts: boolean } | null {
   const text = raw.trim().replace(/^```(?:json)?\s*|\s*```$/g, "");
@@ -155,6 +187,9 @@ async function aiVoice(env: Env, model: string, input: Input, ruled: AssistantRe
     // every amount it writes must be one the facts gave (prices, fees, codes…)
     const known = new Set(amountsIn(JSON.stringify(facts)));
     if (amountsIn(parsed.reply).some((n) => !known.has(n))) return ruled;
+    // and every promise (free delivery, refund, discount, returns) one the facts make
+    const allowed = allowedPromises(facts);
+    if (promisesIn(parsed.reply).some((p) => !allowed.has(p))) return ruled;
     // products only when she is looking for a piece: the model's judgement, unless the rules read precise wishes
     const precise = ruled.intent !== "search" || (ruled.understood.length > 0 && !ruled.relaxed);
     return { ...ruled, reply: parsed.reply, products: parsed.showProducts || precise ? ruled.products : [], ai: true };

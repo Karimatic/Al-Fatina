@@ -250,7 +250,13 @@ export async function quote(env: Env, req: QuoteRequest): Promise<QuoteResult> {
 
 /** Store orders (not the team's): pieces per order, unconfirmed orders per connection per day. */
 export const MAX_WEB_PIECES = 10;
-const MAX_PENDING_PER_IP_PER_DAY = 12;
+/**
+ * Unconfirmed store orders from one connection today. Algerian mobile operators put many
+ * customers behind one public address (audit R3-3): from SOFT the order still goes through but is
+ * flagged for the team (and logged, to see if real customers reach it); only HARD refuses — a
+ * script piling up orders to hold the stock, not a busy mobile gateway.
+ */
+const PENDING_PER_IP = { soft: 12, hard: 40 } as const;
 
 export interface NewOrder {
   idempotencyKey: string;
@@ -376,9 +382,9 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
         delivered_count: number | null; returned_count: number | null; cancelled_count: number | null; fake_count: number | null; is_blacklisted: number | null;
       }>();
     if ((r?.last_hour ?? 0) >= checkout.max_orders_per_phone_per_hour) throw new HttpError(429, "too_many_orders");
-    // unconfirmed orders hold stock: one connection can't pile them up (generous: mobile
-    // operators put many customers behind one address)
-    if ((r?.ip_pending ?? 0) >= MAX_PENDING_PER_IP_PER_DAY) throw new HttpError(429, "too_many_orders");
+    // unconfirmed orders hold stock: one connection can't pile them up (see PENDING_PER_IP)
+    const ipPending = r?.ip_pending ?? 0;
+    if (ipPending >= PENDING_PER_IP.hard) throw new HttpError(429, "too_many_orders");
     // nor can one order hold a whole shelf: bigger orders go through the team
     if (q.lines.reduce((n, l) => n + l.qty, 0) > MAX_WEB_PIECES) throw new HttpError(422, "too_many_pieces");
     riskFlags = [];
@@ -386,6 +392,10 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
     if (r?.last_day) riskFlags.push("repeat_24h");
     // mobile operators share public IPs (CGNAT): only many different numbers in a short window count
     if (input.ipHash && (r?.ip_phones ?? 0) >= 3) riskFlags.push("ip_burst");
+    if (ipPending >= PENDING_PER_IP.soft) {
+      riskFlags.push("ip_pending");
+      console.warn("ip_pending_soft", ipPending); // Workers logs: how often real traffic gets here
+    }
     if (input.communeId == null && input.communeText) riskFlags.push("commune_text");
     if (total >= HIGH_VALUE_DA) riskFlags.push("high_value");
     risk = assessRisk(

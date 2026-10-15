@@ -95,3 +95,29 @@ describe("loyalty points, two orders at once", () => {
     expect(await count(db, "SELECT COUNT(*) AS n FROM orders WHERE points_used > 0")).toBe(1);
   });
 });
+
+/**
+ * Shared mobile addresses (audit R3-3): many unconfirmed orders from one connection are flagged
+ * for the team from 12, refused only from 40 (a script, not a busy operator gateway).
+ */
+describe("unconfirmed orders from one connection", () => {
+  const pile = (db: TestDb, n: number) => {
+    const now = Date.now();
+    for (let i = 0; i < n; i++)
+      db.sqlite.exec(`INSERT INTO orders (public_code, track_token_hash, idempotency_key, status, channel, customer_id, name, phone, wilaya_code, delivery_type, subtotal, shipping_price, total, ip_hash, created_at, updated_at)
+        VALUES ('HN-P${i}', 'x', 'k-${i}', 'nouvelle', 'web', 1, 'X', '05500000${String(i).padStart(2, "0")}', 16, 'bureau', 3000, 400, 3400, 'iphash', ${now}, ${now})`);
+  };
+  it("12 today: her order goes through, flagged for the team", async () => {
+    const db = shop();
+    pile(db, 12);
+    const o = await createOrder(envOf(db), order());
+    const flags = JSON.parse(String(await db.prepare("SELECT risk_flags AS n FROM orders WHERE id = ?").bind(o.id).first("n")));
+    expect(flags).toContain("ip_pending");
+  });
+  it("40 today: refused", async () => {
+    const db = shop();
+    pile(db, 40);
+    await expect(createOrder(envOf(db), order())).rejects.toMatchObject({ status: 429, code: "too_many_orders" });
+  });
+});
+

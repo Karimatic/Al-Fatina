@@ -43,14 +43,14 @@ export function HomePage() {
 
   const blocks: Record<HomeSectionKey, () => ReactNode> = {
     stories: () => (
-      <div className="pt-8">
+      <div className="pt-5 md:pt-8">
         <Stories categories={categories.data} products={products} />
       </div>
     ),
     hero: () => (
       /* Hero: the shop's photo, the promise centred on it */
       <section className="px-3 pt-3 md:px-4">
-        <div ref={heroRef} className="relative mx-auto flex min-h-[42svh] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
+        <div ref={heroRef} className="relative mx-auto flex min-h-[19.5rem] max-w-6xl flex-col items-center justify-end overflow-hidden rounded-[1.75rem] bg-noir text-center md:min-h-[34rem] md:justify-center md:rounded-[2.25rem]">
           {/* cinematic: the shop's photo drifting slowly (or, by default, two silks
               cross-fading), under a warm grade, a vignette, film grain and a light sweep */}
           {design.heroImage ? (
@@ -83,21 +83,24 @@ export function HomePage() {
           <div aria-hidden="true" className="hero-sweep pointer-events-none absolute inset-0" />
           <div aria-hidden="true" className="hero-grain pointer-events-none absolute -inset-[10%]" />
           <div aria-hidden="true" className="hero-frame pointer-events-none absolute" />
-          <div className="relative flex w-full max-w-2xl flex-col items-center p-6 pb-8 text-white md:p-12">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#e9c98f]/40 bg-black/35 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#f3dcb0]">
+          {/* phones: compact, so the first products come sooner (audit PERF-1 / UX-3) */}
+          <div className="relative flex w-full max-w-2xl flex-col items-center px-5 pb-5 pt-6 text-white md:p-12">
+            <p className="mb-3 inline-flex md:mb-4 items-center gap-2 rounded-full border border-[#e9c98f]/40 bg-black/35 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#f3dcb0]">
               <span className="size-1.5 animate-pulse rounded-full bg-[#e9c98f]" aria-hidden="true" />
               {eyebrow}
             </p>
-            <AnimatedTagline key={title} text={title} tone="light" className="text-[2.35rem] leading-[1.1] md:text-6xl" />
-            <p className="mt-3 max-w-md text-base leading-relaxed text-white/85 md:text-lg">{subtitle}</p>
-            <div className="mt-6 flex flex-col items-center gap-2">
+            {/* two lines kept on phones: the fallback font fits the title on one line, the real one
+                on two (the banner grew when it arrived) */}
+            <AnimatedTagline key={title} text={title} tone="light" className="text-balance text-[1.9rem] leading-[1.1] max-md:min-h-[2.2em] md:text-6xl" />
+            <p className="mt-2 line-clamp-2 max-w-md text-sm leading-relaxed text-white/85 md:mt-3 md:line-clamp-none md:text-lg">{subtitle}</p>
+            <div className="mt-4 flex flex-col items-center gap-1 md:mt-6 md:gap-2">
               <a href="#nouveautes" className="lift inline-flex h-12 items-center justify-center rounded-full bg-white px-8 font-semibold text-noir">
                 {t.hero.cta}
               </a>
               {/* its line is kept from the first paint (it appearing with the products moved the page) */}
-              {!heroProduct && <span className="h-10" aria-hidden="true" />}
+              {!heroProduct && <span className="h-9 md:h-10" aria-hidden="true" />}
               {heroProduct && (
-                <a href={href(`/produit/${heroProduct.slug}`)} className="inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-white/85 underline-offset-4 hover:underline">
+                <a href={href(`/produit/${heroProduct.slug}`)} className="inline-flex h-9 items-center gap-1.5 text-sm font-semibold text-white/85 underline-offset-4 hover:underline md:h-10">
                   {ar ? heroProduct.nameAr : heroProduct.nameFr}
                   <span aria-hidden="true" className="rtl:rotate-180">→</span>
                 </a>
@@ -108,7 +111,7 @@ export function HomePage() {
       </section>
     ),
     promise: () => (
-      <div className="py-4">
+      <div className="py-3 md:py-4">
         <PromiseBand />
       </div>
     ),

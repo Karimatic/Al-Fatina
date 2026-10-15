@@ -765,3 +765,15 @@ Report in `docs/audit/` (kept out of git). Commits a9b602d … e9ae241, live ver
 - Waiting for the owner: domain (WAF, email, Search Console), GitHub secrets for backups/deploy, turning off
   Cloudflare's own Git build (two deploy paths), RC/NIF on the legal pages, real ZR price grid, D1 usage alert
   (API token), Meta Conversions API (token + privacy decision), the live privacy page text (Admin → Pages).
+
+## 22. Audit rounds 2–3 (2026-10-15): 58 → 70, then the round-3 list
+
+- Round 2 (c1d323c): erasure covers every copy, real points-race test, cashier sale key, per-visitor
+  counter share (`RL_BEACON_IP`), « copie enregistrée » notice, map on tap, steady cart pages.
+- Round 3: categories wait for both lists (no « aucun article » flash); erasure deletes photos first;
+  per-IP pending orders flagged from 12 (`ip_pending`), refused from 40 (shared mobile IPs); AI replies
+  can't promise free delivery / refunds / discounts the facts don't make; Commandes → « Libérer le stock »
+  for site orders unconfirmed 48 h (manual, never automatic — no captcha, the owner's choice) + a line in
+  the evening Telegram report; DB-quota warning at 50 / 80 % (needs CF_ANALYTICS_TOKEN, RUNBOOK §5);
+  GETs retried once; compact phone banner (categories on the first screen), home CLS 0.134 → 0.048.
+- Audit reports stay on local branches only (public repo).

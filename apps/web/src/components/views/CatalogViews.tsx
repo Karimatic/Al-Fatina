@@ -163,9 +163,11 @@ export function CategoryView() {
         ))}
       </div>
 
-      {catalog.error ? (
-        <ErrorBox onRetry={catalog.reload} />
-      ) : !catalog.data ? (
+      {catalog.error || categories.error ? (
+        <ErrorBox onRetry={() => (catalog.error ? catalog.reload() : categories.reload())} />
+      ) : !catalog.data || !categories.data ? (
+        // both lists are needed: a main category's pieces sit in its sub-categories, so without
+        // the category list it would look empty for a moment on a slow phone (audit R3-1)
         <ProductGridSkeleton count={6} />
       ) : products.length ? (
         <ProductGrid products={products} level={2} />

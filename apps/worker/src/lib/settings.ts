@@ -50,6 +50,8 @@ export interface Settings {
   catalog_version: number;
   /** when the team was last told about contact messages (at most one Telegram per 15 min) */
   contact_notice: { at: number };
+  /** the last database-quota warning sent (lib/quota.ts): UTC day and level (50 / 80 %) */
+  quota_notice: { day: string; level: number };
   /** start/end times of published drops: public cache keys change when one passes */
   drop_times: number[];
   reviews: { auto_approve_verified: boolean };
@@ -107,6 +109,7 @@ export const DEFAULTS: Settings = {
   "shipping.prices_verified": false,
   catalog_version: 0,
   contact_notice: { at: 0 },
+  quota_notice: { day: "", level: 0 },
   drop_times: [],
   reviews: { auto_approve_verified: true },
   texts: { ar: {}, fr: {} },
