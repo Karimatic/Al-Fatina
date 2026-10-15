@@ -395,7 +395,7 @@ export function IntegrationsSection() {
           <TextField label={tr("TikTok Pixel ID")} value={pixels.tiktok} onChange={(e) => setPixels({ ...pixels, tiktok: e.target.value.toUpperCase() })} />
           <Button onClick={() => run(() => put("/integrations/pixels", { metaPixelId: pixels.meta || null, tiktokPixelId: pixels.tiktok || null }), tr("Pixels enregistrés"))}>{tr("Enregistrer")}</Button>
         </div>
-        <p className="mt-2 text-xs text-ink-soft">{tr("L'activation des pixels sur la boutique (avec consentement) arrive avec la mise en ligne.")}</p>
+        <p role="note" className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{tr("⚠️ Pas encore actif : la boutique n'envoie rien à Meta ni à TikTok (aucun script publicitaire, pour la vitesse et la vie privée). Les numéros sont seulement gardés. Pour savoir quelles pubs vendent, mettez des liens de campagne (?utm_campaign=…) et regardez Statistiques → Sources.")}</p>
       </Card>
     </>
   );

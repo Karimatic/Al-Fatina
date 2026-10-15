@@ -80,9 +80,13 @@ export function SearchView() {
   }, [needle, results.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    // the box focuses itself as the page appears, often before this script runs: no focus event
-    // then, so read it here (else suggestions only showed after a second tap)
-    if (box.current?.contains(document.activeElement)) setFocused(true);
+    // an empty search page: straight into the box. Arriving with a search already made (?q=…,
+    // a shared link): the results, not a suggestion list and a keyboard over them. (Decided
+    // here, not by an autofocus attribute: the browser's own focus came at random moments.)
+    if (!new URLSearchParams(location.search).get("q")) {
+      box.current?.querySelector("input")?.focus();
+      setFocused(true);
+    }
     const out = (e: PointerEvent) => !box.current?.contains(e.target as Node) && setFocused(false);
     document.addEventListener("pointerdown", out);
     return () => document.removeEventListener("pointerdown", out);
@@ -97,7 +101,6 @@ export function SearchView() {
       <div ref={box} className="relative mb-4">
         <SearchIcon className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ink-soft" />
         <input
-          autoFocus
           type="search"
           enterKeyHint="search"
           aria-label={t.search.title}

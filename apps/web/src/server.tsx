@@ -59,6 +59,47 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 /** Default picture of link previews (the built-in home photo, 640 × 640). */
 export const SHARE_IMAGE = { src: "/ig/pyjamas-rayures.jpg", width: 640, height: 640 };
 
+/**
+ * Home page only: who the shop is (Organization: name, logo, Instagram, Boumerdès) and the site
+ * itself (WebSite, with its search) for Google's knowledge panel and site name (audit SEO-2).
+ * Built into the page: no Worker request per visit. Product and category pages get their own
+ * (Product, BreadcrumbList) from the Worker.
+ */
+function shopJsonLd(locale: Locale, abs: (p: string) => string): string {
+  const home = abs(localePath(locale, "/"));
+  const data = [
+    {
+      "@context": "https://schema.org",
+      "@type": "ClothingStore",
+      "@id": `${abs("/")}#shop`,
+      name: "Henine Boutique",
+      url: home,
+      logo: abs("/icons/icon-512.png"),
+      image: abs(SHARE_IMAGE.src),
+      sameAs: ["https://www.instagram.com/henine.boutique/"],
+      address: { "@type": "PostalAddress", addressLocality: locale === "fr" ? "Boumerdès" : "بومرداس", addressRegion: "Boumerdès", addressCountry: "DZ" },
+      areaServed: { "@type": "Country", name: "Algeria" },
+      currenciesAccepted: "DZD",
+      paymentAccepted: "Cash",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Henine Boutique",
+      url: home,
+      inLanguage: locale === "fr" ? "fr-DZ" : "ar-DZ",
+      publisher: { "@id": `${abs("/")}#shop` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: `${abs(localePath(locale, "/recherche"))}?q={search_term_string}` },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ];
+  // "<" escaped so the JSON can never close the <script> tag
+  return `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`;
+}
+
 function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
   const t = getDictionary(locale);
   const title = page.title ? `${page.title[locale]} · Henine Boutique` : t.meta.title;
@@ -79,8 +120,8 @@ function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
     const fr = localePath("fr", page.path);
     tags.push(
       `<link rel="canonical" href="${abs(own)}"/>`,
-      `<link rel="alternate" hreflang="ar" href="${abs(ar)}"/>`,
-      `<link rel="alternate" hreflang="fr" href="${abs(fr)}"/>`,
+      `<link rel="alternate" hreflang="ar-DZ" href="${abs(ar)}"/>`,
+      `<link rel="alternate" hreflang="fr-DZ" href="${abs(fr)}"/>`,
       `<link rel="alternate" hreflang="x-default" href="${abs(ar)}"/>`,
     );
   }
@@ -106,6 +147,7 @@ function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
     `<link rel="icon" href="/icon.svg"/>`,
     `<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"/>`,
   );
+  if (page.path === "/") tags.push(shopJsonLd(locale, abs));
   return tags.join("");
 }
 

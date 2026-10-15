@@ -166,3 +166,16 @@ export function productJsonLd(env: Env, p: ProductDetailDTO, ar: boolean, path: 
   // "<" escaped so the JSON can never close the <script> tag
   return `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`;
 }
+
+/* ───────────── Breadcrumbs (Google shows the path instead of the bare address) ───────────── */
+
+/** Home → (category) → page, in the page's language (audit SEO-2). */
+export function breadcrumbJsonLd(env: Env, ar: boolean, crumbs: { name: string; path: string }[]): string {
+  const home = { name: ar ? "الرئيسية" : "Accueil", path: ar ? "/" : "/fr" };
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [home, ...crumbs].map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: abs(env, c.path) })),
+  };
+  return `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`;
+}

@@ -145,9 +145,9 @@ function CustomerSheet({ id, onClose }: { id: number; onClose: () => void }) {
   const c = q.data?.customer;
   const owner = useMe().data?.role === "owner";
   const remove = useMutation({
-    mutationFn: () => del(`/customers/${id}`),
-    onSuccess: () => {
-      toast(tr("Cliente supprimée"));
+    mutationFn: (erase: boolean) => del(`/customers/${id}${erase ? "?erase=1" : ""}`),
+    onSuccess: (_r, erase) => {
+      toast(erase ? tr("Données personnelles effacées") : tr("Cliente supprimée"));
       void qc.invalidateQueries({ queryKey: ["customers"] });
       onClose();
     },
@@ -223,10 +223,21 @@ function CustomerSheet({ id, onClose }: { id: number; onClose: () => void }) {
                 loading={remove.isPending}
                 onClick={() =>
                   confirm(tr("Supprimer la fiche de {0} ? Ses commandes restent dans l'historique (sous « Clientes sans fiche »), ses points de fidélité sont perdus.", { 0: c?.name ?? "" })) &&
-                  remove.mutate()
+                  remove.mutate(false)
                 }
               >
                 {tr("🗑 Supprimer la cliente")}
+              </Button>
+              <Button ownerOnly
+                variant="danger"
+                className="ms-2"
+                loading={remove.isPending}
+                onClick={() =>
+                  confirm(tr("Effacer toutes les données personnelles de {0} ? (À faire quand elle le demande, loi 18-07.) Ses commandes restent pour les comptes, mais son nom, son téléphone, son adresse et ses notes sont effacés, ainsi que ses messages et paniers. Impossible à annuler.", { 0: c?.name ?? "" })) &&
+                  remove.mutate(true)
+                }
+              >
+                {tr("🧹 Effacer ses données (à sa demande)")}
               </Button>
             </div>
           )}

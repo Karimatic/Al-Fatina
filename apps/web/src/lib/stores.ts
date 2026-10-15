@@ -5,6 +5,7 @@
  */
 import { useSyncExternalStore } from "react";
 import type { ImageRef } from "@henine/shared";
+import { markStep } from "./attribution";
 
 function createStore<T>(key: string, initial: T) {
   let value: T = initial;
@@ -85,6 +86,7 @@ export const cart = {
     return cartStore.get();
   },
   add(item: CartItem) {
+    markStep("cart");
     cartStore.set((items) => {
       const existing = items.find((i) => i.variantId === item.variantId);
       if (existing) return items.map((i) => (i.variantId === item.variantId ? { ...i, qty: Math.min(20, i.qty + item.qty) } : i));

@@ -136,3 +136,7 @@ export function sourceOfChannel(channel: string): OrderSource | null {
   if (channel === "telephone") return "other";
   return null;
 }
+
+/** Steps of a visit on the way to ordering, each counted once per browser session (Admin → Statistiques → Parcours). */
+export const JOURNEY_STEPS = ["product", "cart", "checkout"] as const;
+export type JourneyStep = (typeof JOURNEY_STEPS)[number];

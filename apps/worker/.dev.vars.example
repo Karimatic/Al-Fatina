@@ -12,3 +12,13 @@ AUTH_PEPPER=dev-auth-pepper-change-me
 SETTINGS_KEY=REPLACE_WITH_32_BYTES_BASE64
 
 # Telegram is configured from Admin → Système → Comptes (token stored encrypted in D1)
+
+# ─── Optional ───
+# Real emails (admin sign-in codes, password reset) through resend.com instead of the console:
+# MAIL_PROVIDER=resend
+# MAIL_API_KEY=re_…
+# MAIL_FROM=Henine Boutique <admin@your-domain>
+# Extra gate in front of /api/admin: also require a Cloudflare Access login (Zero Trust, free
+# up to 50 people). Both from Zero Trust → Access → Applications → the app's Overview:
+# ACCESS_TEAM_DOMAIN=https://your-team.cloudflareaccess.com
+# ACCESS_AUD=…

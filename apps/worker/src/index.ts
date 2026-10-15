@@ -4,7 +4,7 @@ import type { AppEnv } from "./env";
 import { recordError } from "./lib/audit";
 import { getCollection, getProductDetail, listCategories } from "./lib/catalog";
 import { cached } from "./lib/edge-cache";
-import { metaFeedCsv, productJsonLd, robotsTxt, sitemapXml } from "./lib/seo";
+import { breadcrumbJsonLd, metaFeedCsv, productJsonLd, robotsTxt, sitemapXml } from "./lib/seo";
 import { getSettings } from "./lib/settings";
 import { HttpError } from "./lib/http";
 import { handleUpdate, verifyWebhookSecret } from "./lib/telegram";
@@ -194,8 +194,8 @@ function linkTags(c: Context<AppEnv>, path: string): string {
   const abs = (p: string) => esc(new URL(p, c.env.PUBLIC_ORIGIN).toString());
   return [
     `<link rel="canonical" href="${abs(path)}">`,
-    `<link rel="alternate" hreflang="ar" href="${abs(bare)}">`,
-    `<link rel="alternate" hreflang="fr" href="${abs(`/fr${bare}`)}">`,
+    `<link rel="alternate" hreflang="ar-DZ" href="${abs(bare)}">`,
+    `<link rel="alternate" hreflang="fr-DZ" href="${abs(`/fr${bare}`)}">`,
     `<link rel="alternate" hreflang="x-default" href="${abs(bare)}">`,
   ].join("");
 }
@@ -227,7 +227,13 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
   if (section === "produit") {
     const product = await getProductDetail(c.env, slug).catch(() => null);
     if (product) {
-      structured = productJsonLd(c.env, product, ar, url.pathname);
+      const cat = product.category;
+      structured =
+        productJsonLd(c.env, product, ar, url.pathname) +
+        breadcrumbJsonLd(c.env, ar, [
+          ...(cat ? [{ name: ar ? cat.nameAr : cat.nameFr, path: `${prefix}/c/${cat.slug}` }] : []),
+          { name: ar ? product.nameAr : product.nameFr, path: url.pathname },
+        ]);
       const name = ar ? product.nameAr : product.nameFr;
       const text = (product.seoDescription ?? (ar ? product.descriptionAr : product.descriptionFr) ?? "").replace(/[*#\n]+/g, " ").trim();
       const price = formatDA(product.price);
@@ -244,6 +250,7 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
     const cat = (await listCategories(c.env).catch(() => [])).find((x) => x.slug === slug);
     if (cat) {
       const name = ar ? cat.nameAr : cat.nameFr;
+      structured = breadcrumbJsonLd(c.env, ar, [{ name, path: url.pathname }]);
       meta = {
         title: `${name} · Henine Boutique`,
         description: ar

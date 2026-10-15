@@ -8,7 +8,7 @@ import { useStoreTexts } from "@/lib/storeTexts";
 import { cart, checkoutMemory, pendingCoupon, saveOrder, takePendingCoupon, useSavedOrders } from "@/lib/stores";
 import { newIdempotencyKey } from "@/lib/api";
 import { Picker } from "./Picker";
-import { visitAttribution } from "@/lib/attribution";
+import { markStep, visitAttribution } from "@/lib/attribution";
 
 interface Props {
   lines: { variantId: number; qty: number }[];
@@ -53,7 +53,9 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
   useEffect(() => {
     const v = visitAttribution();
     setUntracked(!v?.source && !v?.referrer && !v?.clickId);
-  }, []);
+    // the order page: reached by opening it (the quick form on a product page: by filling it)
+    if (channel === "web") markStep("checkout");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const askHeard = untracked ? site.data?.heardFrom : null;
   // a code brought by a link (cart reminder, campaign) is already filled in
   const linkedCoupon = useMemo(() => takePendingCoupon(), []);
@@ -241,7 +243,7 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
   const describe = (k: string) => (fieldErrors[k] ? { "aria-invalid": true as const, "aria-describedby": `f-${k}-error` } : {});
 
   return (
-    <form onSubmit={submit} noValidate className={compact ? "space-y-4" : "grid gap-8 pb-20 md:pb-0 lg:grid-cols-[1fr_22rem]"}>
+    <form onSubmit={submit} onFocusCapture={channel === "express" ? () => markStep("checkout") : undefined} noValidate className={compact ? "space-y-4" : "grid gap-8 pb-20 md:pb-0 lg:grid-cols-[1fr_22rem]"}>
       <guard.Trap />
       <div className="space-y-4">
         <div>

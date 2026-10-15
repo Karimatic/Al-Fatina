@@ -19,6 +19,7 @@ interface StatsData {
     deliveryRate: number | null; returnRate: number | null;
   };
   funnel: { placed: number; confirmed: number; shipped: number; delivered: number; returned: number; cancelled: number };
+  journey?: { visits: number; product: number; cart: number; checkout: number; ordered: number };
   daily: { date: string; orders: number; revenue: number }[];
   wilayas: {
     code: number; name: string; placed: number; orders: number; revenue: number; delivered: number; cancelled: number; returned: number;
@@ -36,6 +37,27 @@ interface StatsData {
 }
 
 const pct = (v: number | null) => (v == null ? "—" : ltr(`${v} %`));
+
+/**
+ * Where visitors stop on the way to an order (each step counted once per visit, counted since
+ * 15/10/2026): visits → saw a product → added to the cart → opened the order form → ordered.
+ */
+function JourneyCard({ j }: { j: NonNullable<StatsData["journey"]> }) {
+  const share = (n: number) => (j.visits ? ` · ${pct(Math.round((n / j.visits) * 1000) / 10)}` : "");
+  const rows = [
+    { label: tr("Visites"), value: j.visits, display: String(j.visits) },
+    { label: tr("Ont vu un produit"), value: j.product, display: String(j.product) + share(j.product) },
+    { label: tr("Ont ajouté au panier"), value: j.cart, display: String(j.cart) + share(j.cart) },
+    { label: tr("Ont ouvert la commande"), value: j.checkout, display: String(j.checkout) + share(j.checkout) },
+    { label: tr("Ont commandé (site)"), value: j.ordered, display: String(j.ordered) + share(j.ordered) },
+  ];
+  return (
+    <Card title={tr("Parcours des visiteuses")}>
+      <BarList rows={rows} />
+      <p className="mt-3 text-xs text-ink-soft">{tr("Chaque étape comptée une fois par visite, depuis le 15/10/2026. La plus grosse chute montre où agir : photos et prix (produit), tailles et livraison (panier), formulaire (commande).")}</p>
+    </Card>
+  );
+}
 
 /** Every day of the range (missing days = 0), "dd/mm" labels. */
 function fillDays(data: StatsData["daily"], since: number, days: number) {
@@ -277,6 +299,7 @@ export function StatsPage() {
             {d.range.days > 1 && <CumulativeChart data={d.daily} since={d.range.since} days={d.range.days} />}
             <WeekdayChart rows={d.weekdays ?? []} />
           </div>
+          {d.journey && <JourneyCard j={d.journey} />}
           <Card title={tr("Entonnoir des commandes")}>
             <BarList
               rows={[

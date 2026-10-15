@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { noticeNewContact } from "../lib/contact-notice";
 import {
   askableSources,
@@ -34,6 +35,7 @@ import {
   type ReviewWallDTO,
   type SiteConfigDTO,
   type TrackedOrderDTO,
+  JOURNEY_STEPS,
 } from "@henine/shared";
 import type { AppEnv } from "../env";
 import { recordError } from "../lib/audit";
@@ -54,6 +56,17 @@ import { isPushEndpoint, sendRestockPushes, vapidKeys } from "../lib/webpush";
 import { z } from "zod";
 
 export const publicRoutes = new Hono<AppEnv>();
+
+// Biggest body a store request may send (audit SEC-4): the forms are a few KB; a review with
+// its 3 photos (≤ 2.5 MB each, checked again one by one) the only large one.
+const SMALL_BODY = 64 * 1024;
+const REVIEW_BODY = 10 * 1024 * 1024;
+const tooLarge = () => {
+  throw new HttpError(413, "body_too_large");
+};
+const smallBody = bodyLimit({ maxSize: SMALL_BODY, onError: tooLarge });
+const reviewBody = bodyLimit({ maxSize: REVIEW_BODY, onError: tooLarge });
+publicRoutes.use("*", (c, next) => (c.req.method === "GET" || c.req.method === "HEAD" ? next() : c.req.path.endsWith("/reviews") ? reviewBody(c, next) : smallBody(c, next)));
 
 /**
  * Edge cache keyed on the catalogue version (admin edits are visible immediately) and on
@@ -209,6 +222,17 @@ publicRoutes.post("/visit", async (c) => {
   if (v.campaign) metrics.push(["visits_campaign", v.campaign.toLowerCase()]);
   // a flood of visits is counted up to the shop-wide budget, never at the cost of the orders
   if (await withinBudget(c.env.RL_BEACON, "visit")) await c.env.DB.batch(analyticsStmts(c.env, Date.now(), metrics, 1));
+  return c.body(null, 204);
+});
+
+/**
+ * A visit reached a step on the way to ordering (Admin → Statistiques → Parcours, audit OBS-3):
+ * sent at most once per step and per browser session. Same budget as the visits.
+ */
+publicRoutes.post("/step", async (c) => {
+  await rateLimit(c.env.RL_LOOKUP, `visit:${clientIp(c)}`);
+  const { step } = validate(await c.req.json().catch(() => ({})), z.object({ step: z.enum(JOURNEY_STEPS) }));
+  if (await withinBudget(c.env.RL_BEACON, "visit")) await c.env.DB.batch(analyticsStmts(c.env, Date.now(), [["journey", step]], 1));
   return c.body(null, 204);
 });
 

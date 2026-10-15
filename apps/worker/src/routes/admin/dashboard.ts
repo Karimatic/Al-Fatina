@@ -5,7 +5,7 @@ import { Hono } from "hono";
 import type { AppEnv } from "../../env";
 import { HttpError } from "../../lib/http";
 import { mediaUrl, variantLabels } from "../../lib/catalog";
-import { algiersDayStart, CANCELLED_SQL, periodStats } from "../../lib/orders";
+import { algiersDate, algiersDayStart, CANCELLED_SQL, periodStats } from "../../lib/orders";
 import { getSettings } from "../../lib/settings";
 import { requirePermission } from "../../middleware/access";
 import { ABANDONED_AFTER } from "./carts";
@@ -184,7 +184,7 @@ dashboardRoutes.get("/stats", requirePermission("stats.view"), async (c) => {
   const { since, until, label, days } = statsRange((k) => c.req.query(k));
   const inRange = "o.created_at >= ?1 AND o.created_at < ?2";
   const valid = `o.status NOT IN ${CANCELLED_SQL}`;
-  const [totals, daily, statusRows, wilayas, channels, hours, top, reasons, durations, byType, weekdays] = await c.env.DB.batch([
+  const [totals, daily, statusRows, wilayas, channels, hours, top, reasons, durations, byType, weekdays, journey] = await c.env.DB.batch([
     c.env.DB.prepare(
       `SELECT COUNT(*) AS placed,
               SUM(CASE WHEN ${valid} THEN 1 ELSE 0 END) AS orders,
@@ -249,6 +249,14 @@ dashboardRoutes.get("/stats", requirePermission("stats.view"), async (c) => {
       `SELECT CAST(strftime('%w', (o.created_at + 3600000) / 1000, 'unixepoch') AS INTEGER) AS dow, COUNT(*) AS orders, COALESCE(SUM(o.total), 0) AS revenue
          FROM orders o WHERE ${inRange} AND ${valid} GROUP BY dow`,
     ).bind(since, until),
+    // the visitors' way to an order: visits and the steps they reached (once per visit each),
+    // then the orders placed on the site (Algiers days, like the counters)
+    c.env.DB.prepare(
+      `SELECT CASE WHEN metric = 'visits' THEN 'visits' ELSE dim END AS step, SUM(value) AS n FROM analytics_daily
+        WHERE metric IN ('visits', 'journey') AND date >= ?1 AND date <= ?2 GROUP BY step
+       UNION ALL
+       SELECT 'ordered', COUNT(*) FROM orders o WHERE o.created_at >= ?3 AND o.created_at < ?4 AND o.channel IN ('web', 'express')`,
+    ).bind(algiersDate(since), algiersDate(until - 1), since, until),
   ]);
 
   const t = totals!.results[0] as Record<string, number | null>;
@@ -291,6 +299,10 @@ dashboardRoutes.get("/stats", requirePermission("stats.view"), async (c) => {
       returnRate: pct(n("returned"), resolved),
     },
     funnel: { placed: n("placed"), confirmed, shipped, delivered: n("delivered"), returned: n("returned"), cancelled: n("cancelled") },
+    journey: (() => {
+      const j = Object.fromEntries((journey!.results as { step: string; n: number }[]).map((r) => [r.step, r.n ?? 0]));
+      return { visits: j.visits ?? 0, product: j.product ?? 0, cart: j.cart ?? 0, checkout: j.checkout ?? 0, ordered: j.ordered ?? 0 };
+    })(),
     daily: daily!.results,
     byStatus,
     wilayas: (wilayas!.results as Record<string, number | string | null>[]).map((w) => {

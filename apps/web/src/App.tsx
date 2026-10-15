@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
+import { Boundary } from "@/components/layout/Boundary";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ErrorReporter } from "@/components/layout/ErrorReporter";
 import { FloatingHelp } from "@/components/layout/FloatingHelp";
@@ -35,15 +36,27 @@ export function App({ Provider, children }: { Provider: LanguageProvider; childr
       <SplashScreen />
       <Provider>
         <SkipLink />
-        <AnnouncementBar />
-        <SiteHeader />
+        <Boundary where="announcement" quiet>
+          <AnnouncementBar />
+        </Boundary>
+        <Boundary where="header" quiet>
+          <SiteHeader />
+        </Boundary>
         <main id="main" className="flex-1">
-          {children}
+          <Boundary where="page">{children}</Boundary>
         </main>
-        <SiteFooter />
-        <BottomNav />
-        <FloatingHelp />
-        <InstallPrompt />
+        <Boundary where="footer" quiet>
+          <SiteFooter />
+        </Boundary>
+        <Boundary where="bottom-nav" quiet>
+          <BottomNav />
+        </Boundary>
+        <Boundary where="assistant" quiet>
+          <FloatingHelp />
+        </Boundary>
+        <Boundary where="install" quiet>
+          <InstallPrompt />
+        </Boundary>
         <ThemeStyle />
         <ErrorReporter />
       </Provider>

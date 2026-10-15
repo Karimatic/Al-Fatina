@@ -157,17 +157,35 @@ customerRoutes.put("/loyalty", requirePermission("loyalty.edit"), async (c) => {
 /**
  * A customer removed from the list. Her orders stay (sales history) under "Clientes sans
  * fiche"; her loyalty points go with her. A new order from her number starts a new record.
+ * `?erase=1`, when she asks for her data to be deleted (law 18-07, the privacy page): her
+ * orders keep only what the accounts need (items, amounts, wilaya, dates), her name, phone,
+ * address and notes are wiped, and her saved checkouts, messages and stock alerts deleted;
+ * her published reviews show "Cliente". The audit log keeps no trace of who she was.
  */
 customerRoutes.delete("/customers/:id", requireOwner, async (c) => {
   const id = intParam(c, "id");
+  const erase = c.req.query("erase") === "1";
   const cust = await c.env.DB.prepare("SELECT id, name, phone FROM customers WHERE id = ?").bind(id).first<{ id: number; name: string; phone: string }>();
   if (!cust || cust.phone === "") throw new HttpError(404, "not_found");
+  const wipe = erase
+    ? [
+        c.env.DB.prepare("UPDATE reviews SET name = 'Cliente' WHERE order_id IN (SELECT id FROM orders WHERE customer_id = ?1 OR phone = ?2)").bind(id, cust.phone),
+        c.env.DB.prepare(
+          `UPDATE orders SET name = 'Cliente effacée', phone = '', address = NULL, customer_note = NULL, internal_note = NULL,
+                  ip_hash = NULL, ua_short = NULL, referrer = NULL WHERE customer_id = ?1 OR phone = ?2`,
+        ).bind(id, cust.phone),
+        c.env.DB.prepare("DELETE FROM carts WHERE phone = ?").bind(cust.phone),
+        c.env.DB.prepare("DELETE FROM contact_messages WHERE phone = ?").bind(cust.phone),
+        c.env.DB.prepare("DELETE FROM stock_alerts WHERE phone = ?").bind(cust.phone),
+      ]
+    : [];
   await c.env.DB.batch([
+    ...wipe,
     noRecordCustomerStmt(c.env),
     c.env.DB.prepare("UPDATE orders SET customer_id = (SELECT id FROM customers WHERE phone = '') WHERE customer_id = ?").bind(id),
     c.env.DB.prepare("DELETE FROM loyalty_ledger WHERE customer_id = ?").bind(id),
     c.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(id),
-    auditStmt(c.env, actorOf(c.get("member")), "delete", "customer", id, { name: cust.name, phone: cust.phone }),
+    auditStmt(c.env, actorOf(c.get("member")), erase ? "erase" : "delete", "customer", id, erase ? { erased: true } : { name: cust.name, phone: cust.phone }),
   ]);
   return c.json({ ok: true });
 });

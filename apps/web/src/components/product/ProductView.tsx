@@ -21,6 +21,7 @@ import { ProductGrid } from "./ProductCard";
 import { ReviewForm } from "./ReviewForm";
 import { ShareButton } from "./ShareButton";
 import { SizeGuideButton } from "./SizeGuide";
+import { markStep } from "@/lib/attribution";
 
 export function ProductView() {
   const [slug, setSlug] = useState<string | null>(null);
@@ -66,6 +67,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
   useEffect(() => {
     document.title = `${name} · Henine Boutique`;
     rememberViewed(p.slug); // "Vus récemment" on the home page
+    markStep("product");
   }, [name, p.slug]);
 
   // pre-select the only value of single-value options, and the first in-stock colour
