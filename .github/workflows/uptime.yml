@@ -1,0 +1,45 @@
+name: Uptime
+
+# Is the shop up? (audit OBS-1) Every 15 minutes from GitHub's machines: the API and its database
+# (/api/health) and the home page. Two failures in a row (a minute apart) fail the run, and GitHub
+# emails the account that last changed this file. Optional: TELEGRAM_BOT_TOKEN and
+# TELEGRAM_CHAT_ID secrets also send the alert to the team's Telegram.
+# (GitHub pauses scheduled jobs after 60 days without any commit: re-enable it in Actions.)
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SHOP: ${{ vars.PUBLIC_ORIGIN || 'https://henine-boutique.karimmaticmz.workers.dev' }}
+    steps:
+      - name: Health and home page (2 tries)
+        id: probe
+        run: |
+          check() {
+            curl -fsS -m 20 -A "henine-uptime" "$SHOP/api/health" > /dev/null &&
+            curl -fsS -m 20 -A "henine-uptime" "$SHOP/" | grep -q "<title>"
+          }
+          if check; then echo "✓ up"; exit 0; fi
+          echo "first check failed, again in 60 s"; sleep 60
+          if check; then echo "✓ up (after one failure)"; exit 0; fi
+          echo "::error::$SHOP is down: /api/health or the home page did not answer twice in a row"
+          exit 1
+      - name: Tell the team on Telegram
+        if: failure()
+        env:
+          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -n "$TOKEN" ] && [ -n "$CHAT" ] || exit 0
+          curl -fsS -m 20 "https://api.telegram.org/bot$TOKEN/sendMessage" \
+            --data-urlencode "chat_id=$CHAT" \
+            --data-urlencode "text=🚨 La boutique ne répond pas ($SHOP). Vérifiez Cloudflare → Workers, ou docs/RUNBOOK.md." > /dev/null

@@ -1,0 +1,65 @@
+name: Backup
+
+# Weekly encrypted copy of the live database, proved restorable (audit DATA-1): export → encrypt
+# (scripts/backup.mjs) → restore into a throwaway database and compare every table's rows
+# (scripts/restore-drill.mjs) → keep the encrypted file 8 weeks as a workflow artifact.
+#
+# Needs 3 repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   a token with "D1: Edit" on the account (export needs it)
+#   CLOUDFLARE_ACCOUNT_ID  the account id
+#   BACKUP_PASSPHRASE      a long passphrase, also kept somewhere safe off GitHub (without it a
+#                          backup can't be opened)
+# Without them the job says so and stops. Run it by hand: Actions → Backup → Run workflow.
+
+on:
+  schedule:
+    - cron: "0 2 * * 0" # Sunday 03:00 Algiers
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Secrets present?
+        id: ready
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PASS: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$PASS" ]; then
+            echo "::warning::Backup skipped: add the CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and BACKUP_PASSPHRASE secrets (see docs/RUNBOOK.md)."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.ready.outputs.ok == 'true'
+        uses: actions/checkout@v5
+      - if: steps.ready.outputs.ok == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - if: steps.ready.outputs.ok == 'true'
+        run: npm ci
+      - if: steps.ready.outputs.ok == 'true'
+        name: Export and encrypt
+        run: node scripts/backup.mjs backups
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      - if: steps.ready.outputs.ok == 'true'
+        name: Restore drill
+        run: node scripts/restore-drill.mjs backups/*.sql.enc
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      - if: steps.ready.outputs.ok == 'true'
+        uses: actions/upload-artifact@v5
+        with:
+          name: backup-${{ github.run_number }}
+          path: backups/
+          retention-days: 56

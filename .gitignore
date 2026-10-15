@@ -33,3 +33,6 @@ npm-debug.log*
 apps/worker/wrangler.e2e.jsonc
 test-results/
 playwright-report/
+
+# encrypted database backups (scripts/backup.mjs): never committed
+backups/
