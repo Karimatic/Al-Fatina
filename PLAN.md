@@ -748,3 +748,20 @@ Live at https://henine-boutique.karimmaticmz.workers.dev (Worker `henine-boutiqu
 - TEST-001 (e2e flakiness): the dev server's engine could die while wrangler kept running → health watchdog; no reuse of a stale server; one retry; phone / computer as parallel CI jobs.
 - DEPS-001 (dev-only esbuild advisories): override → `npm audit` 0.
 - Not code: online payment (Chargily / BaridiMob) is a schema value only, waiting for the owner's decision and a merchant account; ZR Express API waiting for credentials.
+
+## 21. Fifth audit (2026-10-14 → 10-15, "Fragile" 58/100): everything fixable in code fixed
+
+Report in `docs/audit/` (kept out of git). Commits a9b602d … e9ae241, live version 5c8d0981.
+- Orders: a lost answer + retry never makes a second order (idempotency replay before every check,
+  derived tracking token); coupon/points used exactly once; catalogue cache only bumped when stock
+  crosses zero; phone-only lookups hide the items.
+- Free-plan headroom: shop-wide write budget `RL_BEACON` for visits/steps/logs/carts; categories in 2 queries.
+- Phones: home LCP 2.4 s (was 13), CLS < 0.05, lighter fonts (logo subset), splash only in the installed app.
+- Ops: encrypted weekly backups + restore drill (`.github/workflows/backup.yml`), migration-history check,
+  post-deploy check (`npm run verify:deploy`), uptime every 15 min, `docs/RUNBOOK.md`, Dependabot, Node 24 pin.
+- Store: error boundaries; offline copies of public pages (service worker); WCAG 2.2 AA in axe; Organization/
+  WebSite/Breadcrumb data, hreflang ar-DZ/fr-DZ; request size caps; visitor journey in Stats; customer data
+  erasure on request (law 18-07) + retention section in the privacy page text (`packages/db/data/pages.json`).
+- Waiting for the owner: domain (WAF, email, Search Console), GitHub secrets for backups/deploy, turning off
+  Cloudflare's own Git build (two deploy paths), RC/NIF on the legal pages, real ZR price grid, D1 usage alert
+  (API token), Meta Conversions API (token + privacy decision), the live privacy page text (Admin → Pages).
