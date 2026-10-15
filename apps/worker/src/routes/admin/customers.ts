@@ -160,15 +160,38 @@ customerRoutes.put("/loyalty", requirePermission("loyalty.edit"), async (c) => {
  * `?erase=1`, when she asks for her data to be deleted (law 18-07, the privacy page): her
  * orders keep only what the accounts need (items, amounts, wilaya, dates), her name, phone,
  * address and notes are wiped, and her saved checkouts, messages and stock alerts deleted;
- * her published reviews show "Cliente". The audit log keeps no trace of who she was.
+ * her published reviews show "Cliente". The copies go too: notes in the order history, the
+ * team's corrections of her name/phone/address, exchange and follow-up notes, alerts about
+ * her orders, the parcel photo. The audit log keeps no trace of who she was.
  */
+/** Corrections of these order fields hold her personal data (order_changes.field). */
+const PERSONAL_FIELDS = "('name', 'phone', 'address', 'commune_id', 'customer_note', 'internal_note')";
+
 customerRoutes.delete("/customers/:id", requireOwner, async (c) => {
   const id = intParam(c, "id");
   const erase = c.req.query("erase") === "1";
   const cust = await c.env.DB.prepare("SELECT id, name, phone FROM customers WHERE id = ?").bind(id).first<{ id: number; name: string; phone: string }>();
   if (!cust || cust.phone === "") throw new HttpError(404, "not_found");
+  // her orders (by record or by number), before they are detached from her
+  const mine = erase
+    ? ((await c.env.DB.prepare("SELECT id, pack_photo FROM orders WHERE customer_id = ?1 OR phone = ?2").bind(id, cust.phone).all<{ id: number; pack_photo: string | null }>())
+        .results)
+    : [];
+  const ids = JSON.stringify(mine.map((o) => o.id));
+  const inMine = "IN (SELECT value FROM json_each(?))";
   const wipe = erase
     ? [
+        c.env.DB.prepare(`UPDATE order_events SET note = NULL WHERE order_id ${inMine}`).bind(ids),
+        c.env.DB.prepare(
+          `UPDATE order_changes SET reason = NULL,
+                  old_value = CASE WHEN field IN ${PERSONAL_FIELDS} THEN NULL ELSE old_value END,
+                  new_value = CASE WHEN field IN ${PERSONAL_FIELDS} THEN NULL ELSE new_value END
+            WHERE order_id ${inMine}`,
+        ).bind(ids),
+        c.env.DB.prepare(`UPDATE exchange_requests SET note = NULL, decision_note = NULL WHERE order_id ${inMine}`).bind(ids),
+        c.env.DB.prepare(`UPDATE delivery_followups SET note = NULL WHERE order_id ${inMine}`).bind(ids),
+        c.env.DB.prepare(`UPDATE alerts SET message = 'Données effacées à la demande de la cliente' WHERE (entity = 'order' AND entity_id IN (SELECT CAST(value AS TEXT) FROM json_each(?1))) OR (entity = 'customer' AND entity_id = ?2)`).bind(ids, String(id)),
+        c.env.DB.prepare(`UPDATE orders SET pack_photo = NULL WHERE id ${inMine}`).bind(ids),
         c.env.DB.prepare("UPDATE reviews SET name = 'Cliente' WHERE order_id IN (SELECT id FROM orders WHERE customer_id = ?1 OR phone = ?2)").bind(id, cust.phone),
         c.env.DB.prepare(
           `UPDATE orders SET name = 'Cliente effacée', phone = '', address = NULL, customer_note = NULL, internal_note = NULL,
@@ -187,5 +210,8 @@ customerRoutes.delete("/customers/:id", requireOwner, async (c) => {
     c.env.DB.prepare("DELETE FROM customers WHERE id = ?").bind(id),
     auditStmt(c.env, actorOf(c.get("member")), erase ? "erase" : "delete", "customer", id, erase ? { erased: true } : { name: cust.name, phone: cust.phone }),
   ]);
+  // the parcel photos (her label, her address) leave the storage too
+  const photos = mine.map((o) => o.pack_photo).filter((k): k is string => !!k);
+  if (photos.length) await c.env.MEDIA.delete(photos);
   return c.json({ ok: true });
 });

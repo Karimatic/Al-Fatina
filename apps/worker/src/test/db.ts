@@ -93,7 +93,7 @@ export const member = (permissions: string[], id = 2): AdminMember => ({ id, ema
  * A route module behind a signed-in member (the session check itself is tested elsewhere).
  * `call` returns the status and the JSON body.
  */
-export function testApp(routes: Hono<AppEnv>, db: TestDb, as: AdminMember = OWNER) {
+export function testApp(routes: Hono<AppEnv>, db: TestDb, as: AdminMember = OWNER, extraEnv: Partial<Env> = {}) {
   const app = new Hono<AppEnv>();
   let who = as;
   app.use("*", async (c, next) => {
@@ -106,7 +106,7 @@ export function testApp(routes: Hono<AppEnv>, db: TestDb, as: AdminMember = OWNE
     throw err;
   });
   app.route("/", routes);
-  const env = { DB: db, ENVIRONMENT: "development", PUBLIC_ORIGIN: "http://localhost:8787", MEDIA_ORIGIN: "" } as unknown as Env;
+  const env = { DB: db, ENVIRONMENT: "development", PUBLIC_ORIGIN: "http://localhost:8787", MEDIA_ORIGIN: "", ...extraEnv } as unknown as Env;
   const ctx = { waitUntil: () => undefined, passThroughOnException: () => undefined, props: {} } as unknown as ExecutionContext;
   return {
     as(m: AdminMember) {

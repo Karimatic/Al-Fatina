@@ -504,6 +504,8 @@ export const ar: Dictionary = {
       closed: "مغلق",
       address: "العنوان",
       directions: "🧭 الاتجاهات",
+      showMap: "🗺️ عرض الخريطة",
+      mapNote: "الخريطة من Google Maps.",
       call: "📞 اتصلي",
       whatsapp: "واتساب",
       sameStock: "مخزون الموقع والمحل واحد: ما ترينه على الإنترنت موجود في المحل.",
@@ -526,6 +528,6 @@ export const ar: Dictionary = {
       remove: "إزالة",
     },
   },
-  common: { loading: "جارٍ التحميل…", retry: "إعادة المحاولة", close: "إغلاق", back: "رجوع", error: "تعذر التحميل. تحققي من الاتصال." },
+  common: { loading: "جارٍ التحميل…", retry: "إعادة المحاولة", close: "إغلاق", back: "رجوع", error: "تعذر التحميل. تحققي من الاتصال.", savedCopy: "اتصال ضعيف: نسخة محفوظة، قد تكون الأسعار والمخزون تغيّرت.", refresh: "تحديث" },
   notFound: { title: "الصفحة غير موجودة", text: "هذه الصفحة غير موجودة أو لم تعد متوفرة.", cta: "العودة إلى الرئيسية", browse: "تصفحي الأقسام" },
 };

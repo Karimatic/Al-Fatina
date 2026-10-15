@@ -32,11 +32,13 @@ salesRoutes.post("/sales/manual", requirePermission("sales.create"), async (c) =
       shipping: z.number().int().min(0).max(10000).optional(),
       coupon: z.string().trim().toUpperCase().max(32).optional(),
       note: cleanText(500).optional(),
+      /** made when the sale form opens: a second tap on « Vendre » gives back the same sale (audit R2-5) */
+      idempotencyKey: z.string().uuid().optional(),
     }),
   );
   if (input.channel !== "boutique" && (!input.phone || !input.name)) throw new HttpError(422, "validation_failed", { phone: "required" });
   const order = await createOrder(c.env, {
-    idempotencyKey: crypto.randomUUID(),
+    idempotencyKey: input.idempotencyKey ?? crypto.randomUUID(),
     name: input.name ?? "Cliente en boutique",
     phone: input.phone ?? "",
     wilaya: input.wilaya,
@@ -53,6 +55,7 @@ salesRoutes.post("/sales/manual", requirePermission("sales.create"), async (c) =
     internalNote: input.note,
     shippingOverride: input.channel === "boutique" ? 0 : input.shipping,
   });
+  if ("replayed" in order) return c.json(order, 200); // the same sale, already recorded
   await c.env.DB.batch([auditStmt(c.env, actorOf(c.get("member")), "manual_sale", "order", order.id, { channel: input.channel, total: order.total })]);
   // an order taken by phone / Instagram may already exist on the website
   if (input.channel !== "boutique") c.executionCtx.waitUntil(detectDuplicates(c.env, order.id).catch(() => undefined));

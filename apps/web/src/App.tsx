@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { ErrorReporter } from "@/components/layout/ErrorReporter";
 import { FloatingHelp } from "@/components/layout/FloatingHelp";
 import { InstallPrompt } from "@/components/layout/InstallPrompt";
+import { SavedCopyNotice } from "@/components/layout/SavedCopyNotice";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SplashScreen } from "@/components/layout/SplashScreen";
@@ -56,6 +57,9 @@ export function App({ Provider, children }: { Provider: LanguageProvider; childr
         </Boundary>
         <Boundary where="install" quiet>
           <InstallPrompt />
+        </Boundary>
+        <Boundary where="saved-copy" quiet>
+          <SavedCopyNotice />
         </Boundary>
         <ThemeStyle />
         <ErrorReporter />

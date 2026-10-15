@@ -13,6 +13,15 @@ export class ApiError extends Error {
 /** A stalled mobile connection never leaves a spinner turning for minutes. */
 const TIMEOUT_MS = { read: 8_000, send: 15_000 };
 
+/** Some data on this page came from the phone's saved copy, not the shop (audit R2-4). */
+export let savedCopyShown = false;
+export const SAVED_COPY_EVENT = "henine:saved-copy";
+function markSavedCopy() {
+  if (savedCopyShown) return;
+  savedCopyShown = true;
+  window.dispatchEvent(new Event(SAVED_COPY_EVENT));
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   const ctrl = new AbortController();
@@ -28,6 +37,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   } finally {
     clearTimeout(timer);
   }
+  // the phone's saved copy (slow or no network, see public/sw.js): say so on the page
+  if (res.headers.get("Server-Timing")?.includes('desc="saved"')) markSavedCopy();
   const body = (await res.json().catch(() => null)) as { error?: string; details?: unknown } | null;
   if (!res.ok) throw new ApiError(res.status, body?.error ?? "generic", body?.details);
   return body as T;

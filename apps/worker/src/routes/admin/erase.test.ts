@@ -28,6 +28,40 @@ describe("erasing a customer's personal data", () => {
     expect(log).not.toContain("0554650718");
   });
 
+  // audit round 2 (R2-2): the copies kept elsewhere — her own address edit in the order's
+  // history, the team's corrections, exchange and follow-up notes, alerts, the parcel photo
+  it("leaves no copy in the history, notes, alerts or the parcel photo", async () => {
+    const db = testDb();
+    seedShop(db);
+    const mine = addOrder(db, { customerId: 1 });
+    const s = db.sqlite;
+    s.exec(`INSERT INTO order_events (order_id, kind, actor, source, note, created_at)
+      VALUES (${mine}, 'edit', 'customer', 'customer', 'Adresse modifiée par la cliente : « Cité 200 logements bloc B » → « 12 rue des Roses »', 1)`);
+    s.exec(`INSERT INTO order_changes (order_id, field, old_value, new_value, reason, actor, created_at)
+      VALUES (${mine}, 'phone', '0554650718', '0554650719', 'elle a appelé du 0554650719', 'Ilyas', 1), (${mine}, 'discount', '0', '300', NULL, 'Ilyas', 1)`);
+    s.exec(`INSERT INTO exchange_requests (order_id, order_item_id, to_variant_id, reason, note, decision_note) VALUES (${mine}, 1, 2, 'size', 'Amina, livrer au 12 rue des Roses', 'appeler 0554650718')`);
+    s.exec(`INSERT INTO delivery_followups (order_id, reason, last_attempt_at, note, created_by) VALUES (${mine}, 'unreachable', 1, 'Amina ne répond pas au 0554650718', 'Ilyas')`);
+    s.exec(`INSERT INTO alerts (kind, priority, entity, entity_id, message, dedupe_key) VALUES ('risk', 'high', 'order', '${mine}', 'Amina 0554650718 : 3 retours', 'k1')`);
+    s.exec(`UPDATE orders SET pack_photo = 'private/packing/${mine}-abc.jpg' WHERE id = ${mine}`);
+    const deleted: string[] = [];
+    const MEDIA = { delete: async (k: string | string[]) => void deleted.push(...[k].flat()) };
+
+    expect((await testApp(customerRoutes, db, undefined, { MEDIA } as never).call("DELETE", "/customers/1?erase=1")).status).toBe(200);
+
+    const left = JSON.stringify({
+      events: s.prepare("SELECT note FROM order_events WHERE order_id = ?").all(mine),
+      changes: s.prepare("SELECT old_value, new_value, reason FROM order_changes WHERE order_id = ?").all(mine),
+      exchanges: s.prepare("SELECT note, decision_note FROM exchange_requests").all(),
+      followups: s.prepare("SELECT note FROM delivery_followups").all(),
+      alerts: s.prepare("SELECT message FROM alerts").all(),
+      photo: s.prepare("SELECT pack_photo FROM orders WHERE id = ?").get(mine),
+    });
+    expect(left).not.toMatch(/Roses|Cité 200|055465071|Amina|packing/);
+    expect(deleted).toEqual([`private/packing/${mine}-abc.jpg`]);
+    // the accounts keep the amounts
+    expect(s.prepare("SELECT old_value, new_value FROM order_changes WHERE field = 'discount'").get()).toEqual({ old_value: "0", new_value: "300" });
+  });
+
   it("a plain delete still keeps her orders as they were", async () => {
     const db = testDb();
     seedShop(db);

@@ -44,6 +44,8 @@ export function SaleDesk() {
   const [deliveryType, setDeliveryType] = useState<"domicile" | "bureau">("domicile");
   const [address, setAddress] = useState("");
   const [shipping, setShipping] = useState<number | null>(null);
+  // one key per sale: two taps on « Vendre » (or a retry after a lost answer) make one sale
+  const [saleKey, setSaleKey] = useState(() => crypto.randomUUID());
   const inShop = channel === "boutique";
   const products = useMemo(
     () => (list.data?.products ?? []).filter((p) => p.status !== "archived" && `${p.name} ${p.nameAr}`.toLowerCase().includes(q.trim().toLowerCase())),
@@ -64,6 +66,7 @@ export function SaleDesk() {
         name: name.trim() || undefined,
         phone: phone.trim() ? normalizeDzPhone(phone) : undefined,
         lines: lines.map((l) => ({ variantId: l.variantId, qty: l.qty })),
+        idempotencyKey: saleKey,
         ...(inShop
           ? {}
           : { wilaya, communeId: null, deliveryType, address: deliveryType === "domicile" && address.trim() ? address : undefined, shipping: ship }),
@@ -75,6 +78,7 @@ export function SaleDesk() {
       setPhone("");
       setAddress("");
       setShipping(null);
+      setSaleKey(crypto.randomUUID()); // the next customer's sale
       void qc.invalidateQueries();
     },
     onError: (e) => toast(errorMessage(e), "error"),

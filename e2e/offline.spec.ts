@@ -21,6 +21,8 @@ test("offline: a product page she saw comes back, an unseen page says offline", 
   await context.setOffline(true);
   await page.goto(product);
   await expect(page.getByRole("heading", { level: 1, name: "Pyjama short coton fleuri" })).toBeVisible({ timeout: 15_000 });
+  // and she is told the price may have changed (audit R2-4)
+  await expect(page.getByRole("status").filter({ hasText: "copie enregistrée" })).toBeVisible();
 
   // never opened: the offline page, not an error
   const res = await page.goto("/fr/promotions").catch(() => null);

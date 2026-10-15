@@ -494,6 +494,8 @@ export const fr = {
       closed: "Fermé",
       address: "Adresse",
       directions: "🧭 Itinéraire",
+      showMap: "🗺️ Afficher la carte",
+      mapNote: "La carte vient de Google Maps.",
       call: "📞 Appeler",
       whatsapp: "WhatsApp",
       sameStock: "Le stock du site et de la boutique est le même : ce que vous voyez en ligne est en boutique.",
@@ -516,7 +518,7 @@ export const fr = {
       remove: "Retirer",
     },
   },
-  common: { loading: "Chargement…", retry: "Réessayer", close: "Fermer", back: "Retour", error: "Impossible de charger. Vérifiez votre connexion." },
+  common: { loading: "Chargement…", retry: "Réessayer", close: "Fermer", back: "Retour", error: "Impossible de charger. Vérifiez votre connexion.", savedCopy: "Connexion lente : copie enregistrée, les prix et le stock ont pu changer.", refresh: "Actualiser" },
   notFound: { title: "Page introuvable", text: "Cette page n'existe pas ou plus.", cta: "Retour à l'accueil", browse: "Voir les catégories" },
 };
 

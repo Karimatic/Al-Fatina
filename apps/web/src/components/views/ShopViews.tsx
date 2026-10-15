@@ -53,6 +53,9 @@ function useCartRestore() {
 
 /* ───────── Cart ───────── */
 
+/** Cart and order pages: at least this tall, whatever is inside (empty cart, loading, items). */
+const PAGE_MIN_H = "min-h-svh";
+
 export function CartView() {
   const { t, href, ar, locale } = useLocale();
   const items = useCart();
@@ -63,9 +66,10 @@ export function CartView() {
   const site = useApi<SiteConfigDTO>("/site");
   const freeOver = site.data?.checkout.freeShippingOver ?? null;
 
-  if (!ready) return <div className="mx-auto max-w-3xl px-4 py-8"><div className="skeleton h-40 rounded-card" /></div>;
+  // the same height reserved before and after the cart is read: the footer doesn't jump (audit R2-8)
+  if (!ready) return <div className={`mx-auto max-w-3xl px-4 py-8 ${PAGE_MIN_H}`}><div className="skeleton h-40 rounded-card" /></div>;
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className={`mx-auto max-w-3xl px-4 py-8 ${PAGE_MIN_H}`}>
       <PageTitle>{t.cart.title}</PageTitle>
       {restored && (
         <p role="status" className={`mb-4 rounded-2xl p-4 text-sm font-semibold ${restored.ok ? "bg-rose-100 text-plum-700" : "bg-ivory-deep text-ink-soft"}`}>
@@ -143,10 +147,10 @@ export function CheckoutView() {
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
   const lines = useMemo(() => items.map((i) => ({ variantId: i.variantId, qty: i.qty })), [items]);
-  if (!ready) return <div className="mx-auto max-w-5xl px-4 py-8"><div className="skeleton h-96 rounded-card" /></div>;
+  if (!ready) return <div className={`mx-auto max-w-5xl px-4 py-8 ${PAGE_MIN_H}`}><div className="skeleton h-96 rounded-card" /></div>;
   if (!items.length) {
     return (
-      <div className="mx-auto max-w-md px-4 py-16 text-center">
+      <div className={`mx-auto max-w-md px-4 py-16 text-center ${PAGE_MIN_H}`}>
         <h1 className="sr-only">{t.checkout.title}</h1>
         <p className="text-ink-soft">{t.cart.empty}</p>
         <a href={href("/")} className="mt-5 inline-flex h-12 items-center rounded-full bg-plum-600 px-6 font-semibold text-white">{t.cart.continue}</a>
@@ -154,7 +158,7 @@ export function CheckoutView() {
     );
   }
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className={`mx-auto max-w-5xl px-4 py-8 ${PAGE_MIN_H}`}>
       <PageTitle>{t.checkout.title}</PageTitle>
       <CheckoutForm lines={lines} channel="web" />
     </div>

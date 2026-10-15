@@ -39,3 +39,38 @@ describe("shop-wide write budget of the counters", () => {
     expect(await rows(db, "carts")).toBe(0);
   });
 });
+
+/** A fake rate limit: `max` calls per key (the real ones count per minute). */
+function limiter(max: number) {
+  const seen = new Map<string, number>();
+  const calls: string[] = [];
+  return {
+    calls,
+    limit: async ({ key }: { key: string }) => {
+      calls.push(key);
+      const n = (seen.get(key) ?? 0) + 1;
+      seen.set(key, n);
+      return { success: n <= max };
+    },
+  };
+}
+
+describe("one visitor can't use up the shop-wide budget (audit R2-3)", () => {
+  it("past her own share, her requests no longer touch the shared budget; others are still counted", async () => {
+    const db = testDb();
+    seedShop(db);
+    const shared = limiter(20);
+    const env = { DB: db, IP_HASH_SALT: "s", RL_BEACON: shared, RL_BEACON_IP: limiter(10) } as unknown as Env;
+    const app = new Hono<AppEnv>();
+    app.route("/", publicRoutes);
+    const ctx = { waitUntil: () => undefined, passThroughOnException: () => undefined } as unknown as ExecutionContext;
+    const visit = (ip: string) =>
+      app.request("/visit", { method: "POST", headers: { "Content-Type": "application/json", "CF-Connecting-IP": ip }, body: "{}" }, env, ctx);
+
+    for (let i = 0; i < 50; i++) expect((await visit("6.6.6.6")).status).toBe(204); // a script
+    expect(shared.calls.length).toBe(10); // only her share reached the shared budget
+    await visit("41.100.1.2"); // a real visitor
+    expect(await db.prepare("SELECT SUM(value) AS n FROM analytics_daily WHERE metric = 'visits'").first("n")).toBe(11);
+  });
+});
+

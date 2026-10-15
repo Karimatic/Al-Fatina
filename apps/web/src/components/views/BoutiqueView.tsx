@@ -37,6 +37,8 @@ export function BoutiqueView() {
   const wa = whatsappLink(contact?.whatsapp, t.plus.whatsapp.hello);
   // today's row (Algiers time), on the phone only: the page itself is built in advance
   const [today, setToday] = useState<number | null>(null);
+  // the map loads on tap: ~1 MB less on phones, and Google only sees who asked for it
+  const [map, setMap] = useState(false);
   useEffect(() => setToday(new Date(Date.now() + 3600_000).getUTCDay()), []);
   const address = ar ? b.addressAr || b.addressFr : b.addressFr || b.addressAr;
   const note = ar ? b.noteAr || b.noteFr : b.noteFr || b.noteAr;
@@ -48,13 +50,23 @@ export function BoutiqueView() {
       <PageTitle>📍 {B.title}</PageTitle>
       <div className="grid gap-6 md:grid-cols-[1.2fr_1fr]">
         <div className="overflow-hidden rounded-card border border-line bg-ivory-deep">
-          <iframe
-            title={B.title}
-            src={`https://www.google.com/maps?q=${q}&output=embed`}
-            className="aspect-[4/3] w-full md:aspect-auto md:h-full md:min-h-[24rem]"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+          {map ? (
+            <iframe
+              title={B.title}
+              src={`https://www.google.com/maps?q=${q}&output=embed`}
+              className="aspect-[4/3] w-full md:aspect-auto md:h-full md:min-h-[24rem]"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          ) : (
+            <div className="grid aspect-[4/3] w-full place-items-center p-6 text-center md:aspect-auto md:h-full md:min-h-[24rem]">
+              <div>
+                <button type="button" onClick={() => setMap(true)} className="inline-flex h-12 items-center rounded-full bg-ink px-6 font-semibold text-on-ink">
+                  {B.showMap}
+                </button>
+                <p className="mt-3 text-xs text-ink-soft">{B.mapNote}</p>
+              </div>
+            </div>
+          )}
         </div>
         <div className="space-y-5">
           {site.data && <BoutiqueOpenBadge boutique={b} />}

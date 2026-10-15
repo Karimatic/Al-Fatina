@@ -66,6 +66,15 @@ export async function withinBudget(binding: RateLimit | undefined, key: string):
   return (await binding.limit({ key })).success;
 }
 
+/**
+ * May this counter write (visit, step, saved checkout, error report)? Her own share first: past
+ * it the request never touches the shop-wide budget, so one visitor can't use it up for everyone.
+ */
+export async function counterAllowed(c: Context<AppEnv>, kind: string): Promise<boolean> {
+  if (!(await withinBudget(c.env.RL_BEACON_IP, `counter:${clientIp(c)}`))) return false;
+  return withinBudget(c.env.RL_BEACON, kind);
+}
+
 export function uaShort(c: Context<AppEnv>): string {
   const ua = c.req.header("User-Agent") ?? "";
   const os = /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "macOS" : "Autre";

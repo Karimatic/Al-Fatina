@@ -71,3 +71,27 @@ describe("same checkout key → the first order, every time", () => {
     expect(await res.json()).toMatchObject({ code: first.code, token: first.token });
   });
 });
+
+/**
+ * Loyalty points spent twice at the same instant (audit ORD-6, round 2 R2-6): two checkouts
+ * started together with the same 100 points, through the real order code. One gets them, the
+ * other is refused with « points_changed », the balance never goes below zero.
+ */
+describe("loyalty points, two orders at once", () => {
+  it("only one order spends them", async () => {
+    const db = shop(`INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('loyalty', '{"enabled":true,"points_per_100da":1,"redeem_value_da":5,"min_redeem":100,"expiry_days":365}', 0)`);
+    const env = envOf(db);
+    // her earlier order is the proof that the number is hers
+    const proof = await createOrder(env, order({ idempotencyKey: "a0000000-0000-4000-8000-000000000001" }));
+    db.sqlite.exec("UPDATE orders SET status = 'livree'; UPDATE customers SET points_balance = 100 WHERE phone = '0554650718'");
+    const spend = (key: string) =>
+      createOrder(env, order({ idempotencyKey: key, usePoints: true, proofs: [{ code: proof.code, token: proof.token }] }));
+    const results = await Promise.allSettled([spend("a0000000-0000-4000-8000-000000000002"), spend("a0000000-0000-4000-8000-000000000003")]);
+
+    expect(results.map((r) => r.status).sort()).toEqual(["fulfilled", "rejected"]);
+    const refused = results.find((r) => r.status === "rejected") as PromiseRejectedResult;
+    expect(refused.reason).toMatchObject({ status: 409, code: "points_changed" });
+    expect(await count(db, "SELECT points_balance AS n FROM customers WHERE phone = '0554650718'")).toBe(0);
+    expect(await count(db, "SELECT COUNT(*) AS n FROM orders WHERE points_used > 0")).toBe(1);
+  });
+});

@@ -108,6 +108,16 @@
       }
     },
     {
+      // each visitor's own share of those counters, checked first: one script can no longer
+      // empty the shop-wide budget for everyone (a real visit sends a few per minute)
+      "name": "RL_BEACON_IP",
+      "namespace_id": "1006",
+      "simple": {
+        "limit": 10,
+        "period": 60
+      }
+    },
+    {
       "name": "RL_AI",
       "namespace_id": "1004",
       "simple": {
