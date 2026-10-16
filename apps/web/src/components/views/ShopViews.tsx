@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { formatDA, type ProductCardDTO, type QuoteDTO, type SiteConfigDTO } from "@henine/shared";
+import { formatDA, type ProductCardDTO, type SiteConfigDTO } from "@henine/shared";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/ProductCard";
 import { PageTitle, ProductImage } from "@/components/ui/kit";
-import { apiGet, apiPost, useApi } from "@/lib/api";
+import { useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { pushSupported, subscribeProduct } from "@/lib/push";
 import { cart, cartCount, favoritesStore, pendingCoupon, useCart, useFavorites } from "@/lib/stores";
@@ -12,42 +12,19 @@ export { SearchView } from "./SearchView";
 export { CategoriesView, CategoryView, PromotionsView } from "./CatalogViews";
 
 /**
- * Reminder link from the team ("نسيت شيئًا في سلتك 🛒"): /panier?r=<cart id>&code=<promo>.
- * Puts the items back in the cart on this phone and keeps the code for the checkout.
+ * A campaign link with a promo code (/panier?code=ETE10): the code is kept for the checkout and
+ * shown here.
  */
-function useCartRestore() {
-  const { locale } = useLocale();
-  const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
+function useLinkedCode() {
   const { t } = useLocale();
+  const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const id = params.get("r");
-    const code = params.get("code")?.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "").slice(0, 32);
-    if (!id && !code) return;
+    const code = new URLSearchParams(location.search).get("code")?.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "").slice(0, 32);
+    if (!code) return;
     history.replaceState(null, "", location.pathname);
-    const notes: string[] = [];
-    if (code) {
-      pendingCoupon.set({ code, at: Date.now() });
-      notes.push(t.plus.restore.code(code));
-    }
-    if (!id) return setNote({ ok: true, text: notes.join(" · ") });
-    apiGet<{ lines: { variantId: number; qty: number }[]; ordered: boolean }>(`/carts/${encodeURIComponent(id)}`)
-      .then(async (saved) => {
-        if (saved.ordered) return setNote({ ok: true, text: t.plus.restore.ordered });
-        const q = await apiPost<QuoteDTO>("/quote", { lines: saved.lines });
-        const ok = q.lines.filter((l) => l.problem !== "unavailable" && l.problem !== "out_of_stock");
-        const inCart = new Set(cart.items().map((i) => i.variantId));
-        for (const l of ok) {
-          if (inCart.has(l.variantId)) continue;
-          cart.add({
-            variantId: l.variantId, qty: Math.min(l.qty, Math.max(1, l.available)), productId: l.productId, slug: l.slug, nameFr: l.nameFr, nameAr: l.nameAr,
-            optionsFr: l.optionsFr, optionsAr: l.optionsAr, price: l.unitPrice, image: l.image, color: null,
-          });
-        }
-        setNote(ok.length ? { ok: true, text: [t.plus.restore.restored(ok.length), ...notes].join(" · ") } : { ok: false, text: t.plus.restore.gone });
-      })
-      .catch(() => setNote({ ok: false, text: t.plus.restore.gone }));
-  }, [locale]); // eslint-disable-line react-hooks/exhaustive-deps
+    pendingCoupon.set({ code, at: Date.now() });
+    setNote({ ok: true, text: t.plus.restore.code(code) });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return note;
 }
 
@@ -59,7 +36,7 @@ const PAGE_MIN_H = "min-h-svh";
 export function CartView() {
   const { t, href, ar, locale } = useLocale();
   const items = useCart();
-  const restored = useCartRestore();
+  const restored = useLinkedCode();
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);

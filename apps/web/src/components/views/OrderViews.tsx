@@ -6,6 +6,7 @@ import { ErrorBox, inputCls, PageTitle, ProductImage, Spinner } from "@/componen
 import { ApiError, apiGet, apiPost, useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { useSavedOrders } from "@/lib/stores";
+import { trackPurchaseOnce } from "@/lib/pixels";
 
 /* ───────── Thank you ───────── */
 
@@ -18,6 +19,10 @@ export function ThankYouView() {
     setParams({ code: p.get("c") ?? "", token: p.get("t") ?? "" });
   }, []);
   const { data: order } = useApi<TrackedOrderDTO>(params?.code ? `/track/${params.code}?t=${encodeURIComponent(params.token)}` : null);
+  // the ad pixels count the order once (its code as id: Meta and TikTok never count it twice)
+  useEffect(() => {
+    if (order && params?.code) trackPurchaseOnce(params.code, order.total, order.items.filter((i) => i.productId != null).map((i) => ({ id: i.productId!, price: i.unitPrice, qty: i.qty })));
+  }, [order, params?.code]);
   if (!params) return null;
   const link = `${location.origin}${href(`/suivi?c=${params.code}&t=${encodeURIComponent(params.token)}`)}`;
   const wa = `https://wa.me/?text=${encodeURIComponent(`🌸 Henine Boutique · ${params.code}\n${link}`)}`;

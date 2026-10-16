@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { ThemeStyle } from "@/components/layout/ThemeStyle";
 import { useLocale } from "@/lib/locale";
+import { AdsConsent } from "@/components/layout/AdsConsent";
 
 /** The language's texts, given by each page's own provider (a page only downloads its language). */
 export type LanguageProvider = ComponentType<{ children: ReactNode }>;
@@ -60,6 +61,9 @@ export function App({ Provider, children }: { Provider: LanguageProvider; childr
         </Boundary>
         <Boundary where="saved-copy" quiet>
           <SavedCopyNotice />
+        </Boundary>
+        <Boundary where="ads-consent" quiet>
+          <AdsConsent />
         </Boundary>
         <ThemeStyle />
         <ErrorReporter />

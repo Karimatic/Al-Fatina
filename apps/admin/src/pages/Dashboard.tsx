@@ -105,7 +105,6 @@ function todos(a: DashboardData["attention"]): Todo[] {
     { key: "stale_preparing", icon: "📦", label: tr("En préparation depuis plus de 48 h"), hint: tr("à expédier"), count: a.stale_preparing, to: "/commandes", search: { attention: "stale_preparing" }, perm: "orders.view" },
     { key: "stale_shipped", icon: "🚚", label: tr("Expédiées depuis plus de 7 jours"), hint: tr("vérifier le suivi ZR Express"), count: a.stale_shipped, to: "/commandes", search: { attention: "stale_shipped" }, perm: "orders.view" },
     { key: "returns", icon: "↩️", label: tr("Retours à réceptionner"), hint: tr("remettre en stock à l'arrivée"), count: a.returns, to: "/commandes", search: { attention: "returns" }, perm: "orders.view" },
-    { key: "abandoned", icon: "🛒", label: tr("Paniers abandonnés (24 h)"), hint: a.abandonedValue ? tr("{0} non commandés", { 0: da(a.abandonedValue) }) : undefined, count: a.abandoned, to: "/paniers", perm: "carts.view" },
     { key: "restocked", icon: "🔔", label: tr("De retour en stock : clientes à prévenir"), count: a.restocked, to: "/notifier", perm: "marketing.edit" },
     { key: "out", icon: "⛔", label: tr("Variantes en rupture"), hint: a.lowStock ? tr("+ {0} en stock bas", { 0: a.lowStock }) : undefined, count: a.outOfStock, to: "/stock", search: { filter: "out" }, perm: "stock.view" },
     { key: "reviews", icon: "⭐", label: tr("Avis à valider"), count: a.pendingReviews, to: "/avis", perm: "reviews.moderate" },

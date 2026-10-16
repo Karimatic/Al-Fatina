@@ -473,30 +473,6 @@ export const alerts = sqliteTable(
   (t) => [index("alerts_open_idx").on(t.resolvedAt, t.priority, t.createdAt)],
 );
 
-export const carts = sqliteTable(
-  "carts",
-  {
-    id: text("id").primaryKey(), // client-generated uuid
-    items: text("items", { mode: "json" }).$type<{ variantId: number; qty: number }[]>().notNull(),
-    phone: text("phone"),
-    name: text("name"),
-    wilayaCode: integer("wilaya_code"),
-    communeId: integer("commune_id"),
-    deliveryType: text("delivery_type"),
-    channel: text("channel"),
-    locale: text("locale"),
-    value: integer("value").notNull().default(0),
-    /** details | address | delivery | ready */
-    step: text("step"),
-    consent: bool("consent").notNull().default(false),
-    recoveredOrderId: integer("recovered_order_id"),
-    lastContactedAt: integer("last_contacted_at"),
-    createdAt: createdAt(),
-    updatedAt: updatedAt(),
-  },
-  (t) => [index("carts_updated_idx").on(t.updatedAt)],
-);
-
 /* ───────────────────────────── Marketing ───────────────────────────── */
 
 export const coupons = sqliteTable("coupons", {

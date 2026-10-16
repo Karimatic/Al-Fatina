@@ -201,7 +201,6 @@ customerRoutes.delete("/customers/:id", requireOwner, async (c) => {
           `UPDATE orders SET name = 'Cliente effacée', phone = '', address = NULL, customer_note = NULL, internal_note = NULL,
                   ip_hash = NULL, ua_short = NULL, referrer = NULL WHERE customer_id = ?1 OR phone = ?2`,
         ).bind(id, cust.phone),
-        c.env.DB.prepare("DELETE FROM carts WHERE phone = ?").bind(cust.phone),
         c.env.DB.prepare("DELETE FROM contact_messages WHERE phone = ?").bind(cust.phone),
         c.env.DB.prepare("DELETE FROM stock_alerts WHERE phone = ?").bind(cust.phone),
       ]

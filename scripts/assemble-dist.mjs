@@ -28,11 +28,14 @@ for (const entry of readdirSync(dist)) rmSync(join(dist, entry), { recursive: tr
 cpSync(web, dist, { recursive: true });
 cpSync(admin, join(dist, "admin"), { recursive: true });
 
-// Storefront CSP: scripts only from the site itself and the page's own
-// inline scripts (the theme and splash boot scripts), each allowed by its
-// sha256, never 'unsafe-inline'. Data only goes back to the site itself; frames only for
+// Storefront CSP: scripts only from the site itself, the page's own inline scripts (the theme
+// and splash boot scripts, each allowed by its sha256, never 'unsafe-inline') and the two ad
+// pixels. Data only goes back to the site itself (and to the pixels once the visitor agrees); frames only for
 // the shop's Google Maps card; every font is self-hosted.
-const SCRIPT_SRC = "script-src 'self'";
+// + the ad pixels' own scripts (Meta, TikTok), loaded only after the visitor agrees (lib/pixels.ts)
+const PIXEL_SCRIPTS = "https://connect.facebook.net https://analytics.tiktok.com";
+const PIXEL_SEND = "https://www.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://*.tiktok.com https://*.tiktokw.us";
+const SCRIPT_SRC = `script-src 'self' ${PIXEL_SCRIPTS}`;
 // photos and videos come from the shop itself (/media, /hero, /ig), or from a separate media
 // domain when MEDIA_ORIGIN is set at build time: never from just any website
 const MEDIA = (process.env.MEDIA_ORIGIN ?? "").trim();
@@ -42,9 +45,9 @@ const pagePolicy = (hashes) =>
     [SCRIPT_SRC, ...hashes].join(" "),
     "style-src 'self' 'unsafe-inline'",
     `font-src 'self' data:${MEDIA ? ` ${MEDIA}` : ""}`,
-    `img-src 'self' data: blob:${MEDIA ? ` ${MEDIA}` : ""}`,
+    `img-src 'self' data: blob:${MEDIA ? ` ${MEDIA}` : ""} ${PIXEL_SEND}`,
     `media-src 'self' blob:${MEDIA ? ` ${MEDIA}` : ""}`,
-    "connect-src 'self'",
+    `connect-src 'self' ${PIXEL_SEND}`,
     "frame-src https://www.google.com",
     "worker-src 'self'",
     "manifest-src 'self'",

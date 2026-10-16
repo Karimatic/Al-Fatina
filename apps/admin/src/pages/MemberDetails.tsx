@@ -6,7 +6,7 @@ import { tr } from "../i18n";
 import { ago, date } from "../lib/format";
 import { useMe } from "../Shell";
 import { Badge, Button, ListSkeleton, useToast } from "../ui";
-import { PERMISSION_LABEL } from "./System";
+import { PERMISSION_LABEL } from "./Team";
 
 interface Details {
   member: {

@@ -92,6 +92,13 @@ export const fr = {
     items: STORE_TEXTS.fr.faq,
   },
   footer: { rights: "Tous droits réservés.", help: "Aide", shop: "Boutique", contact: "Contact", links: "Nos liens" },
+  ads: {
+    text: "Nous aimerions mesurer quelles publicités Meta et TikTok vous ont amenée ici. Vous êtes d'accord ?",
+    yes: "D'accord",
+    no: "Non merci",
+    more: "En savoir plus",
+    footer: "Publicités",
+  },
   product: {
     size: "Taille",
     color: "Couleur",
@@ -414,10 +421,7 @@ export const fr = {
       denied: "Notifications bloquées dans votre navigateur.",
     },
     restore: {
-      restored: (n: number) => `Votre panier est de retour : ${n} article(s) 🛒`,
       code: (c: string) => `Le code ${c} sera appliqué à votre commande 🎁`,
-      gone: "Ce panier n'est plus disponible.",
-      ordered: "Ce panier a déjà été commandé 🌸",
     },
     reviews: { photos: "📷 Ajouter des photos (3 max)", photosHint: "Visibles après validation par l'équipe.", remove: "Retirer la photo", photoAlt: "Photo de la cliente" },
     assistant: {

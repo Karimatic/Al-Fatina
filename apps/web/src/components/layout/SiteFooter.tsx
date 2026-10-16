@@ -4,6 +4,7 @@ import { ColorModeSwitch } from "./ColorModeSwitch";
 import { WhatsAppIcon } from "./FloatingHelp";
 import { useDesign, useSite, whatsappLink } from "@/lib/site";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { openConsent, pixelsConfigured } from "@/lib/pixels";
 
 /** Social links saved in Admin → Contact (only the ones filled in). */
 function useSocials() {
@@ -19,6 +20,7 @@ function useSocials() {
 }
 
 export function SiteFooter() {
+  const site = useSite();
   const { t, href, ar } = useLocale();
   const design = useDesign();
   const socials = useSocials();
@@ -89,6 +91,14 @@ export function SiteFooter() {
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-5">
           <p className="text-xs text-white/50">
             © {new Date().getFullYear()} Henine Boutique · {t.footer.rights}
+            {pixelsConfigured(site.data?.pixels) && (
+              <>
+                {" · "}
+                <button type="button" onClick={openConsent} className="underline underline-offset-2 hover:text-white">
+                  {t.ads.footer}
+                </button>
+              </>
+            )}
           </p>
           <div className="flex flex-wrap items-center gap-2 pe-14 md:pe-0">
             <ColorModeSwitch tone="dark" />

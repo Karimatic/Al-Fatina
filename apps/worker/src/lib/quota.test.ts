@@ -10,7 +10,7 @@ import { d1UsageToday, quotaCheck } from "./quota";
 
 const NOW = Date.parse("2026-10-15T15:00:00Z");
 function cloudflare(rowsWritten: number, rowsRead = 1000) {
-  const calls: { url: string; body: { variables: { account: string; day: string } } }[] = [];
+  const calls: { url: string; body: { variables: Record<string, string> } }[] = [];
   const fetcher = (async (url: string, init: RequestInit) => {
     calls.push({ url, body: JSON.parse(String(init.body)) });
     return Response.json({ data: { viewer: { accounts: [{ d1AnalyticsAdaptiveGroups: [{ sum: { rowsRead, rowsWritten: rowsWritten - 10 } }, { sum: { rowsRead: 0, rowsWritten: 10 } }] }] } } });
@@ -23,7 +23,7 @@ describe("database quota warning", () => {
   it("sums every database of the account for today's UTC day", async () => {
     const { fetcher, calls } = cloudflare(30_000);
     expect(await d1UsageToday(envOf(), NOW, fetcher)).toEqual({ rowsRead: 1000, rowsWritten: 30_000 });
-    expect(calls[0]!.body.variables).toEqual({ account: "acc", day: "2026-10-15" });
+    expect(calls[0]!.body.variables).toEqual({ accountTag: "acc", start: "2026-10-15", end: "2026-10-15" });
   });
 
   it("nothing without the token", async () => {

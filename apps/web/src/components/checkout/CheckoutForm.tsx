@@ -9,23 +9,12 @@ import { cart, checkoutMemory, pendingCoupon, saveOrder, takePendingCoupon, useS
 import { newIdempotencyKey } from "@/lib/api";
 import { Picker } from "./Picker";
 import { markStep, visitAttribution } from "@/lib/attribution";
+import { trackAd } from "@/lib/pixels";
 
 interface Props {
   lines: { variantId: number; qty: number }[];
   channel: "web" | "express";
   compact?: boolean;
-}
-
-/** One autosaved checkout per tab and per checkout kind (cart page vs. express on a product). */
-const CART_KEY = (channel: string) => `henine.cartId.${channel}`;
-function cartId(channel: string): string {
-  try {
-    let id = sessionStorage.getItem(CART_KEY(channel));
-    if (!id) sessionStorage.setItem(CART_KEY(channel), (id = crypto.randomUUID()));
-    return id;
-  } catch {
-    return crypto.randomUUID();
-  }
 }
 
 export function CheckoutForm({ lines, channel, compact = false }: Props) {
@@ -54,7 +43,10 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
     const v = visitAttribution();
     setUntracked(!v?.source && !v?.referrer && !v?.clickId);
     // the order page: reached by opening it (the quick form on a product page: by filling it)
-    if (channel === "web") markStep("checkout");
+    if (channel === "web") {
+      markStep("checkout");
+      trackAd("InitiateCheckout", cart.items().map((i) => ({ id: i.productId, price: i.price, qty: i.qty })));
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const askHeard = untracked ? site.data?.heardFrom : null;
   // a code brought by a link (cart reminder, campaign) is already filled in
@@ -108,36 +100,15 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
     return () => clearTimeout(id);
   }, [linesKey, wilaya, communeId, deliveryType, coupon, quotePhone, usePoints]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /*
-   * Checkout autosave (abandoned checkouts): once the phone number is valid, the progress is
-   * saved (debounced, only when something changed) so the team can call back. The notice
-   * under the phone field tells the customer what the number is used for.
-   */
   const normalizedPhone = normalizeDzPhone(phone);
-  const step = !wilaya ? "details" : !communeId ? "address" : deliveryType === "domicile" && address.trim().length < 4 ? "delivery" : name.trim().length >= 2 ? "ready" : "delivery";
-  const lastSaved = useRef("");
-  useEffect(() => {
-    if (!normalizedPhone || !lines.length) return;
-    const payload = {
-      id: cartId(channel),
-      lines,
-      phone: normalizedPhone,
-      name: name.trim() || undefined,
-      wilaya,
-      communeId: typeof communeId === "number" ? communeId : null,
-      deliveryType,
-      step,
-      channel,
-      locale,
-    };
-    const key = JSON.stringify(payload);
-    if (key === lastSaved.current) return;
-    const id = setTimeout(() => {
-      lastSaved.current = key;
-      apiPost("/carts", payload).catch(() => undefined);
-    }, 2000);
-    return () => clearTimeout(id);
-  }, [normalizedPhone, linesKey, name, wilaya, communeId, deliveryType, step, channel, locale]); // eslint-disable-line react-hooks/exhaustive-deps
+  // the quick form on a product page: « started the order » when she starts filling it
+  const expressStarted = useRef(false);
+  const startExpress = () => {
+    markStep("checkout");
+    if (expressStarted.current) return;
+    expressStarted.current = true;
+    trackAd("InitiateCheckout", (quote?.lines ?? []).map((l) => ({ id: l.productId, price: l.unitPrice, qty: l.qty })));
+  };
 
   const problems = quote?.lines.filter((l) => l.problem) ?? [];
 
@@ -162,7 +133,6 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
       const order = await guard.send((g) => withRetry(() => apiPost<CreatedOrderDTO>("/orders", {
         guard: g,
         idempotencyKey: idem.current,
-        cartId: normalizedPhone ? cartId(channel) : undefined,
         name: name.trim(),
         phone: normalizedPhone,
         wilaya,
@@ -191,11 +161,6 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
       }
       saveOrder({ code: order.code, token: order.token, total: order.total, createdAt: Date.now() });
       if (coupon) pendingCoupon.set(null); // used: not offered again
-      try {
-        sessionStorage.removeItem(CART_KEY(channel)); // the next checkout is a new one
-      } catch {
-        /* private mode */
-      }
       checkoutMemory.set({ name: name.trim(), phone: normalizedPhone!, wilaya, communeId: communeId === "other" ? null : communeId, address, deliveryType });
       if (channel === "web") cart.clear();
       location.href = href(`/merci?c=${order.code}&t=${encodeURIComponent(order.token)}`);
@@ -243,7 +208,7 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
   const describe = (k: string) => (fieldErrors[k] ? { "aria-invalid": true as const, "aria-describedby": `f-${k}-error` } : {});
 
   return (
-    <form onSubmit={submit} onFocusCapture={channel === "express" ? () => markStep("checkout") : undefined} noValidate className={compact ? "space-y-4" : "grid gap-8 pb-20 md:pb-0 lg:grid-cols-[1fr_22rem]"}>
+    <form onSubmit={submit} onFocusCapture={channel === "express" ? startExpress : undefined} noValidate className={compact ? "space-y-4" : "grid gap-8 pb-20 md:pb-0 lg:grid-cols-[1fr_22rem]"}>
       <guard.Trap />
       <div className="space-y-4">
         <div>

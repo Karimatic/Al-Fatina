@@ -60,8 +60,6 @@ export const createOrderInput = z
     guard: formGuard,
     proofs: orderProofs,
     idempotencyKey: z.string().uuid(),
-    /** checkout autosave id: the saved abandoned checkout is marked recovered */
-    cartId: z.string().uuid().optional(),
     name: cleanText(80).pipe(z.string().min(2, "name_required").refine(hasLetters(2), "name_required")),
     phone: dzPhone,
     wilaya: wilayaCode,
@@ -137,21 +135,6 @@ export const quoteInput = z.object({
   proofs: orderProofs,
 });
 export type QuoteInput = z.infer<typeof quoteInput>;
-
-/** Checkout in progress (autosaved once the phone number is valid; see the notice in the form). */
-export const CHECKOUT_STEPS = ["details", "address", "delivery", "ready"] as const;
-export const cartSaveInput = z.object({
-  id: z.string().uuid(),
-  lines: z.array(orderLine).min(1).max(30),
-  phone: dzPhone,
-  name: cleanText(80).optional(),
-  wilaya: wilayaCode.nullable().optional(),
-  communeId: z.number().int().positive().nullable().optional(),
-  deliveryType: deliveryType.optional(),
-  step: z.enum(CHECKOUT_STEPS).default("details"),
-  channel: z.enum(["web", "express"]).default("web"),
-  locale: z.enum(["fr", "ar"]).default("ar"),
-});
 
 const orderCode = z.string().trim().toUpperCase().regex(/^HN-[0-9A-Z]{4,10}$/);
 

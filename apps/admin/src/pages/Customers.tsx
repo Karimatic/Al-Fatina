@@ -6,7 +6,7 @@ import { api, del, errorMessage, patch, post, put } from "../api";
 import { ago, da, date, ltr, telLink, waLink } from "../lib/format";
 import { RiskBadge, RiskPanel, SegmentBadge } from "../lib/risk";
 import { useCan, useMe } from "../Shell";
-import { Badge, Button, Card, Empty, ErrorState, ListSkeleton, NumberField, PageHeader, Pills, SearchBox, Sheet, Stat, StatusBadge, TextArea, TextField, Toggle, useToast, useIsOwner } from "../ui";
+import { Badge, Button, Card, Empty, ErrorState, ListSkeleton, NumberField, PageHeader, Pills, SearchBox, Sheet, Stat, StatusBadge, TextArea, TextField, Toggle, useToast } from "../ui";
 import { tr } from "../i18n";
 
 /* ───────────── Clients ───────────── */
@@ -33,7 +33,6 @@ const SEGMENTS = [
   { value: "returning", label: tr("Fidèles") },
   { value: "vip", label: tr("VIP") },
   { value: "high_spender", label: tr("💰 Gros paniers") },
-  { value: "abandoned", label: tr("🛒 Panier abandonné") },
   { value: "high_risk", label: tr("Risque élevé") },
   { value: "inactives", label: tr("😴 Inactives 60 j") },
   { value: "blacklist", label: tr("Liste noire") },
@@ -233,7 +232,7 @@ function CustomerSheet({ id, onClose }: { id: number; onClose: () => void }) {
                 className="ms-2"
                 loading={remove.isPending}
                 onClick={() =>
-                  confirm(tr("Effacer toutes les données personnelles de {0} ? (À faire quand elle le demande, loi 18-07.) Ses commandes restent pour les comptes, mais son nom, son téléphone, son adresse et ses notes sont effacés, ainsi que ses messages et paniers. Impossible à annuler.", { 0: c?.name ?? "" })) &&
+                  confirm(tr("Effacer toutes les données personnelles de {0} ? (À faire quand elle le demande, loi 18-07.) Ses commandes restent pour les comptes, mais son nom, son téléphone, son adresse et ses notes sont effacés, ainsi que ses messages. Impossible à annuler.", { 0: c?.name ?? "" })) &&
                   remove.mutate(true)
                 }
               >
@@ -244,150 +243,6 @@ function CustomerSheet({ id, onClose }: { id: number; onClose: () => void }) {
         </div>
       )}
     </Sheet>
-  );
-}
-
-/* ───────────── Paniers ───────────── */
-
-interface CartRow {
-  id: string;
-  phone: string;
-  name: string | null;
-  wilaya: string | null;
-  commune: string | null;
-  delivery_type: string | null;
-  channel: string | null;
-  step: string | null;
-  value: number;
-  created_at: number;
-  updated_at: number;
-  last_contacted_at: number | null;
-  recovered_code: string | null;
-  customer_orders: number;
-  items: { variantId: number; qty: number; name: string }[];
-  locale: string | null;
-}
-
-/** "نسيت شيئًا في سلتك 🛒": the reminder in her language, with the link that refills her cart. */
-function reminderText(c: CartRow): string {
-  const ar = c.locale !== "fr";
-  const link = `${location.origin}${ar ? "" : "/fr"}/panier?r=${c.id}`;
-  const items = c.items.map((i) => i.name).join(ar ? "، " : ", ");
-  if (ar) {
-    return `السلام عليكم ${c.name ?? ""} 🌸\nنسيتِ شيئًا في سلتك 🛒: ${items}.\nأكملي طلبك من هنا: ${link}\nHenine Boutique`;
-  }
-  return `Bonjour ${c.name ?? ""} 🌸\nVous avez oublié quelque chose dans votre panier 🛒 : ${items}.\nTerminez votre commande ici : ${link}\nHenine Boutique`;
-}
-
-const STEP_LABEL: Record<string, [string, number]> = {
-  details: [tr("Coordonnées saisies"), 1],
-  address: ["Wilaya choisie", 2],
-  delivery: ["Commune / livraison", 3],
-  ready: [tr("Formulaire complet, non envoyé"), 4],
-  checkout: [tr("Coordonnées saisies"), 1],
-};
-
-export function CartsPage() {
-  const owner = useIsOwner();
-  const qc = useQueryClient();
-  const [filter, setFilter] = useState("abandoned");
-  const q = useQuery({
-    queryKey: ["carts", filter],
-    queryFn: () => api<{ stats: { total: number; recovered: number; lost_value: number }; rows: CartRow[] }>(`/carts?filter=${filter}`),
-    refetchInterval: 60_000,
-  });
-  const s = q.data?.stats;
-  return (
-    <div>
-      <PageHeader
-        group={tr("Commandes")}
-        title={tr("Paniers abandonnés")}
-        subtitle={tr("Commandes commencées (numéro saisi) mais non envoyées depuis 30 min. Aucun message automatique : c'est vous qui décidez de rappeler.")}
-      />
-      {s && (
-        <div className="mb-4 grid grid-cols-3 gap-3">
-          <Stat label={tr("Paniers (30 j)")} value={s.total} />
-          <Stat label={tr("Récupérés")} value={s.recovered} tone="good" hint={s.total ? `${Math.round((s.recovered / s.total) * 100)} %` : undefined} />
-          <Stat label={tr("Valeur non récupérée")} value={da(s.lost_value)} />
-        </div>
-      )}
-      <Pills
-        value={filter}
-        onChange={setFilter}
-        options={[{ value: "abandoned", label: tr("À relancer") }, { value: "active", label: tr("En cours (< 30 min)") }, { value: "recovered", label: tr("Récupérés") }, { value: "all", label: tr("Tous") }]}
-      />
-      {q.error ? <ErrorState error={q.error} onRetry={q.refetch} /> : !q.data ? <ListSkeleton /> : q.data.rows.length === 0 ? (
-        <Empty title={tr("Aucun panier")} icon="🛒">{tr("Ils apparaissent quand une cliente saisit un numéro valide au moment de commander, sans envoyer la commande.")}</Empty>
-      ) : (
-        <ul className="space-y-2">
-          {q.data.rows.map((c) => {
-            const [stepLabel, stepN] = STEP_LABEL[c.step ?? "details"] ?? ["—", 1];
-            return (
-            <li key={c.id} className="rounded-xl border border-line bg-surface p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-semibold">{c.name ?? tr("Sans nom")} · <span className="font-mono text-sm"><bdi dir="ltr">{formatDzPhone(c.phone)}</bdi></span></p>
-                  <p className="text-sm text-ink-soft">{c.items.map((i) => `${i.name} ×${i.qty}`).join(", ")}</p>
-                  <p className="text-xs text-ink-soft">
-                    📍 {c.wilaya ?? tr("wilaya non choisie")}{c.commune ? ` › ${c.commune}` : ""}{c.delivery_type ? ` · ${c.delivery_type === "bureau" ? "Bureau" : "Domicile"}` : ""}
-                    {c.channel === "express" ? tr(" · commande express") : ""}
-                  </p>
-                  <p className="text-xs text-ink-soft">
-                    {tr("Dernière activité")} {ago(c.updated_at)}{c.last_contacted_at ? tr(" · relancée {0}", { 0: ago(c.last_contacted_at) }) : ""}
-                    {c.customer_orders ? tr(" · {0} commande(s) passée(s)", { 0: c.customer_orders }) : tr(" · jamais commandé")}
-                  </p>
-                  <div className="mt-1.5 flex items-center gap-2 text-xs">
-                    <span className="flex gap-0.5" aria-hidden="true">
-                      {[1, 2, 3, 4].map((n) => <span key={n} className={`h-1.5 w-5 rounded-full ${n <= stepN ? "bg-plum-600" : "bg-line"}`} />)}
-                    </span>
-                    <span className="text-ink-soft">{stepLabel}</span>
-                  </div>
-                </div>
-                <b className="shrink-0">{da(c.value)}</b>
-              </div>
-              {c.recovered_code ? (
-                <Badge tone="bg-emerald-100 text-emerald-800">{tr("✓ Commande")} {c.recovered_code}</Badge>
-              ) : (
-                <div className="mt-2 flex flex-wrap gap-2">
-                <a href={telLink(c.phone)} onClick={() => void post(`/carts/${c.id}/contacted`).then(() => qc.invalidateQueries({ queryKey: ["carts"] }))} className="inline-flex h-9 items-center rounded-lg bg-plum-600 px-4 text-sm font-semibold text-white">
-                  {tr("📞 Appeler")}
-                </a>
-                <a
-                  href={waLink(c.phone, reminderText(c))}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => void post(`/carts/${c.id}/contacted`).then(() => qc.invalidateQueries({ queryKey: ["carts"] }))}
-                  className="inline-flex h-9 items-center rounded-lg bg-[#25D366] px-4 text-sm font-semibold text-white"
-                >
-                  {tr("WhatsApp")}
-                </a>
-                <button
-                  type="button"
-                  hidden={!owner}
-                  onClick={() => confirm(tr("Supprimer ce panier de la liste ?")) && void del(`/carts/${c.id}`).then(() => qc.invalidateQueries({ queryKey: ["carts"] }))}
-                  className="ms-auto inline-flex h-9 items-center rounded-lg border border-line px-3 text-sm font-semibold text-red-700"
-                >
-                  {tr("🗑 Supprimer")}
-                </button>
-                </div>
-              )}
-              {c.recovered_code && (
-                <button
-                  type="button"
-                  hidden={!owner}
-                  onClick={() => confirm(tr("Supprimer ce panier de la liste ?")) && void del(`/carts/${c.id}`).then(() => qc.invalidateQueries({ queryKey: ["carts"] }))}
-                  className="ms-2 text-xs font-semibold text-red-700 underline"
-                >
-                  {tr("🗑 Supprimer")}
-                </button>
-              )}
-            </li>
-            );
-          })}
-        </ul>
-
-      )}
-    </div>
   );
 }
 

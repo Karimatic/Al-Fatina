@@ -13,7 +13,7 @@ import { checkPassword, devEcho, hashPassword, passwordKeyValid } from "../../li
 import { decryptSecret, encryptSecret, maskSecret, randomToken } from "../../lib/crypto";
 import { body, HttpError, intParam, rateLimit } from "../../lib/http";
 import { mailLayout, mailProvider, sendMail } from "../../lib/mail";
-import { getSettings, patchSetting } from "../../lib/settings";
+import { bumpCatalogStmt, getSettings, patchSetting } from "../../lib/settings";
 import { processOutbox, sendTelegramText, telegramConfig, tgCall } from "../../lib/telegram";
 import { actorOf, requirePermission } from "../../middleware/access";
 
@@ -200,6 +200,8 @@ accountRoutes.put("/integrations/zr", requirePermission("integrations.manage"), 
 accountRoutes.put("/integrations/pixels", requirePermission("integrations.manage"), async (c) => {
   const input = await body(c, z.object({ metaPixelId: z.string().regex(/^\d{5,20}$/).nullable(), tiktokPixelId: z.string().regex(/^[A-Z0-9]{5,30}$/).nullable() }));
   await patchSetting(c.env, "integrations", { meta_pixel_id: input.metaPixelId, tiktok_pixel_id: input.tiktokPixelId });
+  // the store reads them from /api/site: a new version so its cache follows at once
+  await c.env.DB.batch([bumpCatalogStmt(c.env), auditStmt(c.env, actorOf(c.get("member")), "update", "integration", "pixels", input)]);
   return c.json({ ok: true });
 });
 

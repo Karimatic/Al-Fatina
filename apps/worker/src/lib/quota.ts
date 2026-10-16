@@ -14,19 +14,22 @@ import { sendTelegramText } from "./telegram";
 export const D1_FREE_DAILY = { rowsRead: 5_000_000, rowsWritten: 100_000 } as const;
 const LEVELS = [80, 50] as const;
 
-const QUERY = `query ($account: String!, $day: Date!) {
-  viewer { accounts(filter: { accountTag: $account }) {
-    d1AnalyticsAdaptiveGroups(limit: 1000, filter: { date: $day }) { sum { rowsRead rowsWritten } }
+// as in Cloudflare's D1 docs (Observability → Metrics and analytics): lowercase « string! »,
+// the day as date_geq / date_leq (audit R4-1)
+const QUERY = `query D1Usage($accountTag: string!, $start: Date, $end: Date) {
+  viewer { accounts(filter: { accountTag: $accountTag }) {
+    d1AnalyticsAdaptiveGroups(limit: 10000, filter: { date_geq: $start, date_leq: $end }) { sum { rowsRead rowsWritten } }
   } }
 }`;
 
 /** Today's rows read / written over every database of the account (UTC day, like the quota). */
 export async function d1UsageToday(env: Env, now = Date.now(), fetcher: typeof fetch = fetch): Promise<{ rowsRead: number; rowsWritten: number } | null> {
   if (!env.CF_ACCOUNT_ID || !env.CF_ANALYTICS_TOKEN) return null;
+  const day = new Date(now).toISOString().slice(0, 10);
   const res = await fetcher("https://api.cloudflare.com/client/v4/graphql", {
     method: "POST",
     headers: { Authorization: `Bearer ${env.CF_ANALYTICS_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ query: QUERY, variables: { account: env.CF_ACCOUNT_ID, day: new Date(now).toISOString().slice(0, 10) } }),
+    body: JSON.stringify({ query: QUERY, variables: { accountTag: env.CF_ACCOUNT_ID, start: day, end: day } }),
   });
   if (!res.ok) throw new Error(`d1 usage: HTTP ${res.status}`);
   const json = (await res.json()) as {

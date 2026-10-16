@@ -8,7 +8,6 @@ import { mediaUrl, variantLabels } from "../../lib/catalog";
 import { algiersDate, algiersDayStart, CANCELLED_SQL, periodStats } from "../../lib/orders";
 import { getSettings } from "../../lib/settings";
 import { requirePermission } from "../../middleware/access";
-import { ABANDONED_AFTER } from "./carts";
 import { attentionSql } from "./orders";
 
 export const dashboardRoutes = new Hono<AppEnv>();
@@ -58,14 +57,10 @@ dashboardRoutes.get("/dashboard", requirePermission("dashboard.view"), async (c)
   const { operations } = await getSettings(c.env, ["operations"]);
   const attn = attentionSql(now, operations.sla);
   const attnCols = Object.entries(attn).map(([k, cond]) => `SUM(CASE WHEN ${cond} THEN 1 ELSE 0 END) AS ${k}`).join(", ");
-  const [pipeline, attention, carts, lowStock, stockCounts, restocked, recent, reviews, messages, outbox] = await c.env.DB.batch([
+  const [pipeline, attention, lowStock, stockCounts, restocked, recent, reviews, messages, outbox] = await c.env.DB.batch([
     c.env.DB.prepare(`SELECT status, COUNT(*) AS n FROM orders WHERE status IN (${ACTIVE}) GROUP BY status`),
     // one pass over the active orders (status index) for every "needs attention" counter
     c.env.DB.prepare(`SELECT ${attnCols} FROM orders o LEFT JOIN customers c ON c.id = o.customer_id WHERE o.status IN (${ACTIVE})`),
-    c.env.DB.prepare(
-      `SELECT COUNT(*) AS n, COALESCE(SUM(value), 0) AS value FROM carts
-        WHERE recovered_order_id IS NULL AND last_contacted_at IS NULL AND updated_at < ? AND updated_at > ?`,
-    ).bind(now - ABANDONED_AFTER, now - 86400_000),
     c.env.DB.prepare(
       `SELECT v.id, p.id AS product_id, p.name_fr, v.stock_on_hand - v.stock_reserved AS available,
               (SELECT COUNT(*) FROM stock_alerts a WHERE a.variant_id = v.id AND a.notified_at IS NULL) AS waiting
@@ -106,7 +101,6 @@ dashboardRoutes.get("/dashboard", requirePermission("dashboard.view"), async (c)
   )
     .bind(now)
     .first<{ open: number | null; due: number | null }>();
-  const cartRow = carts!.results[0] as { n: number; value: number };
   const sc = stockCounts!.results[0] as { out_count: number | null; low_count: number | null };
   // cancelled orders (annulée / doublon / fausse) are never counted as orders or revenue
   return c.json({
@@ -123,8 +117,6 @@ dashboardRoutes.get("/dashboard", requirePermission("dashboard.view"), async (c)
     pipeline: Object.fromEntries((pipeline!.results as { status: string; n: number }[]).map((r) => [r.status, r.n])),
     attention: {
       ...Object.fromEntries(Object.keys(attn).map((k) => [k, a[k] ?? 0])),
-      abandoned: cartRow.n,
-      abandonedValue: cartRow.value,
       restocked: back.length,
       outOfStock: sc.out_count ?? 0,
       lowStock: sc.low_count ?? 0,

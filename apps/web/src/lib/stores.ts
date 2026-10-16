@@ -6,6 +6,7 @@
 import { useSyncExternalStore } from "react";
 import type { ImageRef } from "@henine/shared";
 import { markStep } from "./attribution";
+import { trackAd } from "./pixels";
 
 function createStore<T>(key: string, initial: T) {
   let value: T = initial;
@@ -87,6 +88,7 @@ export const cart = {
   },
   add(item: CartItem) {
     markStep("cart");
+    trackAd("AddToCart", [{ id: item.productId, price: item.price, qty: item.qty, name: item.nameFr }]);
     cartStore.set((items) => {
       const existing = items.find((i) => i.variantId === item.variantId);
       if (existing) return items.map((i) => (i.variantId === item.variantId ? { ...i, qty: Math.min(20, i.qty + item.qty) } : i));

@@ -17,6 +17,8 @@ test("store pages carry a strict content security policy", async ({ request }) =
   const res = await request.get("/fr");
   const csp = res.headers()["content-security-policy"] ?? "";
   expect(csp).toContain("script-src 'self'");
+  // only the store itself and the two ad pixels (loaded after consent) may run scripts
+  expect(csp).toMatch(/script-src 'self' https:\/\/connect\.facebook\.net https:\/\/analytics\.tiktok\.com( 'sha256-[^']+')*;/);
   expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
   expect(csp).toMatch(/img-src 'self' data: blob:(;| )/);
   expect(csp).toContain("object-src 'none'");

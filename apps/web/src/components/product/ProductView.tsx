@@ -22,6 +22,7 @@ import { ReviewForm } from "./ReviewForm";
 import { ShareButton } from "./ShareButton";
 import { SizeGuideButton } from "./SizeGuide";
 import { markStep } from "@/lib/attribution";
+import { trackAd } from "@/lib/pixels";
 
 export function ProductView() {
   const [slug, setSlug] = useState<string | null>(null);
@@ -68,7 +69,8 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
     document.title = `${name} · Henine Boutique`;
     rememberViewed(p.slug); // "Vus récemment" on the home page
     markStep("product");
-  }, [name, p.slug]);
+    trackAd("ViewContent", [{ id: p.id, price: p.price, name: p.nameFr }]);
+  }, [name, p.slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // pre-select the only value of single-value options, and the first in-stock colour
   const [selected, setSelected] = useState<Record<number, number>>(() => {

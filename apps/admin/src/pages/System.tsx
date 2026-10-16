@@ -27,96 +27,6 @@ function useSave<T>(fn: (v: T) => Promise<unknown>, keys: string[], ok = "Enregi
   });
 }
 
-/* ───────────── Équipe ───────────── */
-
-interface Member {
-  id: number;
-  email: string;
-  name: string;
-  phone: string | null;
-  telegram_user_id: number | null;
-  is_active: number;
-  last_seen_at: number | null;
-  has_password: number;
-  role: string;
-  role_name: string;
-  sessions: number;
-}
-
-export const PERMISSION_LABEL: Record<string, string> = {
-  "orders.confirm": tr("Confirmer / annuler"), "orders.ship": tr("Préparer / expédier"), "orders.edit": tr("Modifier commandes"), "orders.export": tr("Exporter"),
-  "customers.edit": tr("Fiches clientes"), "products.edit": tr("Produits"), "stock.edit": tr("Stock"), "cost.view": tr("Prix d'achat"), "sales.create": tr("Ventes manuelles"),
-  "promos.edit": tr("Promos"), "loyalty.edit": tr("Fidélité"), "marketing.edit": tr("Marketing"), "reviews.moderate": tr("Avis"), "stats.view": tr("Statistiques"),
-  "content.edit": tr("Contenu"), "delivery.edit": tr("Tarifs livraison"), "team.manage": tr("Équipe"), "integrations.manage": tr("Intégrations"),
-};
-
-export function TeamPage() {
-  const me = useMe();
-  const q = useQuery({ queryKey: ["team"], queryFn: () => api<{ members: Member[]; roles: { key: string; name: string; permissions: string[] }[] }>("/team") });
-  const [edit, setEdit] = useState<Member | null>(null);
-  return (
-    <div className="space-y-4">
-      <PageHeader
-        group={tr("Système")}
-        title={tr("Équipe")}
-        subtitle={tr("Qui fait partie de l'équipe et ce que chaque rôle peut faire. Créer un compte, changer les droits ou envoyer une invitation : dans Comptes.")}
-        actions={<a href="/admin/comptes" className="inline-flex h-9 items-center rounded-lg border border-line bg-surface px-3.5 text-sm font-semibold">{tr("Gérer les accès → Comptes")}</a>}
-      />
-      {q.error ? <ErrorState error={q.error} onRetry={q.refetch} /> : !q.data ? <ListSkeleton /> : (
-        <>
-          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
-            {q.data.members.map((m) => (
-              <li key={m.id}>
-                <button type="button" onClick={() => setEdit(m)} className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-start hover:bg-rose-100/30 ${m.is_active ? "" : "opacity-50"}`}>
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium">{m.name}{m.id === me.data?.id ? tr(" (vous)") : ""}</span>
-                    <span className="block truncate text-xs text-ink-soft">{m.email} {tr("· vu")} {ago(m.last_seen_at)}</span>
-                  </span>
-                  <span className="flex shrink-0 flex-col items-end gap-1">
-                    <Badge>{m.role_name}</Badge>
-                    {!m.has_password && <Badge tone="bg-amber-100 text-amber-800">{tr("Invitation en attente")}</Badge>}
-                    {m.telegram_user_id ? <span className="text-xs text-ink-soft">{tr("📱 Telegram lié")}</span> : null}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          <Card title={tr("Rôles et droits")}>
-            <ul className="space-y-3 text-sm">
-              {q.data.roles.map((r) => (
-                <li key={r.key}>
-                  <p className="font-semibold">{r.name}</p>
-                  <p className="text-xs text-ink-soft">{r.permissions.includes("*") ? tr("Tous les droits") : r.permissions.filter((p) => tr(PERMISSION_LABEL[p])).map((p) => tr(PERMISSION_LABEL[p])).join(" · ") || tr("Consultation")}</p>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </>
-      )}
-      {edit && <MemberSheet member={edit} onClose={() => setEdit(null)} />}
-    </div>
-  );
-}
-
-/** A team member's name and Telegram ID; access (rights, invitation, sessions) is in Comptes. */
-function MemberSheet({ member, onClose }: { member: Member; onClose: () => void }) {
-  const [name, setName] = useState(member.name);
-  const [tg, setTg] = useState<number | null>(member.telegram_user_id);
-  const save = useSave(() => patch(`/team/${member.id}`, { name, telegramUserId: tg }), ["team"]);
-  return (
-    <Sheet open onClose={onClose} title={member.name} footer={<Button variant="primary" className="w-full" loading={save.isPending} onClick={() => save.mutate(undefined, { onSuccess: onClose })}>{tr("Enregistrer")}</Button>}>
-      <div className="space-y-3">
-        <p className="text-sm text-ink-soft">{member.email} · {member.role_name}</p>
-        <TextField label={tr("Nom")} value={name} onChange={(e) => setName(e.target.value)} />
-        <NumberField label={tr("ID Telegram")} hint={tr("envoyez /id au bot pour l'obtenir")} value={tg} onChange={setTg} />
-        <p className="border-t border-line pt-3 text-sm text-ink-soft">
-          {tr("Droits, invitation, déconnexion ou désactivation :")} <a href="/admin/comptes" className="font-semibold text-plum-600">{tr("Comptes")}</a>
-        </p>
-      </div>
-    </Sheet>
-  );
-}
-
 /* ───────────── Comptes (my account + integrations) ───────────── */
 
 interface Integrations {
@@ -395,7 +305,7 @@ export function IntegrationsSection() {
           <TextField label={tr("TikTok Pixel ID")} value={pixels.tiktok} onChange={(e) => setPixels({ ...pixels, tiktok: e.target.value.toUpperCase() })} />
           <Button onClick={() => run(() => put("/integrations/pixels", { metaPixelId: pixels.meta || null, tiktokPixelId: pixels.tiktok || null }), tr("Pixels enregistrés"))}>{tr("Enregistrer")}</Button>
         </div>
-        <p role="note" className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{tr("⚠️ Pas encore actif : la boutique n'envoie rien à Meta ni à TikTok (aucun script publicitaire, pour la vitesse et la vie privée). Les numéros sont seulement gardés. Pour savoir quelles pubs vendent, mettez des liens de campagne (?utm_campaign=…) et regardez Statistiques → Sources.")}</p>
+        <p role="note" className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">{tr("✅ Actif dès qu'un numéro est enregistré. La boutique demande d'abord l'accord de chaque visiteuse (petit message en bas de l'écran, loi 18-07) ; si elle accepte, Meta et TikTok reçoivent : page vue, produit vu, ajout au panier, début de commande, commande passée (montant en DZD, code de la commande). Leurs scripts se chargent après la page : la vitesse de la boutique ne change pas.")}</p>
       </Card>
     </>
   );

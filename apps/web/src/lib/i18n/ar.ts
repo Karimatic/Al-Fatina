@@ -94,6 +94,13 @@ export const ar: Dictionary = {
     items: STORE_TEXTS.ar.faq,
   },
   footer: { rights: "جميع الحقوق محفوظة.", help: "مساعدة", shop: "المتجر", contact: "تواصلي معنا", links: "روابطنا" },
+  ads: {
+    text: "نودّ أن نعرف أي إعلان من Meta أو TikTok أوصلك إلينا. هل توافقين؟",
+    yes: "موافقة",
+    no: "لا، شكرًا",
+    more: "اعرفي المزيد",
+    footer: "الإعلانات",
+  },
   product: {
     size: "المقاس",
     color: "اللون",
@@ -424,10 +431,7 @@ export const ar: Dictionary = {
       denied: "الإشعارات محظورة في متصفحك.",
     },
     restore: {
-      restored: (n: number) => `سلتك عادت: ${arCount(n, { one: "منتج واحد", two: "منتجان", few: "منتجات", many: "منتجًا", other: "منتج" })} 🛒`,
       code: (c: string) => `سيُطبَّق الرمز ${c} على طلبك 🎁`,
-      gone: "هذه السلة لم تعد متوفرة.",
-      ordered: "تم طلب هذه السلة من قبل 🌸",
     },
     reviews: { photos: "📷 أضيفي صورًا (3 كحد أقصى)", photosHint: "تظهر بعد موافقة الفريق.", remove: "حذف الصورة", photoAlt: "صورة الزبونة" },
     assistant: {
