@@ -236,10 +236,16 @@ async function saveProduct(c: Parameters<typeof body>[0], existingId: number | n
   const now = Date.now();
   const ids = await nextIds(env);
   const productId = existingId ?? ids.product;
-  const slug = slugify(input.slug || input.nameFr) || `produit-${productId}`;
-
-  const dup = await env.DB.prepare("SELECT id FROM products WHERE slug = ? AND id != ?").bind(slug, productId).first();
-  if (dup) throw new HttpError(409, "slug_taken");
+  const base = slugify(input.slug || input.nameFr) || `produit-${productId}`;
+  const taken = async (s: string) => !!(await env.DB.prepare("SELECT id FROM products WHERE slug = ? AND id != ?").bind(s, productId).first());
+  let slug = base;
+  if (await taken(slug)) {
+    // an address typed by hand stays as typed: say it is taken
+    if (input.slug) throw new HttpError(409, "slug_taken");
+    // made from the name (two pieces called « Pyjama satin », an old draft…): the next free number
+    let n = 2;
+    while (await taken((slug = `${base}-${n}`))) if (++n > 50) throw new HttpError(409, "slug_taken");
+  }
 
   const current = existingId ? await loadProduct(c, existingId) : null;
   const canStock = hasPermission(c.get("member").permissions, "stock.edit");
