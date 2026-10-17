@@ -33,7 +33,13 @@
       "/fr/collection/*"
     ]
   },
-  // Free *.workers.dev URL until a domain is bought. Then: routes + custom_domain, workers_dev: false.
+  // The shop's address: henineboutique.com (and www., which redirects to it). The old workers.dev
+  // address stays on: its pages redirect to the domain, its API keeps answering (saved pages,
+  // the Telegram webhook).
+  "routes": [
+    { "pattern": "henineboutique.com", "custom_domain": true },
+    { "pattern": "www.henineboutique.com", "custom_domain": true }
+  ],
   "workers_dev": true,
   "preview_urls": false,
   "d1_databases": [
@@ -146,7 +152,7 @@
   },
   "vars": {
     "ENVIRONMENT": "production",
-    "PUBLIC_ORIGIN": "https://henine-boutique.karimmaticmz.workers.dev",
+    "PUBLIC_ORIGIN": "https://henineboutique.com",
     "MEDIA_ORIGIN": "",
     // "console": no email service, admins sign in with an authenticator app
     "MAIL_PROVIDER": "console",

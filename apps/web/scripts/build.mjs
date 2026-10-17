@@ -70,6 +70,16 @@ const { renderPage, PAGES, NOT_FOUND, APP_CLASS, BOOT_SCRIPT } = await import(pa
 
 // 3. pages
 const site = siteUrl();
+/**
+ * The shop has one address (henineboutique.com): a page opened on the old workers.dev address or
+ * on www. goes there before anything is drawn, same path. (Static pages never reach the Worker,
+ * so this is the page's first line; the Worker redirects the pages it serves itself.)
+ */
+const siteHost = new URL(site).hostname;
+const REDIRECT_BOOT =
+  site.startsWith("https://") && !siteHost.endsWith(".workers.dev")
+    ? `if(/\\.workers\\.dev$/.test(location.hostname)||location.hostname===${JSON.stringify(`www.${siteHost}`)})location.replace(${JSON.stringify(site)}+location.pathname+location.search+location.hash);`
+    : "";
 const fonts = JSON.parse(readFileSync(join(web, "src/styles/font-preload.json"), "utf8"));
 const HERO_PRELOAD =
   `<link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(max-width: 767px)" imagesrcset="/hero/silk-rose-480.webp 480w, /hero/silk-rose-960.webp 960w" imagesizes="50vw"/>`;
@@ -82,7 +92,7 @@ function writePage(page, locale, file) {
     `<!DOCTYPE html><html lang="${lang}" dir="${dir}"><head>` +
     `<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>` +
     // light / dark choice and the store's colours before the first paint (no flash)
-    `<script>${BOOT_SCRIPT}</script>` +
+    `<script>${REDIRECT_BOOT}${BOOT_SCRIPT}</script>` +
     head +
     // the fonts the first view of this language needs (Arabic pages: Tajawal + the logo's italic)
     fonts[locale].map((f) => `<link rel="preload" href="${f}" as="font" type="font/woff2" crossorigin=""/>`).join("") +

@@ -43,6 +43,18 @@ app.use("*", async (c, next) => {
   }
   await next();
 });
+// One address for the shop: pages opened on the old workers.dev address or on www. move there
+// for good (301, same path). The API stays answered where it is asked: phones with a saved page,
+// the Telegram webhook and forms already open keep working on the old address.
+app.use("*", async (c, next) => {
+  const url = new URL(c.req.url);
+  const home = new URL(c.env.PUBLIC_ORIGIN);
+  const old = url.hostname.endsWith(".workers.dev") || url.hostname === `www.${home.hostname}`;
+  if (old && url.hostname !== home.hostname && !home.hostname.endsWith(".workers.dev") && !url.pathname.startsWith("/api/") && (c.req.method === "GET" || c.req.method === "HEAD")) {
+    return c.redirect(`${home.origin}${url.pathname}${url.search}`, 301);
+  }
+  await next();
+});
 
 /* ─── API ─── */
 const api = new Hono<AppEnv>();

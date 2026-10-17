@@ -1,7 +1,7 @@
 # Henine Boutique — runbook
 
 What to do, step by step, for the things that go wrong or need care. Commands run from the repository
-root unless written otherwise. Live shop: https://henine-boutique.karimmaticmz.workers.dev (Worker
+root unless written otherwise. Live shop: https://henineboutique.com (old address henine-boutique.karimmaticmz.workers.dev redirects to it; Worker
 `henine-boutique`, D1 `henine-boutique-db`, R2 `henine-media`).
 
 ## 1. Deploy

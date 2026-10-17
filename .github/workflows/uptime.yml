@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      SHOP: ${{ vars.PUBLIC_ORIGIN || 'https://henine-boutique.karimmaticmz.workers.dev' }}
+      SHOP: ${{ vars.PUBLIC_ORIGIN || 'https://henineboutique.com' }}
     steps:
       - name: Health and home page (2 tries)
         id: probe
