@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Henine Boutique · WhatsApp guide</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  :root { --plum: #8e1d4f; --rose: #fbe7ef; --ink: #1e1418; --soft: #6b5a61; --line: #ead6de; --wa: #25d366; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 26pt; margin: 0 0 4mm; color: var(--plum); letter-spacing: -0.01em; }
+  h2 { font-size: 15pt; color: var(--plum); margin: 9mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 2px solid var(--rose); break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 5mm 0 1.5mm; break-after: avoid; }
+  p { margin: 0 0 2.5mm; }
+  .ar { font-family: "Segoe UI", Tahoma, Arial, sans-serif; direction: rtl; unicode-bidi: isolate; }
+  td:first-child .ar { display: block; text-align: right; font-weight: 500; }
+  .label { display: inline-block; background: var(--rose); color: var(--plum); border-radius: 6px; padding: 0 5px; font-weight: 600; white-space: nowrap; }
+  .wa { display: inline-block; background: var(--wa); color: #fff; border-radius: 6px; padding: 0 6px; font-weight: 700; white-space: nowrap; }
+  .cover { height: 245mm; display: flex; flex-direction: column; justify-content: center; break-after: page; }
+  .cover .kicker { color: var(--soft); text-transform: uppercase; letter-spacing: 0.18em; font-size: 9pt; font-weight: 700; }
+  .cover .sub { font-size: 13pt; color: var(--soft); max-width: 140mm; }
+  .cover .box { margin-top: 12mm; border: 1px solid var(--line); border-radius: 10px; padding: 5mm 6mm; max-width: 150mm; }
+  .cover .box b { color: var(--plum); }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; break-inside: auto; }
+  th, td { text-align: left; vertical-align: top; padding: 2mm 2.5mm; border-bottom: 1px solid var(--line); }
+  th { background: var(--rose); color: var(--plum); font-size: 9.5pt; }
+  tr { break-inside: avoid; }
+  td:first-child { font-weight: 600; width: 32%; }
+  .steps { counter-reset: s; list-style: none; padding: 0; margin: 1mm 0 3mm; }
+  .steps li { counter-increment: s; position: relative; padding: 0 0 1.6mm 9mm; break-inside: avoid; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 0.3mm; width: 6mm; height: 6mm; border-radius: 50%; background: var(--plum); color: #fff; font-size: 8.5pt; font-weight: 700; display: grid; place-items: center; }
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 3.5mm 4.5mm; margin: 3mm 0; break-inside: avoid; }
+  .tip { background: #eefaf2; border-color: #bfe8cc; }
+  .warn { background: #fff7e6; border-color: #f3dca7; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; align-items: start; }
+  figure { margin: 2mm 0; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 10px; }
+  figcaption { font-size: 8.5pt; color: var(--soft); margin-top: 1mm; }
+  .msg { font-style: italic; background: #f6f1f3; border-left: 3px solid var(--wa); padding: 1.5mm 3mm; margin: 1mm 0 2.5mm; border-radius: 4px; }
+  .toc li { margin-bottom: 1mm; }
+  .small { font-size: 9pt; color: var(--soft); }
+  .page { break-before: page; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <p class="kicker">Henine Boutique · Team guide · October 2026</p>
+  <h1>WhatsApp in your shop</h1>
+  <p class="sub">Everything the website and the admin do with WhatsApp: what customers see, what the team uses every day, and how to do each task step by step.</p>
+  <div class="box">
+    <p><b>Your shop's WhatsApp number:</b> 0554 65 07 18 (set in the admin; every button follows it).</p>
+    <p><b>How it works:</b> every WhatsApp button opens WhatsApp on the phone or computer with the message <b>already written</b>. Nothing is sent by itself: the person checks the message and taps send.</p>
+    <p style="margin:0"><b>Inside:</b> 1. Setup · 2. What customers see (11 places) · 3. What the team uses (10 tools) · 4. Step-by-step tasks · 5. Good practice and limits</p>
+  </div>
+</section>
+
+<h2>1. Setup: one number for the whole shop</h2>
+<p>All the store's WhatsApp buttons use one number. Change it in one place and every button follows.</p>
+<ol class="steps">
+  <li>Admin → <span class="label">Paramètres</span> <span class="ar label">الإعدادات</span> → the <span class="label">Contact &amp; réseaux</span> <span class="ar label">الاتصال والشبكات</span> tab.</li>
+  <li>Type the number in the <b>WhatsApp</b> field, the way you'd say it: <i>0554 65 07 18</i>. A <i>wa.me</i> link also works.</li>
+  <li><b>Enregistrer</b>. The store shows the new number within a few minutes.</li>
+</ol>
+<div class="card tip">Leave the field empty and every WhatsApp button disappears from the store (useful when nobody can answer, for example during a holiday). The phone number and Instagram stay.</div>
+
+<h2>2. What customers see on the website</h2>
+<p>Eleven places send the customer to your WhatsApp, each with a message ready to send so you know at once what she is talking about.</p>
+<table>
+  <tr><th>Where</th><th>What it does</th></tr>
+  <tr><td>Product page: « Une question ? Demandez sur WhatsApp » <span class="ar">«عندك سؤال؟ اسألي عبر واتساب»</span></td><td>Opens a message with the <b>product's name and link</b> already in it. You see straight away which piece she is asking about.</td></tr>
+  <tr><td>Help bubble (bottom corner, every page)</td><td>The assistant panel has a <span class="wa">WhatsApp</span> button. When the assistant can't answer, it also suggests WhatsApp.</td></tr>
+  <tr><td>Menu (☰) and footer</td><td>A WhatsApp button in the menu and a WhatsApp icon among the social links at the bottom of every page.</td></tr>
+  <tr><td>Contact page</td><td>A big green « Écrire sur WhatsApp » button next to the contact form.</td></tr>
+  <tr><td>Boutique page (/boutique)</td><td>WhatsApp next to Call and Directions, with the shop's address and opening hours.</td></tr>
+  <tr><td>Order tracking page</td><td>« Une question sur cette commande ? · Écrire sur WhatsApp » with her <b>order code</b> already in the message.</td></tr>
+  <tr><td>Thank-you page (after ordering)</td><td>« M'envoyer le lien sur WhatsApp »: she sends <b>herself</b> the private tracking link of her order, to find it later.</td></tr>
+  <tr><td>« Partager » on a product</td><td>Shares the product to any WhatsApp chat or group (the phone's share menu, or WhatsApp directly).</td></tr>
+  <tr><td>Link previews</td><td>Any shop link pasted in WhatsApp shows the product's <b>photo, name and price</b>, not a blank link.</td></tr>
+  <tr><td>Size guide</td><td>The tips say « Entre deux tailles ? … écrivez-nous sur WhatsApp ».</td></tr>
+  <tr><td>Where orders come from</td><td>Visits arriving from a WhatsApp link are counted as <b>WhatsApp</b> in <span class="label">Statistiques</span> → <span class="label">Sources</span>, and so are the orders they lead to.</td></tr>
+</table>
+
+<div class="grid2">
+  <figure><img src="img/product-ask.png" alt="" /><figcaption>Product page (French): the green WhatsApp button under the size and quantity.</figcaption></figure>
+  <figure><img src="img/product-ask-ar.png" alt="" /><figcaption>The same page in Arabic.</figcaption></figure>
+</div>
+
+<h2 class="page">3. What the team uses in the admin</h2>
+<p>In the admin, a green <span class="wa">💬 WhatsApp</span> button opens a chat with <b>the customer's</b> number and a message suited to the situation. Several of them also note the contact in the order's history, so the whole team knows she was contacted.</p>
+<table>
+  <tr><th>Where</th><th>What it does</th></tr>
+  <tr><td>Telegram, each new order</td><td>The order message in the team's Telegram group has a <span class="wa">💬 WhatsApp</span> button: a <b>confirmation message in her language</b> (Arabic or French) with the order code, amount, delivery type and wilaya.</td></tr>
+  <tr><td><span class="label">Commandes</span> <span class="ar label">الطلبات</span> → an order</td><td>Four big buttons: <b>📞 Appeler · 💬 WhatsApp · ✉️ SMS · 📝 Noter</b>. WhatsApp opens the confirmation message, and the contact is <b>written in the order's history</b> (with your note if you add one).</td></tr>
+  <tr><td><span class="label">Expéditions</span> → <span class="label">📞 Échecs de livraison</span> <span class="ar label">توصيلات فاشلة</span></td><td>For a parcel the courier couldn't deliver: WhatsApp with « le livreur n'a pas pu vous livrer votre commande … Quand êtes-vous disponible ? ». The contact is counted on the follow-up.</td></tr>
+  <tr><td><span class="label">Clients</span> <span class="ar label">الزبونات</span> → a customer</td><td>A WhatsApp button on her profile, with « Bonjour [name] 🌸 ».</td></tr>
+  <tr><td><span class="label">Contact</span> <span class="ar label">رسائل الزبونات</span> (messages)</td><td>Reply to a contact-form message on WhatsApp: « … suite à votre message ».</td></tr>
+  <tr><td><span class="label">Notifier</span> <span class="ar label">الإعلام</span> → waiting customers</td><td>When a size comes back in stock, each customer who asked for it is listed. One tap per number sends « Bonne nouvelle : [product] est de retour ». Then <b>Marquer comme prévenues</b>.</td></tr>
+  <tr><td><span class="label">Vente au magasin</span> <span class="ar label">البيع في المحل</span> → 💬 WhatsApp</td><td>Records an order a customer sent you <b>on WhatsApp</b>: it joins the orders, already confirmed, and the stock is updated.</td></tr>
+  <tr><td><span class="label">Ventes</span> and <span class="label">Statistiques</span></td><td>Sales by channel, with WhatsApp shown separately, so you see what WhatsApp brings each month.</td></tr>
+  <tr><td><span class="label">Avis</span> <span class="ar label">الآراء</span></td><td>A nice review received on WhatsApp can be typed in and published (without the « Achat vérifié » badge, which is only for delivered orders).</td></tr>
+  <tr><td><span class="label">Équipe</span> <span class="ar label">الفريق</span></td><td>New: an invitation or « mot de passe oublié » link is sent to a team member with <span class="wa">💬 Envoyer sur WhatsApp</span>.</td></tr>
+</table>
+<div class="card warn"><b>Removed on 16 October 2026:</b> the abandoned-carts list (« Paniers ») and its WhatsApp reminders, at the owner's request. Saved checkouts are no longer stored.</div>
+
+<h2 class="page">4. Step by step</h2>
+
+<h3>4.1 Confirm a new order on WhatsApp</h3>
+<ol class="steps">
+  <li>A new order arrives in the Telegram group (or in <span class="label">Commandes</span> → <span class="label">À confirmer</span>).</li>
+  <li>Tap <span class="wa">💬 WhatsApp</span>. WhatsApp opens on her number with this message (in her language):</li>
+</ol>
+<p class="msg">Bonjour Amina 🌸 Ici Henine Boutique. Nous confirmons votre commande HN-4K7P (5 400 DA), livraison à domicile à Alger. Merci !</p>
+<ol class="steps" start="3">
+  <li>Check the message, send it, and wait for her answer.</li>
+  <li>She agrees: tap <b>✅ Confirmer</b> (in Telegram or in the order). No answer: <b>📵 Injoignable</b>, and set a time to call back (Telegram reminds the team).</li>
+</ol>
+<div class="card tip">Calling first and sending WhatsApp only when she doesn't pick up works best: a call confirms faster and cuts fake orders.</div>
+
+<h3>4.2 Note a WhatsApp contact in the order's history</h3>
+<ol class="steps">
+  <li>Open the order in <span class="label">Commandes</span>.</li>
+  <li>Tap <span class="wa">💬 WhatsApp</span>: a small box opens under the buttons.</li>
+  <li>Add what she said (e.g. « préfère être livrée samedi ») and save. It appears in <b>Historique</b> with your name and the time.</li>
+</ol>
+
+<h3>4.3 Record an order received on WhatsApp</h3>
+<ol class="steps">
+  <li>Admin → <span class="label">Vente au magasin</span> (or <span class="label">Ventes</span> → « Vente manuelle »).</li>
+  <li>Choose <b>💬 WhatsApp</b> at the top.</li>
+  <li>Tap the pieces and sizes, type her name and phone, choose the wilaya and home / office delivery.</li>
+  <li>Tap the save button once. The order is created <b>confirmed</b> and the stock is taken off the website at once. A second tap by mistake does not create a second order.</li>
+</ol>
+
+<h3>4.4 A parcel couldn't be delivered</h3>
+<ol class="steps">
+  <li>Admin → <span class="label">Expéditions</span> → <span class="label">📞 Échecs de livraison</span>.</li>
+  <li>Tap <span class="wa">💬 WhatsApp</span> next to the customer: the message asks when she is available.</li>
+  <li>Write down her answer (new day, new address) and choose the result, e.g. « Nouveau passage demandé », then ask the courier for the new delivery.</li>
+</ol>
+
+<h3>4.5 Tell waiting customers that a size is back</h3>
+<ol class="steps">
+  <li>Put the stock back (<span class="label">Stock</span> → Réception, or tap the number).</li>
+  <li>Customers who turned on notifications are told automatically.</li>
+  <li>The others: <span class="label">Notifier</span> → the product's card → tap each number: the « est de retour » message is ready.</li>
+  <li>When done: <b>Marquer comme prévenues</b>.</li>
+</ol>
+
+<h3>4.6 Answer a message from the contact page</h3>
+<ol class="steps">
+  <li>Admin → <span class="label">Contact</span>: the newest messages first.</li>
+  <li>If she left a phone number, tap <span class="wa">WhatsApp</span> to answer there; otherwise call or reply by phone.</li>
+</ol>
+
+<h3>4.7 Share a product or a promotion on WhatsApp (and know what it sells)</h3>
+<ol class="steps">
+  <li>Open the product on the website and tap <b>Partager</b> → WhatsApp (chat, group or <b>Status</b>). The link shows its photo and price.</li>
+  <li>To <b>measure</b> what WhatsApp brings: Admin → <span class="label">Sources</span> <span class="ar label">المصادر</span> → next to WhatsApp, <b>📋 Lien de suivi</b> copies the shop's link marked « WhatsApp ».</li>
+  <li>Share that link (Status, groups). Visits and orders that come from it are counted under WhatsApp in <span class="label">Sources</span>. For one campaign, add <i>&amp;utm_campaign=statut-aid</i> at the end: it gets its own line.</li>
+</ol>
+
+<h3>4.8 Invite a team member with WhatsApp</h3>
+<ol class="steps">
+  <li>Admin → <span class="label">Équipe</span> <span class="ar label">الفريق</span> → <b>+ Inviter quelqu'un</b>.</li>
+  <li>Name, email, then choose her role card (Confirmatrice, Préparation / Stock, Marketing…).</li>
+  <li><b>Créer l'invitation</b> → <span class="wa">💬 Envoyer sur WhatsApp</span> → choose her chat. The link works 7 days, once.</li>
+</ol>
+
+<h3>4.9 Change the shop's WhatsApp number</h3>
+<p>See part 1: <span class="label">Paramètres</span> → <span class="label">Contact &amp; réseaux</span> → WhatsApp → Enregistrer.</p>
+
+<h2 class="page">5. Good practice and limits</h2>
+<div class="card">
+  <p><b>Use WhatsApp Business</b> (free) on the shop's phone: quick replies (« / » + shortcut) for answers you send often, labels (New order, Paid, To deliver), and away messages outside opening hours.</p>
+  <p style="margin:0"><b>One phone, one number:</b> the number in Paramètres should be a phone the team actually watches all day. A message that waits a day is often a lost sale.</p>
+</div>
+<div class="card">
+  <p><b>Customers' privacy</b> (law 18-07): never forward a customer's address, phone or screenshots to other groups. Delete chats of customers who ask you to erase their data (Admin → Clients → « 🧹 Effacer ses données »).</p>
+  <p style="margin:0"><b>Fake orders:</b> an order nobody answers on the phone or WhatsApp after 48 h holds stock for nothing. <span class="label">Commandes</span> shows « Libérer le stock » for these: cancel them (reason « injoignable ») once the team has tried.</p>
+</div>
+<div class="card warn">
+  <p><b>What the shop does NOT do by itself:</b> it never sends WhatsApp messages automatically. Every message is opened, checked and sent by a person. Automatic messages (for example « your parcel has left ») would need the paid WhatsApp Business Platform from Meta: a verified business, approved message templates, and a cost for each conversation. It isn't set up, to stay on free tools.</p>
+  <p style="margin:0">Telegram stays the team's notification channel: new orders, reminders, the evening report.</p>
+</div>
+
+<p class="small" style="margin-top:8mm">Henine Boutique · henine-boutique.karimmaticmz.workers.dev · This guide matches the shop as of 16 October 2026.</p>
+</body>
+</html>
