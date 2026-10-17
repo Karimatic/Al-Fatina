@@ -121,7 +121,23 @@ export function HomePage() {
     new: () => (
       <section id="nouveautes" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-6">
         <SectionHead title={t.home.newArrivals} href={href("/nouveautes")} link={t.home.seeAll} />
-        {catalog.error ? <ErrorBox onRetry={catalog.reload} /> : catalog.data ? <ProductGrid products={newest} /> : <ProductGridSkeleton count={4} />}
+        {catalog.error ? (
+          <ErrorBox onRetry={catalog.reload} />
+        ) : !catalog.data ? (
+          <ProductGridSkeleton count={4} />
+        ) : newest.length ? (
+          <ProductGrid products={newest} />
+        ) : (
+          // nothing online yet: a card the size of the loading one (the page doesn't jump, R5-3)
+          <div className="grid min-h-[32rem] place-items-center rounded-card border border-dashed border-line bg-surface/60 p-8 text-center md:min-h-[22rem]">
+            <div>
+              <p className="text-lg font-semibold">{t.home.comingSoon}</p>
+              <a href="https://www.instagram.com/henine.boutique/" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-semibold text-plum-700 underline underline-offset-2">
+                {t.home.comingSoonHint}
+              </a>
+            </div>
+          </div>
+        )}
       </section>
     ),
     banners: () => <Banners />,

@@ -24,6 +24,12 @@ describe("database quota warning", () => {
     const { fetcher, calls } = cloudflare(30_000);
     expect(await d1UsageToday(envOf(), NOW, fetcher)).toEqual({ rowsRead: 1000, rowsWritten: 30_000 });
     expect(calls[0]!.body.variables).toEqual({ accountTag: "acc", start: "2026-10-15", end: "2026-10-15" });
+    // the query exactly as Cloudflare documents it (audit R4-1 / R5-4): lowercase string!, date range
+    const q = (calls[0]!.body as unknown as { query: string }).query;
+    expect(q).toContain("$accountTag: string!");
+    expect(q).toMatch(/date_geq: \$start/);
+    expect(q).toMatch(/date_leq: \$end/);
+    expect(q).not.toContain("String!");
   });
 
   it("nothing without the token", async () => {

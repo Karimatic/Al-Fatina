@@ -64,6 +64,17 @@ describe("assistant AI voice", () => {
     }
   });
 
+  it("free delivery only with its threshold (audit R4-4)", async () => {
+    const db = testDb();
+    db.sqlite.exec(`INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('checkout', '{"free_shipping_over":10000,"desk_enabled":true,"cod":true,"express_on_product":true,"max_orders_per_phone_per_hour":3}', 0)`);
+    const run = async (reply: string) => {
+      const env = { ...envWith(JSON.stringify({ reply, showProducts: false })).env, DB: db } as unknown as Env;
+      return (await withAiVoice(env, input("livraison ?"), ruled, "ip")).ai === true;
+    };
+    expect(await run("La livraison est gratuite 🌸")).toBe(false);
+    expect(await run("La livraison est gratuite dès 10 000 DA d'achat 🌸")).toBe(true);
+  });
+
   it("lets the promise through when the shop's facts make it", async () => {
     // a product on sale: « remise » is true
     const onSale = { ...ruled, products: [{ ...product(3500), compareAtPrice: 4500 }] };

@@ -163,12 +163,14 @@ export function CategoryView() {
         ))}
       </div>
 
+      {/* a constant height: loading, empty and a few pieces don't move the footer (audit R5-3) */}
+      <div className="min-h-[70svh]">
       {catalog.error || categories.error ? (
         <ErrorBox onRetry={() => (catalog.error ? catalog.reload() : categories.reload())} />
       ) : !catalog.data || !categories.data ? (
         // both lists are needed: a main category's pieces sit in its sub-categories, so without
         // the category list it would look empty for a moment on a slow phone (audit R3-1)
-        <ProductGridSkeleton count={6} />
+        <ProductGridSkeleton count={4} />
       ) : products.length ? (
         <ProductGrid products={products} level={2} />
       ) : (
@@ -184,6 +186,7 @@ export function CategoryView() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

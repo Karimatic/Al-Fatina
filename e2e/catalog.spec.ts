@@ -22,3 +22,13 @@ test("a main category never flashes « no articles » while loading", async ({ p
   await expect(page.locator("main a[href*='/produit/']").first()).toBeVisible({ timeout: 20_000 });
   expect(await page.evaluate(() => (window as unknown as { sawEmpty?: boolean }).sawEmpty ?? false)).toBe(false);
 });
+
+test("a product page shows its product without asking the API again (audit R4-5)", async ({ page }) => {
+  const asked: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes("/api/products/")) asked.push(r.url());
+  });
+  await page.goto("/fr/produit/pyjama-short-coton-fleuri");
+  await expect(page.getByRole("heading", { level: 1, name: "Pyjama short coton fleuri" })).toBeVisible();
+  expect(asked).toEqual([]);
+});

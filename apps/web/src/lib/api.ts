@@ -80,6 +80,21 @@ export const apiForm = <T,>(path: string, form: FormData) => request<T>(path, { 
 const cache = new Map<string, { at: number; data?: unknown; promise?: Promise<unknown> }>();
 const TTL = 60_000;
 
+/** not used for the very first render: the page's own HTML (an empty shell) must match it */
+const prefilled = new Set<string>();
+// answers the server already put in the page (a product page carries its product, audit R4-5):
+// the page shows them at once instead of asking the API a second time
+try {
+  const block = typeof document === "undefined" ? null : document.getElementById("henine-prefill");
+  if (block?.textContent)
+    for (const [path, data] of Object.entries(JSON.parse(block.textContent) as Record<string, unknown>)) {
+      cache.set(path, { at: Date.now(), data });
+      prefilled.add(path);
+    }
+} catch {
+  /* a broken block: the API is asked as usual */
+}
+
 function load<T>(path: string): Promise<T> {
   const hit = cache.get(path);
   if (hit?.data !== undefined && Date.now() - hit.at < TTL) return Promise.resolve(hit.data as T);
@@ -99,12 +114,13 @@ function load<T>(path: string): Promise<T> {
 }
 
 export function useApi<T>(path: string | null) {
-  const cached = path ? (cache.get(path)?.data as T | undefined) : undefined;
+  const cached = path && !prefilled.has(path) ? (cache.get(path)?.data as T | undefined) : undefined;
   const [state, setState] = useState<{ data?: T; error?: ApiError; loading: boolean }>({ data: cached, loading: !!path && cached === undefined });
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!path) return;
+    prefilled.delete(path); // from now on an ordinary cached answer
     let alive = true;
     setState((s) => ({ ...s, loading: s.data === undefined }));
     load<T>(path).then(

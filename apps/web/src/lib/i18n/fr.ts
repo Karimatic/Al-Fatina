@@ -20,6 +20,8 @@ export const fr = {
   },
   home: {
     newArrivals: "Nouveautés",
+    comingSoon: "Les nouvelles pièces arrivent très bientôt 🌸",
+    comingSoonHint: "Suivez-nous sur Instagram pour les voir en premier.",
     bestSellers: "Les plus demandées",
     seeAll: "Tout voir",
     promos: "Promotions",

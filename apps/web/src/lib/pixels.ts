@@ -10,6 +10,8 @@
  * Meta and TikTok never count it twice).
  */
 
+import { hidePrivateToken } from "./privateToken";
+
 type Ids = { meta: string | null; tiktok: string | null };
 type Fn = ((...args: unknown[]) => void) & Record<string, unknown>;
 type W = Window & { fbq?: Fn; _fbq?: Fn; ttq?: unknown[] & Record<string, unknown>; TiktokAnalyticsObject?: string };
@@ -58,6 +60,8 @@ let waiting: (() => void)[] = [];
 function load() {
   if (loaded || !ids || !pixelsConfigured(ids)) return;
   loaded = true;
+  // never with the private order token in the address (pixels send the page address)
+  hidePrivateToken();
   // the queues exist at once (events of this page are kept), the scripts come after the page
   if (ids.meta) loadMeta(ids.meta);
   if (ids.tiktok) loadTiktok(ids.tiktok);
@@ -91,6 +95,8 @@ function loadMeta(id: string) {
     w._fbq ??= fbq;
     script("https://connect.facebook.net/en_US/fbevents.js");
   }
+  // no « automatic advanced matching »: Meta must not read the order form (name, phone) (audit R5-7)
+  w.fbq!("set", "autoConfig", false, id);
   w.fbq!("init", id);
   w.fbq!("track", "PageView");
 }

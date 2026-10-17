@@ -7,6 +7,7 @@ import { ApiError, apiGet, apiPost, useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { useSavedOrders } from "@/lib/stores";
 import { trackPurchaseOnce } from "@/lib/pixels";
+import { usePrivateLink } from "@/lib/privateLink";
 
 /* ───────── Thank you ───────── */
 
@@ -14,10 +15,11 @@ export function ThankYouView() {
   const { t, href, locale } = useLocale();
   const [params, setParams] = useState<{ code: string; token: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const takeLink = usePrivateLink();
   useEffect(() => {
-    const p = new URLSearchParams(location.search);
-    setParams({ code: p.get("c") ?? "", token: p.get("t") ?? "" });
-  }, []);
+    // the private token leaves the address bar at once (pixels read it): kept on this phone
+    setParams(takeLink() ?? { code: "", token: "" });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const { data: order } = useApi<TrackedOrderDTO>(params?.code ? `/track/${params.code}?t=${encodeURIComponent(params.token)}` : null);
   // the ad pixels count the order once (its code as id: Meta and TikTok never count it twice)
   useEffect(() => {
@@ -384,16 +386,15 @@ export function TrackView() {
   const [results, setResults] = useState<TrackedOrderDTO[] | null>(null);
   const [state, setState] = useState<"idle" | "loading" | "error" | "invalid">("idle");
 
-  // 1) private link (?c=&t=)
+  // 1) private link (?c=&t=): the token leaves the address bar at once (pixels read it)
+  const takeLink = usePrivateLink();
   useEffect(() => {
-    const p = new URLSearchParams(location.search);
-    const c = p.get("c");
-    const tk = p.get("t");
-    if (c && tk) {
-      setLinkToken(tk);
-      apiGet<TrackedOrderDTO>(`/track/${c}?t=${encodeURIComponent(tk)}`).then(setLinkOrder, () => undefined);
+    const link = takeLink();
+    if (link?.token) {
+      setLinkToken(link.token);
+      apiGet<TrackedOrderDTO>(`/track/${link.code}?t=${encodeURIComponent(link.token)}`).then(setLinkOrder, () => undefined);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // 2) orders placed on this device
   useEffect(() => {
     Promise.all(saved.slice(0, 5).map((o) => apiGet<TrackedOrderDTO>(`/track/${o.code}?t=${encodeURIComponent(o.token)}`).catch(() => null))).then((list) =>

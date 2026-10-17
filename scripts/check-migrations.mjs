@@ -6,7 +6,7 @@
  *   node scripts/check-migrations.mjs        (needs a Cloudflare login or CLOUDFLARE_API_TOKEN)
  */
 import { spawnSync } from "node:child_process";
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -41,10 +41,30 @@ applied.forEach((n, i) => {
 });
 const pending = files.slice(applied.length);
 
+// Removals ship in two releases (expand / contract, audit R5-2): first the code stops using a
+// table or column, then a later migration named "…contract…" drops it — never the same release,
+// or orders fail between "migration applied" and "new code live".
+const workerSrc = join(root, "apps", "worker", "src");
+const codeFiles = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? codeFiles(join(dir, e.name)) : /\.ts$/.test(e.name) && !/\.test\.ts$/.test(e.name) ? [join(dir, e.name)] : [],
+  );
+const code = codeFiles(workerSrc).map((f) => readFileSync(f, "utf8")).join("\n");
+for (const f of pending) {
+  const sql = readFileSync(join(root, "packages", "db", "migrations", f), "utf8");
+  const drops = [...sql.matchAll(/DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?[`"]?(\w+)/gi)].map((m) => m[1])
+    .concat([...sql.matchAll(/DROP\s+COLUMN\s+[`"]?(\w+)/gi)].map((m) => m[1]));
+  if (!drops.length) continue;
+  if (!/contract/i.test(f)) problems.push(`${f} drops ${drops.join(", ")}: name it …contract… and ship it after the code stopped using it`);
+  for (const name of drops) {
+    if (new RegExp(`\\b${name}\\b`).test(code)) problems.push(`${f} drops "${name}" but apps/worker/src still uses it: release the code change first`);
+  }
+}
+
 if (problems.length) {
-  console.error("✗ The live migration history doesn't match packages/db/migrations:");
+  console.error("✗ Migrations not safe to apply:");
   for (const p of problems) console.error(`  • ${p}`);
-  console.error("  Fix the d1_migrations rows by hand (docs/RUNBOOK.md) before applying anything.");
+  console.error("  Nothing was applied. See docs/RUNBOOK.md §1 (history fixes, two-step removals).");
   process.exit(1);
 }
 console.log(`✓ migration history OK: ${applied.length} applied${pending.length ? `, to apply now: ${pending.join(", ")}` : ", nothing to apply"}`);

@@ -100,9 +100,10 @@ export function Stories({ categories, products }: { categories: CategoryDTO[] | 
   const onSale = products.filter((p) => p.compareAtPrice != null && p.compareAtPrice > p.price).length;
   const stories: (Story & { count?: number })[] = [
     // main categories only (their sub-categories are one tap further)
-    ...mainCategories(categories ?? [])
-      .filter((c) => (c.productCount ?? 0) > 0)
-      .map((c) => ({ key: c.slug, label: ar ? c.nameAr : c.nameFr, href: href(`/c/${c.slug}`), category: c.slug, art: artKey(c.slug), count: c.productCount })),
+    // (none has a piece yet, e.g. while the shop fills its catalogue: all of them, so the row
+    // doesn't vanish and move the page, audit R5-3)
+    ...((mains) => (mains.some((c) => (c.productCount ?? 0) > 0) ? mains.filter((c) => (c.productCount ?? 0) > 0) : mains))(mainCategories(categories ?? []))
+      .map((c) => ({ key: c.slug, label: ar ? c.nameAr : c.nameFr, href: href(`/c/${c.slug}`), category: c.slug, art: artKey(c.slug), count: c.productCount || undefined })),
     ...(onSale ? [{ key: "promo", label: S.promo, href: href("/promotions"), art: "promo", count: onSale }] : []),
   ];
   // while the categories load: the same heading and card boxes as the real row, empty (a

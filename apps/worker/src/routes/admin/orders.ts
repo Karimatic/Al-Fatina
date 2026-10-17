@@ -41,7 +41,12 @@ const riskOf = (r: RiskCounters) =>
  */
 /** Hours after which an unconfirmed site order is offered for « free the stock » (audit SEC-1, no captcha). */
 export const STALE_HOLD_HOURS = 48;
-export const staleHoldSql = (now: number) => `o.channel IN ('web','express') AND o.status IN ('nouvelle','injoignable') AND o.created_at < ${now - STALE_HOLD_HOURS * 3600_000}`;
+export const staleHoldSql = (now: number) =>
+  `o.channel IN ('web','express') AND o.status IN ('nouvelle','injoignable') AND o.created_at < ${now - STALE_HOLD_HOURS * 3600_000}
+   AND (o.status = 'injoignable' OR o.confirm_attempts > 0
+        OR EXISTS (SELECT 1 FROM order_events e WHERE e.order_id = o.id AND e.kind IN ('call','whatsapp','sms')))`;
+// only orders the team already tried to reach (an order nobody called over a weekend is not
+// « unreachable »: audit R4-3)
 
 export function attentionSql(now: number, sla: SlaSettings = DEFAULT_SLA): Record<string, string> {
   const h = 3600_000;

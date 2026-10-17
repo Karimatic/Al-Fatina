@@ -114,6 +114,13 @@ describe("unconfirmed orders from one connection", () => {
     const flags = JSON.parse(String(await db.prepare("SELECT risk_flags AS n FROM orders WHERE id = ?").bind(o.id).first("n")));
     expect(flags).toContain("ip_pending");
   });
+  it("more than 60 pieces held today by one connection: refused (audit R4-2)", async () => {
+    const db = shop();
+    pile(db, 6);
+    db.sqlite.exec("INSERT INTO order_items (order_id, variant_id, product_id, name_fr, name_ar, sku, unit_price, qty) SELECT id, 1, 1, 'Pyjama', 'Pyjama', 'PJ', 3000, 10 FROM orders"); // 6 × 10 pieces
+    await expect(createOrder(envOf(db), order())).rejects.toMatchObject({ status: 429, code: "too_many_orders" });
+  });
+
   it("40 today: refused", async () => {
     const db = shop();
     pile(db, 40);

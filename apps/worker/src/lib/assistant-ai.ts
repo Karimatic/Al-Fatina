@@ -78,9 +78,11 @@ function factText(v: unknown): string {
 }
 
 /** The promises the shop's facts allow. */
-function allowedPromises(facts: { shop: Awaited<ReturnType<typeof shopFacts>>; found: ReturnType<typeof ruleFacts> }): Set<Promise_> {
+function allowedPromises(facts: { shop: Awaited<ReturnType<typeof shopFacts>>; found: ReturnType<typeof ruleFacts> }, reply: string): Set<Promise_> {
   const allowed = new Set(promisesIn(factText(facts)));
-  if (facts.shop.delivery.freeShippingFromDA) allowed.add("free");
+  // free delivery only comes with its condition: the reply must say from which amount (R4-4)
+  const from = facts.shop.delivery.freeShippingFromDA;
+  if (from && amountsIn(reply).includes(String(from))) allowed.add("free");
   if (facts.found.products.some((p) => p.usualPriceDA)) allowed.add("discount");
   return allowed;
 }
@@ -188,7 +190,7 @@ async function aiVoice(env: Env, model: string, input: Input, ruled: AssistantRe
     const known = new Set(amountsIn(JSON.stringify(facts)));
     if (amountsIn(parsed.reply).some((n) => !known.has(n))) return ruled;
     // and every promise (free delivery, refund, discount, returns) one the facts make
-    const allowed = allowedPromises(facts);
+    const allowed = allowedPromises(facts, parsed.reply);
     if (promisesIn(parsed.reply).some((p) => !allowed.has(p))) return ruled;
     // products only when she is looking for a piece: the model's judgement, unless the rules read precise wishes
     const precise = ruled.intent !== "search" || (ruled.understood.length > 0 && !ruled.relaxed);

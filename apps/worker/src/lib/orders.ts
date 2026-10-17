@@ -257,6 +257,8 @@ export const MAX_WEB_PIECES = 10;
  * script piling up orders to hold the stock, not a busy mobile gateway.
  */
 const PENDING_PER_IP = { soft: 12, hard: 40 } as const;
+/** Pieces held by unconfirmed store orders from one connection today, at most. */
+const PIECES_PENDING_PER_IP = 60;
 
 export interface NewOrder {
   idempotencyKey: string;
@@ -371,18 +373,22 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
               (SELECT COUNT(*) FROM orders WHERE phone = ?1 AND created_at > ?4 AND status IN ('annulee','fausse')) AS recent_cancel,
               (SELECT COUNT(DISTINCT phone) FROM orders WHERE ip_hash = ?5 AND created_at > ?6 AND phone != ?1) AS ip_phones,
               (SELECT COUNT(*) FROM orders WHERE ip_hash = ?5 AND ?5 != '' AND created_at > ?3 AND status IN ('nouvelle','injoignable')) AS ip_pending,
+              (SELECT COALESCE(SUM(oi.qty), 0) FROM order_items oi JOIN orders o ON o.id = oi.order_id
+                WHERE o.ip_hash = ?5 AND ?5 != '' AND o.created_at > ?3 AND o.status IN ('nouvelle','injoignable')) AS ip_pieces,
               c.delivered_count, c.returned_count, c.cancelled_count, c.fake_count, c.is_blacklisted
          FROM (SELECT 1) LEFT JOIN customers c ON c.phone = ?1`,
     )
       .bind(input.phone, t - 3600_000, t - 86400_000, t - 7 * 86400_000, input.ipHash ?? "", t - 2 * 3600_000)
       .first<{
-        last_hour: number; last_day: number; recent_cancel: number; ip_phones: number; ip_pending: number;
+        last_hour: number; last_day: number; recent_cancel: number; ip_phones: number; ip_pending: number; ip_pieces: number;
         delivered_count: number | null; returned_count: number | null; cancelled_count: number | null; fake_count: number | null; is_blacklisted: number | null;
       }>();
     if ((r?.last_hour ?? 0) >= checkout.max_orders_per_phone_per_hour) throw new HttpError(429, "too_many_orders");
     // unconfirmed orders hold stock: one connection can't pile them up (see PENDING_PER_IP)
     const ipPending = r?.ip_pending ?? 0;
     if (ipPending >= PENDING_PER_IP.hard) throw new HttpError(429, "too_many_orders");
+    // and pieces: 40 orders × 10 pieces was ~400 pieces held by one connection (audit R4-2)
+    if ((r?.ip_pieces ?? 0) + q.lines.reduce((n, l) => n + l.qty, 0) > PIECES_PENDING_PER_IP) throw new HttpError(429, "too_many_orders");
     // nor can one order hold a whole shelf: bigger orders go through the team
     if (q.lines.reduce((n, l) => n + l.qty, 0) > MAX_WEB_PIECES) throw new HttpError(422, "too_many_pieces");
     riskFlags = [];

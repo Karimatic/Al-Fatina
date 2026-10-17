@@ -233,7 +233,10 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
         breadcrumbJsonLd(c.env, ar, [
           ...(cat ? [{ name: ar ? cat.nameAr : cat.nameFr, path: `${prefix}/c/${cat.slug}` }] : []),
           { name: ar ? product.nameAr : product.nameFr, path: url.pathname },
-        ]);
+        ]) +
+        // the product itself, already read for this page: the store shows it without asking the
+        // API again (audit R4-5). A data block, never run (no CSP hash needed); "<" escaped.
+        `<script type="application/json" id="henine-prefill">${JSON.stringify({ [`/products/${encodeURIComponent(slug)}`]: product }).replace(/</g, "\\" + "u003c")}</script>`;
       const name = ar ? product.nameAr : product.nameFr;
       const text = (product.seoDescription ?? (ar ? product.descriptionAr : product.descriptionFr) ?? "").replace(/[*#\n]+/g, " ").trim();
       const price = formatDA(product.price);

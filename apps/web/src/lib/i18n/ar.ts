@@ -22,6 +22,8 @@ export const ar: Dictionary = {
   },
   home: {
     newArrivals: "القطع الجديدة",
+    comingSoon: "القطع الجديدة قادمة قريبًا جدًا 🌸",
+    comingSoonHint: "تابعينا على إنستغرام لتشاهديها أولًا.",
     bestSellers: "الأكثر طلبا",
     seeAll: "عرض الكل",
     promos: "تخفيضات",

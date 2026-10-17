@@ -25,6 +25,11 @@ One path only (audit DEP-1). Either:
   npm run verify:deploy                          # health OK + the live home page is this build
   ```
   `verify:deploy` matters: twice a deploy reported success while the old version kept serving.
+
+  **Removing a table or column: two releases** (expand / contract). Release 1: the code stops
+  using it. Release 2 (after release 1 is live): a migration named `…_contract_….sql` drops it.
+  `check-migrations` refuses a drop in a file without « contract » in its name, or while
+  `apps/worker/src` still mentions the name, because migrations are applied before the new code is live.
   If it fails after 3 minutes, deploy again; if it still fails, roll back (§2).
 
 ## 2. Roll back
