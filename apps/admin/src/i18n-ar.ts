@@ -441,6 +441,7 @@ export const AR: Record<string, string> = {
   "Enregistrez ici les ventes faites en boutique à Boumerdès ou en message privé Instagram : le stock se met à jour.": "سجّلي هنا المبيعات في المحل ببومرداس أو عبر رسائل إنستغرام: يتحدث المخزون تلقائيًا.",
   "Enregistrez le produit pour associer les photos aux nouvelles couleurs.": "احفظي المنتج لربط الصور بالألوان الجديدة.",
   "Entonnoir des commandes": "مسار الطلبات",
+  "Enregistrer · {0}": "حفظ · {0}",
   "+ Inviter quelqu'un": "+ دعوة شخص",
   "1. Qui ?": "1. من؟",
   "2. Que peut-elle faire ?": "2. ماذا يمكنها أن تفعل؟",

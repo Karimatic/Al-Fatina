@@ -472,7 +472,12 @@ catalogRoutes.post("/products/:id/duplicate", requirePermission("products.edit")
 catalogRoutes.delete("/products/:id", requirePermission("products.edit"), async (c) => {
   const id = intParam(c, "id");
   const actor = actorOf(c.get("member"));
-  const ordered = await c.env.DB.prepare("SELECT 1 FROM order_items WHERE product_id = ? LIMIT 1").bind(id).first();
+  // sold once (by the product or one of its sizes): archived, so the orders keep their history
+  const ordered = await c.env.DB.prepare(
+    "SELECT 1 FROM order_items WHERE product_id = ?1 OR variant_id IN (SELECT id FROM variants WHERE product_id = ?1) LIMIT 1",
+  )
+    .bind(id)
+    .first();
   if (ordered) {
     await c.env.DB.batch([
       c.env.DB.prepare("UPDATE products SET status = 'archived', updated_at = ? WHERE id = ?").bind(Date.now(), id),
@@ -485,6 +490,10 @@ catalogRoutes.delete("/products/:id", requirePermission("products.edit"), async 
   await c.env.DB.batch([
     c.env.DB.prepare("DELETE FROM stock_movements WHERE variant_id IN (SELECT id FROM variants WHERE product_id = ?)").bind(id),
     c.env.DB.prepare("DELETE FROM stock_alerts WHERE variant_id IN (SELECT id FROM variants WHERE product_id = ?)").bind(id),
+    // its lines in stock counts (Inventaire) and exchange requests pointed to its sizes: the
+    // delete failed (« FOREIGN KEY constraint failed »)
+    c.env.DB.prepare("DELETE FROM stock_count_lines WHERE variant_id IN (SELECT id FROM variants WHERE product_id = ?)").bind(id),
+    c.env.DB.prepare("DELETE FROM exchange_requests WHERE to_variant_id IN (SELECT id FROM variants WHERE product_id = ?)").bind(id),
     c.env.DB.prepare("DELETE FROM products WHERE id = ?").bind(id),
     bumpCatalogStmt(c.env),
     auditStmt(c.env, actor, "delete", "product", id),

@@ -2,7 +2,7 @@ import { imageUrl, type ImageRef } from "@henine/shared";
 import { DiscountFields } from "../lib/discount";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api, del, errorMessage, post, put, upload } from "../api";
 import { da } from "../lib/format";
 import { processImage } from "../lib/images";
@@ -328,6 +328,9 @@ function buildVariants(options: Option[], existing: Variant[]): Variant[] {
   });
 }
 
+/** The status names of the « Statut » list (for the save button). */
+const STATUS_NAME: Record<ProductForm["status"], string> = { draft: "Brouillon (invisible)", published: "En ligne", archived: "Archivé" };
+
 export function ProductEditor() {
   const params = useParams({ strict: false }) as { id?: string };
   const isNew = !params.id || params.id === "nouveau";
@@ -337,11 +340,26 @@ export function ProductEditor() {
   const can = useCan();
   const categories = useQuery({ queryKey: ["categories"], queryFn: () => api<CategoryLite[]>("/categories") });
   const sizeGuides = useQuery({ queryKey: ["size-guides"], queryFn: () => api<{ id: number; name: string }[]>("/size-guides") });
-  const loaded = useQuery({ queryKey: ["product", params.id], queryFn: () => api<ProductForm>(`/products/${params.id}`), enabled: !isNew });
+  // read once per product: a refresh (coming back to the tab, a dropdown taking the focus) must
+  // never overwrite what is being edited (the status picked a second ago snapped back)
+  const loaded = useQuery({
+    queryKey: ["product", params.id],
+    queryFn: () => api<ProductForm>(`/products/${params.id}`),
+    enabled: !isNew,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
+  });
   const [form, setForm] = useState<ProductForm | null>(isNew ? emptyForm() : null);
+  const filledFor = useRef<string | null>(null);
+  /** the status the product really has (the buttons follow it, not the dropdown) */
+  const [savedStatus, setSavedStatus] = useState<ProductForm["status"] | null>(null);
   useEffect(() => {
-    if (loaded.data) setForm(loaded.data);
-  }, [loaded.data]);
+    if (!loaded.data || filledFor.current === params.id) return;
+    filledFor.current = params.id ?? null;
+    setForm(loaded.data);
+    setSavedStatus(loaded.data.status);
+  }, [loaded.data, params.id]);
   const [error, setError] = useState<string | null>(null);
 
   const save = useMutation({
@@ -361,6 +379,7 @@ export function ProductEditor() {
       void qc.invalidateQueries({ queryKey: ["products"] });
       qc.setQueryData(["product", String(saved.id)], saved);
       setForm(saved);
+      setSavedStatus(saved.status);
       if (isNew) void navigate({ to: "/produits/$id", params: { id: String(saved.id) } });
     },
     onError: (e) => setError(errorMessage(e)),
@@ -515,7 +534,14 @@ export function ProductEditor() {
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-1 md:px-8">
             <p className="min-w-0 truncate text-sm text-red-700">{error}</p>
             <div className="flex shrink-0 gap-2">
-              {form.status === "published" ? (
+              {/* the status was changed in « Statut »: one button, it saves exactly that (the
+                  buttons used to follow the dropdown, so « Publier » took the place of
+                  « Enregistrer » and put the product back online) */}
+              {savedStatus != null && form.status !== savedStatus ? (
+                <Button variant="primary" loading={save.isPending} onClick={() => submit()}>
+                  {tr("Enregistrer · {0}", { 0: tr(STATUS_NAME[form.status]) })}
+                </Button>
+              ) : form.status === "published" ? (
                 <>
                   <Button loading={save.isPending && save.variables?.status === "draft"} onClick={() => confirm(tr("Retirer ce produit de la boutique ?")) && submit("draft")}>
                     {tr("Mettre hors ligne")}
