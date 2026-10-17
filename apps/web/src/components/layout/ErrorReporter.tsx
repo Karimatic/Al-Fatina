@@ -1,6 +1,10 @@
 import { useEffect } from "react";
+import { isForeignClientError } from "@henine/shared";
 
-/** Sends uncaught browser errors to Admin → Erreurs (sampled, capped per page view). */
+/**
+ * Sends uncaught browser errors to Admin → Erreurs (sampled, capped per page view). Errors from
+ * browser extensions (wallets, translators…) are not the shop's and are not sent.
+ */
 export function ErrorReporter() {
   useEffect(() => {
     let sent = 0;
@@ -14,8 +18,15 @@ export function ErrorReporter() {
         body: JSON.stringify({ message: message.slice(0, 500), stack: stack?.slice(0, 4000), url: location.pathname }),
       }).catch(() => undefined);
     };
-    const onError = (e: ErrorEvent) => report(e.message, e.error?.stack);
-    const onRejection = (e: PromiseRejectionEvent) => report(String(e.reason?.message ?? e.reason), e.reason?.stack);
+    const onError = (e: ErrorEvent) => {
+      if (isForeignClientError({ message: e.message, stack: e.error?.stack, filename: e.filename }, location.origin)) return;
+      report(e.message, e.error?.stack);
+    };
+    const onRejection = (e: PromiseRejectionEvent) => {
+      const message = String(e.reason?.message ?? e.reason);
+      if (isForeignClientError({ message, stack: e.reason?.stack }, location.origin)) return;
+      report(message, e.reason?.stack);
+    };
     window.addEventListener("error", onError);
     window.addEventListener("unhandledrejection", onRejection);
     return () => {

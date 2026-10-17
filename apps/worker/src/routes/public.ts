@@ -35,6 +35,7 @@ import {
   type SiteConfigDTO,
   type TrackedOrderDTO,
   JOURNEY_STEPS,
+  isForeignClientError,
 } from "@henine/shared";
 import type { AppEnv } from "../env";
 import { recordError } from "../lib/audit";
@@ -755,6 +756,8 @@ publicRoutes.post("/push/subscribe", async (c) => {
 publicRoutes.post("/log", async (c) => {
   await rateLimit(c.env.RL_LOOKUP, `log:${clientIp(c)}`);
   const input = await body(c, clientErrorInput);
+  // a browser extension's error (crypto wallet, translator…), not the shop's: not recorded
+  if (isForeignClientError(input)) return c.json({ ok: true });
   // error reports from browsers: up to the shop-wide budget (a broken page in many phones, or a
   // flood, must not use the database writes the orders need)
   if (await counterAllowed(c, "log")) c.executionCtx.waitUntil(recordError(c.env, "client", input.message, { stack: input.stack, url: input.url }));
