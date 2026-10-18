@@ -29,7 +29,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "pretest": "node scripts/doctor.mjs",
-    "test": "npm run test --workspaces --if-present && node --test scripts/lib/",
+    "test": "npm run test --workspaces --if-present && node --test \"scripts/lib/*.test.mjs\"",
     "admin:invite": "node scripts/admin-invite.mjs"
   },
   "allowScripts": {
