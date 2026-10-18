@@ -18,12 +18,11 @@ One path only (audit DEP-1). Either:
   branches only), otherwise every push is deployed twice, once without tests or migrations.
 - **By hand:**
   ```sh
-  npm run build
-  npm run check:migrations                       # history matches the files
-  cd apps/worker && npx wrangler d1 migrations apply henine-boutique-db --remote
-  npx wrangler deploy && cd ../..
-  npm run verify:deploy                          # health OK + the live home page is this build
+  npm run deploy        # on main, everything committed: build → migration checks → migrations
+                        # → wrangler deploy tagged with the commit → live check (stops at the first failure)
   ```
+  Never `npx wrangler deploy` alone: without the commit tag the next table removal is refused
+  (the guard can't see the live code), and an uncommitted tree deploys code that isn't in git.
   `verify:deploy` matters: twice a deploy reported success while the old version kept serving.
 
   **Removing a table or column: two releases** (expand / contract). Release 1: the code stops

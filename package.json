@@ -15,7 +15,7 @@
     "dev:admin": "npm run dev --workspace @henine/admin",
     "prebuild": "node scripts/doctor.mjs",
     "build": "npm run build --workspace @henine/web && npm run build --workspace @henine/admin && node scripts/assemble-dist.mjs",
-    "deploy": "npm run build && npm run deploy --workspace @henine/worker",
+    "deploy": "node scripts/deploy.mjs",
     "test:e2e": "playwright test",
     "verify:deploy": "node scripts/verify-deploy.mjs",
     "backup": "node scripts/backup.mjs",
@@ -29,7 +29,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "pretest": "node scripts/doctor.mjs",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present && node --test scripts/lib/",
     "admin:invite": "node scripts/admin-invite.mjs"
   },
   "allowScripts": {

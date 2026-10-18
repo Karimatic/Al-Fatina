@@ -9,6 +9,7 @@ import { spawnSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { dropProblems, dropsIn } from "./lib/migration-guard.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const worker = join(root, "apps", "worker");
@@ -16,6 +17,14 @@ const files = readdirSync(join(root, "packages", "db", "migrations")).filter((f)
 
 // Windows runs npx through a shell: quote arguments there (on Linux they are passed as they are)
 const arg = (s) => (process.platform === "win32" ? JSON.stringify(s) : s);
+/** wrangler's output, tried 3 times (the network drops now and then) */
+function wrangler(args) {
+  for (let attempt = 1; ; attempt++) {
+    const r = spawnSync("npx", ["wrangler", ...args], { cwd: worker, encoding: "utf8", shell: process.platform === "win32" });
+    if (r.status === 0) return r.stdout;
+    if (attempt >= 3) throw new Error(`wrangler ${args.slice(0, 2).join(" ")} failed: ${r.stderr}`);
+  }
+}
 let out = "";
 for (let attempt = 1; attempt <= 3; attempt++) {
   const r = spawnSync("npx", ["wrangler", "d1", "execute", "DB", "--remote", "--json", "--command", arg("SELECT name FROM d1_migrations ORDER BY id")], {
@@ -49,16 +58,29 @@ const codeFiles = (dir) =>
   readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
     e.isDirectory() ? codeFiles(join(dir, e.name)) : /\.ts$/.test(e.name) && !/\.test\.ts$/.test(e.name) ? [join(dir, e.name)] : [],
   );
-const code = codeFiles(workerSrc).map((f) => readFileSync(f, "utf8")).join("\n");
-for (const f of pending) {
-  const sql = readFileSync(join(root, "packages", "db", "migrations", f), "utf8");
-  const drops = [...sql.matchAll(/DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?[`"]?(\w+)/gi)].map((m) => m[1])
-    .concat([...sql.matchAll(/DROP\s+COLUMN\s+[`"]?(\w+)/gi)].map((m) => m[1]));
-  if (!drops.length) continue;
-  if (!/contract/i.test(f)) problems.push(`${f} drops ${drops.join(", ")}: name it …contract… and ship it after the code stopped using it`);
-  for (const name of drops) {
-    if (new RegExp(`\\b${name}\\b`).test(code)) problems.push(`${f} drops "${name}" but apps/worker/src still uses it: release the code change first`);
-  }
+const releaseCode = codeFiles(workerSrc).map((f) => readFileSync(f, "utf8")).join("\n");
+const pendingSql = pending.map((f) => ({ file: f, sql: readFileSync(join(root, "packages", "db", "migrations", f), "utf8") }));
+// the code of the version live NOW (its git commit is the deploy's tag: scripts/deploy.mjs, CI);
+// only looked up when a pending migration drops something
+const liveCode = pendingSql.some((m) => dropsIn(m.sql).length) ? liveWorkerCode() : null;
+for (const m of pendingSql) problems.push(...dropProblems({ ...m, releaseCode, liveCode }));
+
+/** apps/worker/src (tests excluded) at the commit of the live version, or null if unknown. */
+function liveWorkerCode() {
+  const json = (args) => JSON.parse(wrangler(args).replace(/^[^[{]*/s, ""));
+  const status = json(["deployments", "status", "--json"]);
+  const versionId = status.versions?.[0]?.version_id;
+  if (!versionId) return null;
+  const sha = json(["versions", "view", versionId, "--json"]).annotations?.["workers/tag"];
+  if (!sha || !/^[0-9a-f]{7,40}$/.test(sha)) return null;
+  const git = (args) => spawnSync("git", args, { cwd: root, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  const ls = git(["ls-tree", "-r", "--name-only", sha, "apps/worker/src"]);
+  if (ls.status !== 0) return null; // that commit isn't in this copy: fetch first
+  return ls.stdout
+    .split("\n")
+    .filter((f) => /\.ts$/.test(f) && !/\.test\.ts$/.test(f))
+    .map((f) => git(["show", `${sha}:${f}`]).stdout)
+    .join("\n");
 }
 
 if (problems.length) {
