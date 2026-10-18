@@ -23,14 +23,20 @@ test("a main category never flashes « no articles » while loading", async ({ p
   expect(await page.evaluate(() => (window as unknown as { sawEmpty?: boolean }).sawEmpty ?? false)).toBe(false);
 });
 
-test("a product page shows its product without asking the API again (audit R4-5)", async ({ page }) => {
-  const asked: string[] = [];
-  page.on("request", (r) => {
-    if (r.url().includes("/api/products/")) asked.push(r.url());
+test.describe(() => {
+  // the store's service worker would fetch around the page's interception
+  test.use({ serviceWorkers: "block" });
+  test("a product page shows its product without waiting for the API (audit R4-5), then refreshes it (R6-3)", async ({ page }) => {
+    // the product API never answers: the page must show its product from its own copy
+    let asked = 0;
+    await page.route("**/api/products/**", () => {
+      asked++; // held forever
+    });
+    await page.goto("/fr/produit/pyjama-short-coton-fleuri");
+    await expect(page.getByRole("heading", { level: 1, name: "Pyjama short coton fleuri" })).toBeVisible();
+    // and asks for a fresh copy (stock) once settled
+    await expect.poll(() => asked, { timeout: 10_000 }).toBeGreaterThan(0);
   });
-  await page.goto("/fr/produit/pyjama-short-coton-fleuri");
-  await expect(page.getByRole("heading", { level: 1, name: "Pyjama short coton fleuri" })).toBeVisible();
-  expect(asked).toEqual([]);
 });
 
 test("a product with a video shows it in the gallery, without downloading it before it is seen", async ({ page, isMobile }) => {

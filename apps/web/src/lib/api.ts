@@ -120,15 +120,29 @@ export function useApi<T>(path: string | null) {
 
   useEffect(() => {
     if (!path) return;
-    prefilled.delete(path); // from now on an ordinary cached answer
+    const fromPage = prefilled.delete(path); // from now on an ordinary cached answer
     let alive = true;
     setState((s) => ({ ...s, loading: s.data === undefined }));
     load<T>(path).then(
       (data) => alive && setState({ data, loading: false }),
       (error: ApiError) => alive && setState({ error, loading: false }),
     );
+    // the page's own copy can be a few minutes old (it is cached at the edge with the page):
+    // shown at once, then refreshed quietly once the page has settled (stock, « plus que N », R6-3)
+    const refresh = fromPage
+      ? setTimeout(() => {
+          apiGet<T>(path).then(
+            (data) => {
+              cache.set(path, { at: Date.now(), data });
+              if (alive) setState({ data, loading: false });
+            },
+            () => undefined, // offline or slow: the page's copy stays
+          );
+        }, 1500)
+      : undefined;
     return () => {
       alive = false;
+      clearTimeout(refresh);
     };
   }, [path, tick]);
 
