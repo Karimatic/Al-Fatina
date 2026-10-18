@@ -137,6 +137,7 @@ async function loadProduct(c: { env: AppEnv["Bindings"]; get: (k: "member") => {
       isActive: !!v.is_active,
     })),
     images: (images!.results as unknown as ImageRow[]).map((r) => ({ id: r.id, ...imageRef(c.env, r) })),
+    video: p.video_key ? mediaUrl(c.env, p.video_key as string) : null,
   };
 }
 

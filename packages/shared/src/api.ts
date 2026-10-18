@@ -173,6 +173,8 @@ export interface ProductDetailDTO extends ProductCardDTO {
   relatedKind: "look" | "similar";
   /** size chart chosen for this product in the admin */
   sizeGuide: SizeGuideDTO | null;
+  /** a short video of the piece (Admin → Produits → Vidéo), shown in the photo gallery */
+  video: string | null;
 }
 
 /* ───────────── Collections / drops ───────────── */

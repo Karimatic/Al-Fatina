@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormGuard } from "@/lib/formGuard";
 import { buzz } from "@/lib/haptics";
-import { dateLocale, formatDA, normalizeDzPhone, type ImageRef, type ProductCardDTO, type ProductDetailDTO, type SiteConfigDTO } from "@henine/shared";
+import { dateLocale, formatDA, imageUrl, normalizeDzPhone, type ImageRef, type ProductCardDTO, type ProductDetailDTO, type SiteConfigDTO } from "@henine/shared";
 import { FlashPanel } from "@/components/home/HomeExtras";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { BagIcon, HeartIcon } from "@/components/ui/icons";
@@ -23,6 +23,7 @@ import { ShareButton } from "./ShareButton";
 import { SizeGuideButton } from "./SizeGuide";
 import { markStep } from "@/lib/attribution";
 import { trackAd } from "@/lib/pixels";
+import { ProductVideo } from "./ProductVideo";
 
 export function ProductView() {
   const [slug, setSlug] = useState<string | null>(null);
@@ -166,7 +167,12 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
   const availableNow = variant ? variant.available > 0 : p.inStock;
   const [lightbox, setLightbox] = useState<number | null>(null);
   const G = t.plus.gallery;
-  const slides = images.length;
+  // the gallery's slides: the photos, and the video (if any) right after the main photo
+  const videoAt = p.video ? Math.min(1, images.length) : -1;
+  const slides = images.length + (p.video ? 1 : 0);
+  /** photo shown by a slide (the slides after the video are shifted by one) */
+  const photoOf = (slide: number) => (videoAt >= 0 && slide > videoAt ? slide - 1 : slide);
+  const poster = images[0] ? imageUrl(images[0], 960) : undefined;
   // "Vous aimerez peut-être": other pieces in her price range, in stock, best rated / selling first
   const catalog = useApi<ProductCardDTO[]>("/catalog");
   const mayLike = useMemo(() => {
@@ -222,17 +228,27 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
           <div className="relative">
             {/* phones: full-width swipe */}
             <div ref={swipeRef} onScroll={onSwipe} className="swipe-row flex snap-x snap-mandatory overflow-x-auto md:hidden" aria-label={name}>
-              {(images.length ? images : [null]).map((img, i) => (
-                <button
-                  key={img?.src ?? "none"}
-                  type="button"
-                  onClick={() => img && setLightbox(i)}
-                  aria-label={G.open}
-                  className="w-full shrink-0 snap-center"
-                >
-                  <ProductImage image={img} alt={i === 0 ? name : ""} category={p.categorySlug} color={colorHex} priority={i === 0} sizes="100vw" className="aspect-[4/5] w-full" />
-                </button>
-              ))}
+              {Array.from({ length: Math.max(slides, 1) }, (_, s) => {
+                if (s === videoAt && p.video)
+                  return (
+                    <div key="video" className="w-full shrink-0 snap-center">
+                      <ProductVideo src={p.video} poster={poster} label={G.video} className="aspect-[4/5] w-full" />
+                    </div>
+                  );
+                const i = photoOf(s);
+                const img = images[i] ?? null;
+                return (
+                  <button
+                    key={img?.src ?? "none"}
+                    type="button"
+                    onClick={() => img && setLightbox(i)}
+                    aria-label={G.open}
+                    className="w-full shrink-0 snap-center"
+                  >
+                    <ProductImage image={img} alt={i === 0 ? name : ""} category={p.categorySlug} color={colorHex} priority={i === 0} sizes="100vw" className="aspect-[4/5] w-full" />
+                  </button>
+                );
+              })}
             </div>
             {slides > 1 && (
               <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center gap-1.5 md:hidden" aria-hidden="true">
@@ -242,9 +258,14 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
               </div>
             )}
             {/* larger screens: one photo (zooms under the mouse, opens full screen) + thumbnails */}
+            {active === videoAt && p.video ? (
+              <div className="hidden md:block">
+                <ProductVideo src={p.video} poster={poster} label={G.video} className="aspect-[4/5] w-full rounded-card" />
+              </div>
+            ) : (
             <button
                 type="button"
-                onClick={() => images[active] && setLightbox(active)}
+                onClick={() => images[photoOf(active)] && setLightbox(photoOf(active))}
                 aria-label={G.open}
                 className="hover-zoom hidden w-full cursor-zoom-in md:block"
                 onMouseMove={(e) => {
@@ -253,8 +274,9 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
                   e.currentTarget.style.setProperty("--zy", `${((e.clientY - r.top) / r.height) * 100}%`);
                 }}
               >
-                <ProductImage image={images[active] ?? null} alt={name} category={p.categorySlug} color={colorHex} priority sizes="50vw" className="aspect-[4/5] rounded-card" />
+                <ProductImage image={images[photoOf(active)] ?? null} alt={name} category={p.categorySlug} color={colorHex} priority sizes="50vw" className="aspect-[4/5] rounded-card" />
               </button>
+            )}
             <Badges p={p} className="pointer-events-none absolute start-3 top-3" />
             <FindSimilarButton product={p} className="absolute bottom-3 end-3 md:bottom-4 md:end-4" />
             <button
@@ -269,13 +291,20 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
           </div>
           {slides > 1 && (
             <ul className="mt-3 hidden gap-2 overflow-x-auto pb-1 md:flex">
-              {images.map((img, i) => (
-                <li key={img.src}>
-                  <button type="button" onClick={() => setActive(i)} className={`block overflow-hidden rounded-lg ring-2 ${i === active ? "ring-plum-600" : "ring-transparent"}`} aria-label={`${i + 1}/${slides}`}>
-                    <ProductImage image={img} alt="" sizes="80px" className="aspect-[4/5] w-16" />
-                  </button>
-                </li>
-              ))}
+              {Array.from({ length: slides }, (_, s) => {
+                const isVideo = s === videoAt;
+                const img = isVideo ? (images[0] ?? null) : images[photoOf(s)]!;
+                return (
+                  <li key={isVideo ? "video" : img?.src}>
+                    <button type="button" onClick={() => setActive(s)} className={`relative block overflow-hidden rounded-lg ring-2 ${s === active ? "ring-plum-600" : "ring-transparent"}`} aria-label={isVideo ? G.video : `${s + 1}/${slides}`}>
+                      <ProductImage image={img} alt="" sizes="80px" className="aspect-[4/5] w-16" />
+                      {isVideo && (
+                        <span className="absolute inset-0 grid place-items-center bg-noir/35 text-lg text-white" aria-hidden="true">▶</span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
           {lightbox != null && <Lightbox images={images} start={lightbox} name={name} onClose={() => setLightbox(null)} />}

@@ -10,7 +10,7 @@ import { CategoryOptions, categoryPath, type CategoryLite } from "../lib/categor
 import { tr } from "../i18n";
 import { da } from "../lib/format";
 import { Button, Card, inputCls, NumberField, PageHeader, Spinner, TextArea, TextField, useToast } from "../ui";
-import { COLOR_CHOICES, SIZE_CHOICES, uploadPhoto } from "./Products";
+import { COLOR_CHOICES, SIZE_CHOICES, uploadPhoto, uploadVideo, VIDEO_MAX_MB } from "./Products";
 
 /**
  * New product in 5 short steps, one thing per screen:
@@ -30,6 +30,8 @@ export function ProductWizard() {
   const categories = useQuery({ queryKey: ["categories"], queryFn: () => api<CategoryLite[]>("/categories") });
   const [step, setStep] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
+  /** an optional short video, sent after the photos */
+  const [video, setVideo] = useState<File | null>(null);
   const [info, setInfo] = useState({ nameFr: "", nameAr: "", price: null as number | null, compareAt: null as number | null, cost: null as number | null, categoryId: null as number | null, descriptionFr: "", descriptionAr: "" });
   const [sizes, setSizes] = useState<string[]>([]);
   const [colors, setColors] = useState<Color[]>([]);
@@ -84,6 +86,10 @@ export function ProductWizard() {
         const clean = studio ? await studioPhoto(file) : null;
         if (studio && !clean) studioFailed = true;
         await uploadPhoto(saved.id, clean ?? file, undefined, !!clean).catch(() => toast(tr("Une photo n'a pas pu être envoyée : ajoutez-la depuis la fiche."), "error"));
+      }
+      if (video) {
+        setBusy(tr("Vidéo…"));
+        await uploadVideo(saved.id, video).catch(() => toast(tr("La vidéo n'a pas pu être envoyée : ajoutez-la depuis la fiche."), "error"));
       }
       if (studioFailed) toast(tr("Le fond n'a pas pu être retiré pour le moment : photo gardée telle quelle."), "error");
       toast(status === "published" ? tr("Produit en ligne ✓") : tr("Brouillon enregistré ✓"));
@@ -144,6 +150,32 @@ export function ProductWizard() {
               </label>
             </li>
           </ul>
+          {/* optional: a short video of the piece (worn, turning, the fabric moving) */}
+          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-4">
+            {video ? (
+              <>
+                <span className="text-sm">🎬 {video.name} · {(video.size / 1024 / 1024).toFixed(1)} {tr("Mo")}</span>
+                <button type="button" onClick={() => setVideo(null)} className="text-sm font-semibold text-plum-600">{tr("Retirer")}</button>
+              </>
+            ) : (
+              <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-semibold hover:border-plum-600">
+                🎬 {tr("Ajouter une vidéo (facultatif)")}
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!f) return;
+                    if (f.size > VIDEO_MAX_MB * 1024 * 1024) return toast(tr("Vidéo trop lourde ({0} Mo max) : filmez plus court, en 720p.", { 0: VIDEO_MAX_MB }), "error");
+                    setVideo(f);
+                  }}
+                />
+              </label>
+            )}
+            <span className="text-xs text-ink-soft">{tr("MP4, WebM ou MOV · {0} Mo max · 10 à 30 s, filmée en 720p, suffit.", { 0: VIDEO_MAX_MB })}</span>
+          </div>
         </Card>
       )}
 
@@ -302,6 +334,7 @@ export function ProductWizard() {
               <div><dt className="inline text-ink-soft">{tr("Couleurs")} : </dt><dd className="inline">{colors.map((c) => c.labelFr).join(", ") || "—"}</dd></div>
               <div><dt className="inline text-ink-soft">{tr("Stock")} : </dt><dd className="inline font-semibold">{tr("{0} pièce(s)", { 0: totalPieces })}</dd></div>
               <div><dt className="inline text-ink-soft">{tr("Photos")} : </dt><dd className="inline">{files.length}</dd></div>
+              {video && <div><dt className="inline text-ink-soft">{tr("Vidéo")} : </dt><dd className="inline">✓</dd></div>}
             </dl>
           </div>
           {busy ? (

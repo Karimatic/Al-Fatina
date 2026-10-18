@@ -290,6 +290,8 @@ interface ProductForm {
   options: Option[];
   variants: Variant[];
   images?: (ImageRef & { id: number })[];
+  /** the piece's short video (shown in the store's photo gallery) */
+  video?: string | null;
 }
 
 /** Photos chosen on a product that wasn't saved yet: uploaded right after the first save. */
@@ -489,6 +491,7 @@ export function ProductEditor() {
               </label>
             </Card>
           )}
+          {!isNew && <VideoEditor productId={form.id!} video={form.video ?? null} onChange={(video) => set("video", video)} disabled={readOnly} />}
           {!readOnly && <RelatedPicker productId={form.id} ids={form.relatedIds ?? []} onChange={(ids) => set("relatedIds", ids)} />}
         </div>
 
@@ -1005,6 +1008,78 @@ function ImagesEditor({
       </ul>
       <p className="mt-3 text-xs text-ink-soft">{tr("Les photos sont redimensionnées et compressées sur votre téléphone (et leur localisation GPS est supprimée) avant l'envoi.")}</p>
       {colors.some((c) => !colorIdOf(c.ref)) && <p className="mt-1 text-xs text-amber-700">{tr("Enregistrez le produit pour associer les photos aux nouvelles couleurs.")}</p>}
+    </Card>
+  );
+}
+
+/** Largest video accepted (the server says the same): about 30 s filmed in 720p. */
+export const VIDEO_MAX_MB = 40;
+
+/** Sends a product's video; resolves with its address. */
+export function uploadVideo(productId: number, file: File) {
+  const form = new FormData();
+  form.append("video", file, file.name);
+  return upload<{ video: string }>(`/products/${productId}/video`, form);
+}
+
+/**
+ * One short video of the piece (worn, turning, the fabric moving): shown in the store's photo
+ * gallery after the first photo, without sound, playing in a loop.
+ */
+function VideoEditor({ productId, video, onChange, disabled }: { productId: number; video: string | null; onChange: (v: string | null) => void; disabled?: boolean }) {
+  const toast = useToast();
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  async function send(file: File) {
+    if (file.size > VIDEO_MAX_MB * 1024 * 1024) return toast(tr("Vidéo trop lourde ({0} Mo max) : filmez plus court, en 720p.", { 0: VIDEO_MAX_MB }), "error");
+    setBusy(true);
+    try {
+      const r = await uploadVideo(productId, file);
+      onChange(r.video);
+      void qc.invalidateQueries({ queryKey: ["product", String(productId)] });
+      toast(tr("Vidéo ajoutée ✓"));
+    } catch (e) {
+      toast(errorMessage(e), "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function remove() {
+    if (!confirm(tr("Retirer la vidéo de ce produit ?"))) return;
+    setBusy(true);
+    try {
+      await del(`/products/${productId}/video`);
+      onChange(null);
+      toast(tr("Vidéo retirée"));
+    } catch (e) {
+      toast(errorMessage(e), "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Card title={tr("🎬 Vidéo")}>
+      {video ? (
+        <div className="space-y-3">
+          <video src={video} controls muted playsInline preload="metadata" className="max-h-80 w-full rounded-xl bg-black object-contain" />
+          {!disabled && (
+            <div className="flex flex-wrap gap-2">
+              <label className={`inline-flex h-9 cursor-pointer items-center rounded-lg border border-line bg-surface px-3.5 text-sm font-semibold ${busy ? "pointer-events-none opacity-50" : ""}`}>
+                {busy ? tr("Envoi…") : tr("Remplacer")}
+                <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void send(f); }} />
+              </label>
+              <Button size="sm" variant="danger" disabled={busy} onClick={() => void remove()}>{tr("Retirer")}</Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <label className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line bg-surface p-6 text-center text-sm text-ink-soft hover:border-plum-600 ${busy || disabled ? "pointer-events-none opacity-60" : ""}`}>
+          <span className="text-2xl">🎬</span>
+          {busy ? tr("Envoi de la vidéo…") : tr("Ajouter une vidéo")}
+          <span className="text-xs">{tr("MP4, WebM ou MOV · {0} Mo max · 10 à 30 s, filmée en 720p, suffit.", { 0: VIDEO_MAX_MB })}</span>
+          <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only" disabled={busy || disabled} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void send(f); }} />
+        </label>
+      )}
     </Card>
   );
 }

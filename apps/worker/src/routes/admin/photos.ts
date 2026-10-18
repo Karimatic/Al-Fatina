@@ -6,7 +6,8 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
-import { imageRef, type ImageRow } from "../../lib/catalog";
+import { imageRef, mediaUrl, type ImageRow } from "../../lib/catalog";
+import { putVideo } from "../../lib/media";
 import { randomToken } from "../../lib/crypto";
 import { body, HttpError, intParam } from "../../lib/http";
 import { bumpCatalogStmt } from "../../lib/settings";
@@ -127,5 +128,40 @@ photoRoutes.delete("/images/:id", requirePermission("products.edit"), async (c) 
   ]);
   const keys = await unusedImageKeys(c.env, [img]);
   if (keys.length) c.executionCtx.waitUntil(c.env.MEDIA.delete(keys));
+  return c.json({ ok: true });
+});
+
+/* ───────────── Video (one per product) ─────────────
+ * A short video of the piece (worn, turning, the fabric moving): MP4 / WebM / MOV, 40 MB at
+ * most, stored as it is (no re-encoding on the free plan: film it in 720p, under 30 s). The
+ * product page shows it in the photo gallery, streamed in pieces like the home banner video.
+ */
+photoRoutes.post("/products/:id/video", requirePermission("products.edit"), async (c) => {
+  const id = intParam(c, "id");
+  const p = await c.env.DB.prepare("SELECT video_key FROM products WHERE id = ?").bind(id).first<{ video_key: string | null }>();
+  if (!p) throw new HttpError(404, "not_found");
+  const form = await c.req.formData().catch(() => null);
+  const file = form?.get("video");
+  if (!(file instanceof File)) throw new HttpError(422, "validation_failed", { video: "required" });
+  const key = await putVideo(c.env, `products/video/${id}`, file);
+  await c.env.DB.batch([
+    c.env.DB.prepare("UPDATE products SET video_key = ?, updated_at = ? WHERE id = ?").bind(key, Date.now(), id),
+    bumpCatalogStmt(c.env),
+    auditStmt(c.env, actorOf(c.get("member")), "video", "product", id, { size: file.size }),
+  ]);
+  if (p.video_key) c.executionCtx.waitUntil(c.env.MEDIA.delete(p.video_key));
+  return c.json({ video: mediaUrl(c.env, key) });
+});
+
+photoRoutes.delete("/products/:id/video", requirePermission("products.edit"), async (c) => {
+  const id = intParam(c, "id");
+  const p = await c.env.DB.prepare("SELECT video_key FROM products WHERE id = ?").bind(id).first<{ video_key: string | null }>();
+  if (!p) throw new HttpError(404, "not_found");
+  await c.env.DB.batch([
+    c.env.DB.prepare("UPDATE products SET video_key = NULL, updated_at = ? WHERE id = ?").bind(Date.now(), id),
+    bumpCatalogStmt(c.env),
+    auditStmt(c.env, actorOf(c.get("member")), "video_delete", "product", id),
+  ]);
+  if (p.video_key) c.executionCtx.waitUntil(c.env.MEDIA.delete(p.video_key));
   return c.json({ ok: true });
 });

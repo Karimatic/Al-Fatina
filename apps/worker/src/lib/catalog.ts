@@ -18,6 +18,8 @@ import type { Env } from "../env";
 
 interface ProductRow {
   id: number;
+  /** a short video of the piece (R2 key) */
+  video_key?: string | null;
   slug: string;
   name_fr: string;
   name_ar: string;
@@ -71,7 +73,7 @@ const PRODUCT_COLS = `p.id, p.slug, p.name_fr, p.name_ar, p.description_fr, p.de
   c.slug AS category_slug, p.tags, p.price, p.compare_at_price, p.seo_title, p.seo_description,
   -- "arrived": published, or new stock received since (Nouveautés = the latest goods in)
   MAX(COALESCE(p.published_at, p.created_at), COALESCE((SELECT MAX(m.created_at) FROM stock_movements m JOIN variants mv ON mv.id = m.variant_id
-    WHERE mv.product_id = p.id AND m.reason = 'reception'), 0)) AS created_at, p.related_ids, p.size_guide_id`;
+    WHERE mv.product_id = p.id AND m.reason = 'reception'), 0)) AS created_at, p.related_ids, p.size_guide_id, p.video_key`;
 
 const CANCELLED = "('annulee','doublon','fausse')";
 
@@ -387,6 +389,7 @@ export async function getProductDetail(env: Env, slug: string): Promise<ProductD
     related: related.cards,
     relatedKind: related.kind,
     sizeGuide: sizeGuideDto((guide!.results as { table: string; tips_fr: string | null; tips_ar: string | null }[])[0]),
+    video: p.video_key ? mediaUrl(env, p.video_key) : null,
   };
 }
 
