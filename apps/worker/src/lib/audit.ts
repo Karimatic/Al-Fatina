@@ -16,7 +16,7 @@ export function auditStmt(env: Env, actor: string, action: string, entity: strin
 /** Grouped error feed (Système → Erreurs). One row per fingerprint, with a counter. */
 export async function recordError(
   env: Env,
-  source: "client" | "api" | "cron" | "telegram" | "carrier" | "push",
+  source: "client" | "api" | "cron" | "telegram" | "carrier" | "push" | "network",
   message: string,
   extra: { stack?: string; url?: string } = {},
 ) {

@@ -37,6 +37,8 @@ export const sameOriginWrites: MiddlewareHandler<AppEnv> = async (c, next) => {
   if (method === "GET" || method === "HEAD" || method === "OPTIONS") return next();
   // server-to-server webhooks authenticate with their own secret instead
   if (new URL(c.req.url).pathname.startsWith("/api/tg/")) return next();
+  // network error reports are sent by the browser itself (no Origin, application/reports+json)
+  if (new URL(c.req.url).pathname === "/api/nel") return next();
 
   const origin = c.req.header("Origin");
   const self = new URL(c.req.url).origin;

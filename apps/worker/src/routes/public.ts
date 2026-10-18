@@ -238,6 +238,35 @@ publicRoutes.post("/step", async (c) => {
   return c.body(null, 204);
 });
 
+/**
+ * Network Error Logging: when a phone could not load a page of the shop (timeout, DNS, cut
+ * connection…), the browser reports it here later (headers from scripts/assemble-dist.mjs, 5 %
+ * of failures). Real failures only, address without its query, under the counters' budget:
+ * Admin → Erreurs shows « network ».
+ */
+publicRoutes.post("/nel", async (c) => {
+  await rateLimit(c.env.RL_LOOKUP, `nel:${clientIp(c)}`);
+  const reports = (await c.req.json().catch(() => [])) as unknown;
+  const failures = (Array.isArray(reports) ? reports : [])
+    .filter((r): r is { type: string; url: string; body: { type?: string; phase?: string; status_code?: number } } =>
+      !!r && typeof r === "object" && (r as { type?: unknown }).type === "network-error" && typeof (r as { url?: unknown }).url === "string",
+    )
+    .filter((r) => r.body?.type && r.body.type !== "ok")
+    .slice(0, 3);
+  for (const r of failures) {
+    let path = "/";
+    try {
+      path = new URL(r.url).pathname.slice(0, 200);
+    } catch {
+      /* not an address */
+    }
+    if (!(await counterAllowed(c, "nel"))) break;
+    const what = `${String(r.body.type).slice(0, 60)}${r.body.phase ? ` (${String(r.body.phase).slice(0, 20)})` : ""}${r.body.status_code ? ` HTTP ${Number(r.body.status_code)}` : ""}`;
+    c.executionCtx.waitUntil(recordError(c.env, "network", `${what} ${path}`, { url: path }));
+  }
+  return c.body(null, 204);
+});
+
 /** The signed ticket of the public forms (see lib/form-guard.ts), taken when a page opens. */
 publicRoutes.get("/form-ticket", async (c) => {
   await rateLimit(c.env.RL_LOOKUP, `ticket:${clientIp(c)}`);

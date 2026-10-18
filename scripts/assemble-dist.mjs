@@ -92,7 +92,30 @@ const security = [
   "  X-Frame-Options: DENY",
   "  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()",
   "  Content-Security-Policy: frame-ancestors 'none'; base-uri 'none'; object-src 'none'; form-action 'self'",
+  ...networkErrorLogging(),
 ].join("\n");
+
+/**
+ * Network Error Logging (on the shop's https domain only): a phone that could not load a page
+ * reports it later to /api/nel (5 % of failures, never successes) → Admin → Erreurs « network ».
+ */
+function networkErrorLogging() {
+  let origin = process.env.SITE_URL || "";
+  if (!origin) {
+    try {
+      origin = /"PUBLIC_ORIGIN"\s*:\s*"([^"]*)"/.exec(readFileSync(join(root, "apps", "worker", "wrangler.jsonc"), "utf8"))?.[1] ?? "";
+    } catch {
+      /* no worker config */
+    }
+  }
+  if (!/^https:\/\/[^/]+$/.test(origin.replace(/\/$/, "")) || origin.includes(".workers.dev")) return [];
+  const url = `${origin.replace(/\/$/, "")}/api/nel`;
+  return [
+    `  Reporting-Endpoints: nel="${url}"`,
+    `  Report-To: {"group":"nel","max_age":2592000,"endpoints":[{"url":"${url}"}]}`,
+    `  NEL: {"report_to":"nel","max_age":2592000,"success_fraction":0,"failure_fraction":0.05}`,
+  ];
+}
 
 writeFileSync(
   join(dist, "_headers"),
