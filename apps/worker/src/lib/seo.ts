@@ -130,7 +130,41 @@ export async function metaFeedCsv(env: Env, lang: "ar" | "fr"): Promise<string> 
 
 /* ───────────── Product structured data (Google rich results) ───────────── */
 
-export function productJsonLd(env: Env, p: ProductDetailDTO, ar: boolean, path: string): string {
+/** Delivery prices across the wilayas (DA), for the product's shipping details. */
+export interface ShippingRange {
+  min: number;
+  max: number;
+}
+
+/**
+ * The shop's exchange policy as Google reads it (page « Livraison & retours »): an exchange,
+ * asked within 48 h of delivery, for unworn pieces; no money back.
+ */
+const RETURN_POLICY = {
+  "@type": "MerchantReturnPolicy",
+  applicableCountry: "DZ",
+  returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+  merchantReturnDays: 2,
+  returnMethod: "https://schema.org/ReturnByMail",
+  refundType: "https://schema.org/ExchangeRefund",
+  returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
+};
+
+/** Delivery to the 69 wilayas: 1 day to prepare after the call, 1 to 7 days on the road. */
+function shippingDetails(range: ShippingRange) {
+  return {
+    "@type": "OfferShippingDetails",
+    shippingDestination: { "@type": "DefinedRegion", addressCountry: "DZ" },
+    shippingRate: { "@type": "MonetaryAmount", currency: "DZD", minValue: range.min, maxValue: range.max },
+    deliveryTime: {
+      "@type": "ShippingDeliveryTime",
+      handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 1, unitCode: "DAY" },
+      transitTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 7, unitCode: "DAY" },
+    },
+  };
+}
+
+export function productJsonLd(env: Env, p: ProductDetailDTO, ar: boolean, path: string, shipping?: ShippingRange | null): string {
   const name = ar ? p.nameAr : p.nameFr;
   const url = abs(env, path);
   const prices = p.variants.length ? p.variants.map((v) => v.price) : [p.price];
@@ -148,10 +182,14 @@ export function productJsonLd(env: Env, p: ProductDetailDTO, ar: boolean, path: 
     sku: `HN-P${p.id}`,
     brand: { "@type": "Brand", name: "Henine Boutique" },
     ...(p.category ? { category: ar ? p.category.nameAr : p.category.nameFr } : {}),
-    offers:
-      low === high
+    offers: {
+      ...(low === high
         ? { "@type": "Offer", price: low, priceCurrency: "DZD", availability, url, itemCondition: "https://schema.org/NewCondition" }
-        : { "@type": "AggregateOffer", lowPrice: low, highPrice: high, priceCurrency: "DZD", offerCount: p.variants.length, availability, url },
+        : { "@type": "AggregateOffer", lowPrice: low, highPrice: high, priceCurrency: "DZD", offerCount: p.variants.length, availability, url }),
+      // for Google's merchant listings (audit SEO-2): how it is delivered, and how to exchange it
+      hasMerchantReturnPolicy: RETURN_POLICY,
+      ...(shipping ? { shippingDetails: shippingDetails(shipping) } : {}),
+    },
   };
   if (p.rating) {
     data.aggregateRating = { "@type": "AggregateRating", ratingValue: p.rating.avg, reviewCount: p.rating.count, bestRating: 5, worstRating: 1 };

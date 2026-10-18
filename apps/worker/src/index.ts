@@ -4,7 +4,7 @@ import type { AppEnv } from "./env";
 import { recordError } from "./lib/audit";
 import { getCollection, getProductDetail, listCategories } from "./lib/catalog";
 import { cached } from "./lib/edge-cache";
-import { breadcrumbJsonLd, metaFeedCsv, productJsonLd, robotsTxt, sitemapXml } from "./lib/seo";
+import { breadcrumbJsonLd, metaFeedCsv, productJsonLd, robotsTxt, sitemapXml, type ShippingRange } from "./lib/seo";
 import { getSettings } from "./lib/settings";
 import { HttpError } from "./lib/http";
 import { handleUpdate, verifyWebhookSecret } from "./lib/telegram";
@@ -212,6 +212,17 @@ function linkTags(c: Context<AppEnv>, path: string): string {
   ].join("");
 }
 
+/** Lowest and highest delivery price over the open wilayas (product structured data). */
+async function shippingRange(env: AppEnv["Bindings"]): Promise<ShippingRange | null> {
+  const r = await env.DB.prepare(
+    `SELECT MIN(MIN(COALESCE(desk_price, home_price), COALESCE(home_price, desk_price))) AS min, MAX(MAX(COALESCE(home_price, 0), COALESCE(desk_price, 0))) AS max
+       FROM wilayas WHERE is_active = 1 AND (home_price IS NOT NULL OR desk_price IS NOT NULL)`,
+  )
+    .first<{ min: number | null; max: number | null }>()
+    .catch(() => null);
+  return r?.min != null && r.max ? { min: r.min, max: r.max } : null;
+}
+
 async function shell(c: Context<AppEnv>, prefix: string, section: string, slug: string) {
   const url = new URL(c.req.url);
   const direct = await c.env.ASSETS.fetch(new Request(url, c.req.raw));
@@ -241,7 +252,7 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
     if (product) {
       const cat = product.category;
       structured =
-        productJsonLd(c.env, product, ar, url.pathname) +
+        productJsonLd(c.env, product, ar, url.pathname, await shippingRange(c.env)) +
         breadcrumbJsonLd(c.env, ar, [
           ...(cat ? [{ name: ar ? cat.nameAr : cat.nameFr, path: `${prefix}/c/${cat.slug}` }] : []),
           { name: ar ? product.nameAr : product.nameFr, path: url.pathname },

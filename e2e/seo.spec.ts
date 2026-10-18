@@ -22,6 +22,10 @@ test("product page: the product and its breadcrumb", async ({ page }) => {
   await page.goto("/produit/pyjama-short-coton-fleuri");
   const data = await structured(page);
   expect(data.map((d) => d["@type"])).toEqual(expect.arrayContaining(["Product", "BreadcrumbList"]));
+  // merchant listings: the exchange policy and the delivery (audit SEO-2)
+  const offers = data.find((d) => d["@type"] === "Product")!.offers as { hasMerchantReturnPolicy?: { merchantReturnDays: number }; shippingDetails?: { shippingDestination: { addressCountry: string } } };
+  expect(offers.hasMerchantReturnPolicy?.merchantReturnDays).toBe(2);
+  expect(offers.shippingDetails?.shippingDestination.addressCountry).toBe("DZ");
   const crumbs = data.find((d) => d["@type"] === "BreadcrumbList")!.itemListElement as { name: string; item: string }[];
   expect(crumbs[0]!.name).toBe("الرئيسية");
   expect(crumbs.at(-1)!.item).toMatch(/\/produit\/pyjama-short-coton-fleuri$/);
