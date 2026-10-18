@@ -32,3 +32,24 @@ test("a product page shows its product without asking the API again (audit R4-5)
   await expect(page.getByRole("heading", { level: 1, name: "Pyjama short coton fleuri" })).toBeVisible();
   expect(asked).toEqual([]);
 });
+
+test("a product with a video shows it in the gallery, without downloading it before it is seen", async ({ page, isMobile }) => {
+  const videoRequests: string[] = [];
+  page.on("request", (r) => {
+    if (r.url().includes("/media/e2e/video.mp4")) videoRequests.push(r.url());
+  });
+  await page.goto("/fr/produit/ensemble-satin-ete-lina");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  if (isMobile) {
+    // second slide of the swipe gallery, not loaded until swiped to
+    await expect(page.locator("video[aria-label='Vidéo du produit']").first()).toBeAttached();
+    await page.waitForTimeout(800);
+    expect(videoRequests).toEqual([]);
+  } else {
+    // a ▶ thumbnail after the main photo; chosen, the video takes the big frame and loads
+    expect(videoRequests).toEqual([]);
+    await page.getByRole("button", { name: "Vidéo du produit" }).click();
+    await expect(page.locator("video[aria-label='Vidéo du produit']:visible")).toBeVisible();
+    await expect.poll(() => videoRequests.length).toBeGreaterThan(0);
+  }
+});

@@ -9,12 +9,14 @@ export function ProductVideo({ src, poster, label, className = "" }: { src: stri
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const v = ref.current;
+    if (v && v.getAttribute("src") && v.getAttribute("src") !== src) v.removeAttribute("src"); // another video: wait again
     if (!v || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
       ([e]) => {
         if (!e) return;
         if (e.isIntersecting && e.intersectionRatio >= 0.6) {
-          if (v.preload === "none") v.preload = "auto";
+          // the address only now: given at once, the browser starts downloading whatever « preload » says
+          if (!v.getAttribute("src")) v.src = src;
           void v.play().catch(() => undefined); // a phone in power saving may refuse: the controls stay
         } else v.pause();
       },
@@ -26,7 +28,6 @@ export function ProductVideo({ src, poster, label, className = "" }: { src: stri
   return (
     <video
       ref={ref}
-      src={src}
       poster={poster}
       muted
       loop

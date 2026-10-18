@@ -101,6 +101,7 @@ const MESSAGES: Record<string, string> = {
   limit_below_used: "La limite est inférieure au nombre d'utilisations.",
   points_negative: "Le solde de points deviendrait négatif.",
   file_too_large: "Fichier trop lourd.",
+  video_type: "Format vidéo non accepté : MP4, WebM ou MOV.",
   audio_type: "Format de son non reconnu : choisissez un fichier MP3, WAV, OGG ou M4A.",
   unsupported_image: "Format de photo non supporté.",
   percent_over_100: "Un pourcentage ne peut pas dépasser 100.",
