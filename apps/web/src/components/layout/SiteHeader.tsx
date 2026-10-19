@@ -24,7 +24,7 @@ export function SiteHeader() {
 
   return (
     <>
-      <p className="bg-ink px-4 py-2 text-center text-[11.5px] tracking-[0.08em] text-white/90">
+      <p className="bg-plum-700 px-4 py-2 text-center text-[11.5px] tracking-[0.08em] text-white">
         <span aria-hidden="true" className="me-2 text-gold">
           ✦
         </span>
@@ -66,7 +66,7 @@ export function SiteHeader() {
             <a href={href("/panier")} className={icon} aria-label={`${t.nav.cart} (${count})`}>
               <BagIcon />
               {count > 0 && (
-                <span className="absolute end-0.5 top-1 grid size-5 place-items-center rounded-full bg-ink text-[10.5px] font-medium text-white" dir="ltr">
+                <span className="absolute end-0.5 top-1 grid size-5 place-items-center rounded-full bg-plum-600 text-[10.5px] font-medium text-white" dir="ltr">
                   {count > 9 ? "9+" : count}
                 </span>
               )}

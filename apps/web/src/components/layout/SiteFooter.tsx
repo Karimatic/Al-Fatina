@@ -72,7 +72,7 @@ export function SiteFooter() {
           <p className={title}>{t.plus.footerFollow}</p>
           <div className="flex flex-wrap gap-2">
             {socials.map((s) => (
-              <a key={s.key} href={s.href} rel="noopener noreferrer" target="_blank" aria-label={s.label} className="grid size-10 place-items-center rounded-full border border-ink/25 text-ink transition hover:border-ink hover:bg-ink hover:text-white">
+              <a key={s.key} href={s.href} rel="noopener noreferrer" target="_blank" aria-label={s.label} className="grid size-10 place-items-center rounded-full border border-ink/25 text-ink transition hover:border-ink hover:bg-plum-600 hover:text-white">
                 {s.icon}
               </a>
             ))}

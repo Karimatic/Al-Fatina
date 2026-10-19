@@ -89,7 +89,7 @@ export function FloatingHelp() {
             setOpen(true);
           }}
           aria-label={t.plus.assistant.open}
-          className={`assistant-fab lift relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-ink ps-1.5 text-sm ${compact ? "pe-1.5 md:pe-4" : "pe-4"} font-medium text-white shadow-[0_6px_20px_-6px_rgb(0_0_0/0.45)]`}
+          className={`assistant-fab lift relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-plum-600 ps-1.5 text-sm ${compact ? "pe-1.5 md:pe-4" : "pe-4"} font-medium text-white shadow-[0_6px_20px_-6px_rgb(0_0_0/0.45)]`}
         >
           <span className="grid size-9 place-items-center rounded-full bg-white/20" aria-hidden="true">
             <span className="assistant-spark">
@@ -186,7 +186,7 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
   return (
     <div className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-noir/50 md:items-center" ref={dialogRef} role="dialog" aria-modal="true" aria-label={A.title} onClick={onClose}>
       <div className="sheet-in flex max-h-[88dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-[1.75rem] bg-ivory shadow-2xl md:rounded-[1.75rem]" onClick={(e) => e.stopPropagation()}>
-        <header className="flex items-center justify-between gap-3 bg-ink px-5 py-4 text-white">
+        <header className="flex items-center justify-between gap-3 bg-plum-600 px-5 py-4 text-white">
           <div>
             <p className="heading-display text-xl">{A.title}</p>
             <p className="text-xs text-white/75">{ar ? "من منتجاتنا المتوفرة فقط" : "Uniquement nos pièces en stock"}</p>
@@ -209,7 +209,7 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
           )}
           {turns.map((turn, i) => (
             <div key={i} data-turn className="space-y-2.5">
-              <p className="ms-auto w-fit max-w-[85%] rounded-2xl rounded-se-sm bg-ink px-3.5 py-2.5 text-sm text-on-ink">{turn.q}</p>
+              <p className="ms-auto w-fit max-w-[85%] rounded-2xl rounded-se-sm bg-plum-600 px-3.5 py-2.5 text-sm text-on-ink">{turn.q}</p>
               {turn.error && <p className="text-sm text-danger">{t.common.error}</p>}
               {turn.reply && (
                 <div className="space-y-2.5">

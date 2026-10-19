@@ -93,7 +93,7 @@ export function CartView() {
               </p>
               <span className="mt-2.5 block h-2 overflow-hidden rounded-full bg-surface">
                 <span
-                  className="block h-full rounded-full bg-ink transition-[width] duration-700"
+                  className="block h-full rounded-full bg-plum-600 transition-[width] duration-700"
                   style={{ width: `${Math.min(100, Math.round((subtotal / freeOver) * 100))}%` }}
                 />
               </span>

@@ -3,8 +3,8 @@ import { useLocale } from "@/lib/locale";
 
 // quiet tags: charcoal for what sells, white for the rest
 const TONE: Record<string, string> = {
-  bestseller: "bg-ink text-white",
-  trending: "bg-ink text-white",
+  bestseller: "bg-plum-600 text-white",
+  trending: "bg-plum-600 text-white",
   popular: "bg-white text-ink",
   new: "bg-white text-ink",
   pick: "bg-white text-ink",

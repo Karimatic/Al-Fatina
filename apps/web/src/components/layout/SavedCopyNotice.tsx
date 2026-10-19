@@ -18,7 +18,7 @@ export function SavedCopyNotice() {
   }, []);
   if (!show) return null;
   return (
-    <div role="status" className="fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm text-on-ink shadow-lg md:bottom-4">
+    <div role="status" className="fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-plum-600 px-4 py-3 text-sm text-on-ink shadow-lg md:bottom-4">
       <span className="flex-1">{t.common.savedCopy}</span>
       <button type="button" onClick={() => location.reload()} className="h-10 shrink-0 rounded-full bg-on-ink/15 px-4 font-semibold">
         {t.common.refresh}

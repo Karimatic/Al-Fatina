@@ -2,36 +2,36 @@
 @import "./fonts.css";
 
 /*
- * Al Fatina design tokens, "silk luxe": a white page with cream sections, charcoal text and buttons,
- * warm hairlines, widely spaced capitals, soft 2 px corners, a muted gold for small details and a
- * deep burgundy for sales only.
- * WCAG contrast on white: ink 15.9:1, ink-soft 6.1:1 (5.6:1 on cream), sale 7.5:1 (AA ✓).
- * rose-300/500 and gold are decoration only, never text.
+ * Al Fatina design tokens, "silk luxe" in feminine tones: a white page with blush sections, dusty
+ * rose buttons and accents, rose-gold details, warm mauve-brown text, soft 2 px corners and spaced
+ * capitals; a berry red for sales only.
+ * WCAG contrast: ink 13.4:1, ink-soft 5.7:1 (5.1:1 on blush), white on the rose buttons 5.0:1,
+ * accent text 7.2:1, sale 7.7:1 (AA ✓). rose-300/500 and gold are decoration only, never text.
  */
 @theme {
   --default-border-width: 1px;
   --color-ivory: #ffffff;
-  --color-ivory-deep: #f7f3ee;
-  --color-ink: #222222;
-  --color-ink-soft: #6b6259;
-  --color-line: #e6ded4;
-  --color-rose-800: #111111;
-  --color-plum-600: #222222;
-  --color-plum-700: #111111;
-  --color-rose-100: #f7f3ee;
-  --color-rose-300: #d9cfc3;
-  --color-rose-500: #a8875a;
-  --color-rose-700: #222222;
-  --color-gold: #a8875a;
+  --color-ivory-deep: #fcf0f1;
+  --color-ink: #3d2a30;
+  --color-ink-soft: #7d5f66;
+  --color-line: #f0dde0;
+  --color-rose-800: #7a3046;
+  --color-plum-600: #b04f68;
+  --color-plum-700: #8f3b52;
+  --color-rose-100: #fcf0f1;
+  --color-rose-300: #ecc5cc;
+  --color-rose-500: #d98fa0;
+  --color-rose-700: #b04f68;
+  --color-gold: #c99a8f;
   --color-success: #2f6b4a;
-  --color-danger: #a3122a;
+  --color-danger: #a3123f;
   --color-surface: #ffffff;
-  --color-noir: #222222;
+  --color-noir: #3d2a30;
   --color-on-ink: #ffffff;
-  --color-accent-text: #111111;
+  --color-accent-text: #8f3b52;
   /* sales and discounts: the one colour that is never the theme's */
-  --color-sale: #a3122a;
-  --color-cream: #f7f3ee;
+  --color-sale: #a3123f;
+  --color-cream: #fcf0f1;
 
   --font-display: var(--font-p-jost), "Century Gothic", Arial, sans-serif;
   --font-sans: var(--font-p-jost), system-ui, sans-serif;
@@ -228,10 +228,10 @@ html[lang="ar"] :is(.uppercase, .heading-display, .title-silk, .eyebrow-silk) {
     letter-spacing: 0.16em;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
-  .btn-silk { background: var(--color-ink); color: #fff; }
-  .btn-silk:hover { background: #000; }
+  .btn-silk { background: var(--color-plum-600); color: #fff; }
+  .btn-silk:hover { background: var(--color-plum-700); }
   .btn-silk-line { border: 1px solid currentColor; }
-  .btn-silk-line:hover { background: var(--color-ink); color: #fff; border-color: var(--color-ink); }
+  .btn-silk-line:hover { background: var(--color-plum-600); color: #fff; border-color: var(--color-plum-600); }
   html[lang="ar"] :is(.btn-silk, .btn-silk-line) { letter-spacing: 0; font-size: 0.9375rem; font-weight: 700; }
 }
 

@@ -66,7 +66,7 @@ export function FlashPanel({ flash }: { flash: FlashInfoDTO }) {
   const { left, done } = useCountdown(flash.endsAt);
   if (done) return null;
   return (
-    <div className="mt-4 bg-ink p-4 text-white">
+    <div className="mt-4 bg-plum-600 p-4 text-white">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-bold">⚡ {t.plus.flash.title} · -{flash.percent}%</p>
         <div className="flex items-center gap-2 text-xs">

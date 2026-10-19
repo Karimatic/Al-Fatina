@@ -17,7 +17,7 @@ function PageError() {
   return (
     <div role="alert" className="mx-auto my-10 max-w-md rounded-3xl border border-line bg-surface p-6 text-center">
       <p className="text-sm text-ink-soft">{t.common.error}</p>
-      <button type="button" onClick={() => location.reload()} className="mt-4 inline-flex h-11 items-center rounded-full bg-ink px-6 font-semibold text-on-ink">
+      <button type="button" onClick={() => location.reload()} className="mt-4 inline-flex h-11 items-center rounded-full bg-plum-600 px-6 font-semibold text-on-ink">
         {t.common.retry}
       </button>
     </div>

@@ -64,7 +64,7 @@ export function BottomNav() {
                 className={`relative flex h-16 flex-col items-center justify-center gap-1 text-[10px] uppercase tracking-[0.08em] transition ${active ? "font-medium text-ink" : "text-ink-soft"}`}
               >
                 {/* the page you are on: a thin line along the top of its tab */}
-                {active && <span aria-hidden="true" className="absolute inset-x-4 top-0 h-px bg-ink" />}
+                {active && <span aria-hidden="true" className="absolute inset-x-4 top-0 h-px bg-plum-600" />}
                 <span className="grid h-7 place-items-center">
                   <Icon size={20} />
                 </span>
@@ -73,7 +73,7 @@ export function BottomNav() {
                   <span className="absolute top-1.5 size-2.5 rounded-full bg-sale ring-2 ring-white ms-7" aria-label={t.status[order.status]} />
                 )}
                 {to === "/panier" && count > 0 && (
-                  <span className="absolute top-1 grid min-w-5 place-items-center rounded-full bg-ink px-1 text-[10px] font-bold leading-5 text-white ring-2 ring-white ms-8">
+                  <span className="absolute top-1 grid min-w-5 place-items-center rounded-full bg-plum-600 px-1 text-[10px] font-bold leading-5 text-white ring-2 ring-white ms-8">
                     {count}
                   </span>
                 )}

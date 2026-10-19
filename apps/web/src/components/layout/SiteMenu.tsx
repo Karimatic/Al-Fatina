@@ -143,7 +143,7 @@ export function SiteMenu() {
                         hrefLang={code}
                         lang={code}
                         aria-current={locale === code ? "true" : undefined}
-                        className={`grid h-11 place-items-center rounded-[2px] border text-sm transition ${locale === code ? "border-ink bg-ink text-white" : "border-line text-ink hover:border-ink"}`}
+                        className={`grid h-11 place-items-center rounded-[2px] border text-sm transition ${locale === code ? "border-plum-600 bg-plum-600 text-white" : "border-line text-ink hover:border-ink"}`}
                       >
                         {label}
                       </a>

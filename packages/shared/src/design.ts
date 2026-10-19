@@ -102,9 +102,9 @@ export function designFonts(d: Pick<DesignDTO, "font" | "customFont">): FontChoi
 
 /** Ready-made colour themes. `accent` carries white text (buttons): every preset is ≥ 4.5:1. */
 export const COLOR_PRESETS = [
-  { key: "soie", label: "Soie (Al Fatina)", accent: "#222222", soft: "#f7f3ee" },
+  { key: "rose", label: "Rose poudré (Al Fatina)", accent: "#b04f68", soft: "#fcf0f1" },
+  { key: "soie", label: "Soie", accent: "#222222", soft: "#f7f3ee" },
   { key: "plum", label: "Prune", accent: "#8e1048", soft: "#fbe4ec" },
-  { key: "rose", label: "Rose poudré", accent: "#b03a6a", soft: "#fdeaf1" },
   { key: "noir", label: "Noir & or", accent: "#1f1a17", soft: "#f4ede4" },
   { key: "emeraude", label: "Émeraude", accent: "#0f6b52", soft: "#e2f3ec" },
   { key: "nuit", label: "Bleu nuit", accent: "#1d3b72", soft: "#e6ecf8" },
@@ -151,7 +151,7 @@ export interface DesignDTO {
 
 export const DEFAULT_DESIGN: DesignDTO = {
   logo: null,
-  colors: { accent: "#222222", soft: "#f7f3ee" },
+  colors: { accent: "#b04f68", soft: "#fcf0f1" },
   font: "classic",
   customFont: { display: "Jost", sans: "Jost", arabic: "Tajawal", arabicDisplay: "Tajawal" },
   fontFile: null,

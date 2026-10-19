@@ -58,7 +58,7 @@ export function CategoriesView() {
                     <span className="min-w-0 flex-1">
                       <span className="heading-display block text-xl leading-snug">{ar ? c.nameAr : c.nameFr}</span>
                     </span>
-                    <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-on-ink transition group-hover:bg-plum-600 rtl:rotate-180">→</span>
+                    <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-plum-600 text-on-ink transition group-hover:bg-plum-700 rtl:rotate-180">→</span>
                   </a>
                   {subs.length > 0 && (
                     <ul className="mt-3 flex flex-wrap gap-1.5 border-t border-line pt-3">
@@ -127,7 +127,7 @@ export function CategoryView() {
   }, [category, ar]);
 
   const money = (n: number) => formatDA(n, locale);
-  const chip = (on: boolean) => `h-9 shrink-0 rounded-[2px] border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-ink bg-ink text-white" : "border-line hover:border-ink"}`;
+  const chip = (on: boolean) => `h-9 shrink-0 rounded-[2px] border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-plum-600 bg-plum-600 text-white" : "border-line hover:border-ink"}`;
 
   return (
     <div className="mx-auto max-w-7xl px-3 pb-10 pt-6 md:px-6 md:pt-10">
@@ -181,7 +181,7 @@ export function CategoryView() {
         <div className="rounded-card border border-line bg-surface p-8 text-center">
           <p className="text-ink-soft">{t.categories.empty}</p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <a href={href("/nouveautes")} className="inline-flex h-11 items-center rounded-full bg-ink px-5 text-sm font-semibold text-on-ink">
+            <a href={href("/nouveautes")} className="inline-flex h-11 items-center rounded-full bg-plum-600 px-5 text-sm font-semibold text-on-ink">
               {t.home.newArrivals}
             </a>
             <a href={href("/promotions")} className="inline-flex h-11 items-center rounded-full border border-line px-5 text-sm font-semibold">
@@ -212,7 +212,7 @@ export function PromotionsView() {
   });
   const shown = main === "all" ? sale : sale.filter((p) => p.categorySlug && categorySlugs(all, main).has(p.categorySlug));
   const best = sale[0] ? percentOff(sale[0]) : 0;
-  const chip = (on: boolean) => `h-9 shrink-0 rounded-[2px] border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-ink bg-ink text-white" : "border-line hover:border-ink"}`;
+  const chip = (on: boolean) => `h-9 shrink-0 rounded-[2px] border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-plum-600 bg-plum-600 text-white" : "border-line hover:border-ink"}`;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -249,7 +249,7 @@ export function PromotionsView() {
       ) : (
         <div className="rounded-card border border-line bg-surface p-8 text-center">
           <p className="text-ink-soft">{P.empty}</p>
-          <a href={href("/nouveautes")} className="mt-5 inline-flex h-11 items-center rounded-full bg-ink px-5 text-sm font-semibold text-on-ink">
+          <a href={href("/nouveautes")} className="mt-5 inline-flex h-11 items-center rounded-full bg-plum-600 px-5 text-sm font-semibold text-on-ink">
             {t.home.newArrivals}
           </a>
         </div>

@@ -94,7 +94,7 @@ export function ReviewForm({ productId, code: fixedCode, token: fixedToken, onDo
               <button
                 type="button"
                 onClick={() => setPhotos((list) => list.filter((_, j) => j !== i))}
-                className="absolute -end-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-ink text-xs text-on-ink"
+                className="absolute -end-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-plum-600 text-xs text-on-ink"
                 aria-label={t.plus.reviews.remove}
               >
                 ✕

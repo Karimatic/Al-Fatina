@@ -22,7 +22,7 @@ export function QuickAddButton({ p }: { p: ProductCardDTO }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t.quickAdd.open}
-        className="absolute bottom-2 end-2 grid size-9 place-items-center rounded-full bg-white/90 text-xl font-light text-ink transition hover:bg-ink hover:text-white active:scale-90"
+        className="absolute bottom-2 end-2 grid size-9 place-items-center rounded-full bg-white/90 text-xl font-light text-ink transition hover:bg-plum-600 hover:text-white active:scale-90"
       >
         +
       </button>
@@ -149,7 +149,7 @@ function QuickAddSheet({ slug, onClose }: { slug: string; onClose: () => void })
                           disabled={soldOut}
                           onClick={() => setSelected((s) => ({ ...s, [o.id]: v.id }))}
                           aria-pressed={on}
-                          className={`h-11 min-w-12 rounded-2xl border px-4 text-sm font-semibold transition active:scale-95 ${on ? "border-ink bg-ink text-on-ink" : "border-line bg-surface"} ${soldOut ? "text-ink-soft line-through opacity-50" : ""}`}
+                          className={`h-11 min-w-12 rounded-2xl border px-4 text-sm font-semibold transition active:scale-95 ${on ? "border-plum-600 bg-plum-600 text-on-ink" : "border-line bg-surface"} ${soldOut ? "text-ink-soft line-through opacity-50" : ""}`}
                         >
                           {ar ? v.labelAr : v.labelFr}
                         </button>
@@ -163,7 +163,7 @@ function QuickAddSheet({ slug, onClose }: { slug: string; onClose: () => void })
             {added ? (
               <div className="mt-6 grid gap-2">
                 <p className="text-center text-sm font-semibold text-success">{t.quickAdd.added}</p>
-                <a href={href("/panier")} className="grid h-12 place-items-center rounded-full bg-ink font-semibold text-on-ink">
+                <a href={href("/panier")} className="grid h-12 place-items-center rounded-full bg-plum-600 font-semibold text-on-ink">
                   {t.quickAdd.viewCart}
                 </a>
                 <button type="button" onClick={onClose} className="h-11 rounded-full text-sm font-semibold text-ink-soft">

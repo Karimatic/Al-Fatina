@@ -62,7 +62,7 @@ export function DropBanner({ drop }: { drop: DropTeaserDTO }) {
     <section className="mx-auto max-w-6xl px-4 pt-4">
       <a
         href={href(`/collection/${drop.slug}`)}
-        className="flex flex-col items-center gap-3 bg-ink p-5 text-center text-white md:flex-row md:justify-between md:p-6 md:text-start"
+        className="flex flex-col items-center gap-3 bg-plum-600 p-5 text-center text-white md:flex-row md:justify-between md:p-6 md:text-start"
       >
         <span>
           <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-rose-300">{done ? t.drop.live : t.drop.soon}</span>

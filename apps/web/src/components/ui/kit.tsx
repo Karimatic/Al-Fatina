@@ -8,12 +8,12 @@ export function Price({ value, compareAt, className = "" }: { value: number; com
   return (
     <span className={`inline-flex flex-wrap items-baseline gap-x-2 ${className}`}>
       {/* on sale: the new price in burgundy, the old one struck through, the saving beside */}
-      <span className={`font-medium ${off ? "text-sale" : "text-ink"}`} dir="ltr">
+      <span className={`whitespace-nowrap font-medium ${off ? "text-sale" : "text-ink"}`} dir="ltr">
         {formatDA(value, locale)}
       </span>
       {off ? (
         <>
-          <s className="text-[0.88em] text-ink-soft" dir="ltr">
+          <s className="whitespace-nowrap text-[0.88em] text-ink-soft" dir="ltr">
             {formatDA(compareAt!, locale)}
           </s>
           <span className="text-[0.8em] font-medium text-sale" dir="ltr">

@@ -79,7 +79,7 @@ export function InstagramCard({ children }: { children?: React.ReactNode }) {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="ig-btn inline-flex h-12 shrink-0 items-center gap-2 rounded-[2px] bg-ink px-7 text-[13px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-black"
+              className="ig-btn inline-flex h-12 shrink-0 items-center gap-2 rounded-[2px] bg-plum-600 px-7 text-[13px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-black"
             >
               <InstagramIcon size={18} />
               <span dir="ltr">{t.instagram.cta}</span>

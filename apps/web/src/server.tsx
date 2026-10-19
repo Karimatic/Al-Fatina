@@ -106,7 +106,7 @@ function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
   const description = page.description?.[locale] ?? t.meta.description;
   const abs = (p: string) => esc(new URL(p, siteUrl).toString().replace(/\/$/, "") || siteUrl);
   const tags: string[] = [
-    `<meta name="theme-color" content="#f7f3ee"/>`,
+    `<meta name="theme-color" content="#fcf0f1"/>`,
     `<title>${esc(title)}</title>`,
     `<meta name="description" content="${esc(description)}"/>`,
     `<meta name="application-name" content="Al Fatina"/>`,

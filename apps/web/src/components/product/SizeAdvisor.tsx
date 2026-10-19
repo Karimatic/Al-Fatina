@@ -113,7 +113,7 @@ export function SizeAdvisorButton({
                   type="button"
                   aria-pressed={m.fit === f}
                   onClick={() => setM({ ...m, fit: f })}
-                  className={`h-10 rounded-xl border text-sm font-semibold ${m.fit === f ? "border-ink bg-ink text-on-ink" : "border-line bg-surface"}`}
+                  className={`h-10 rounded-xl border text-sm font-semibold ${m.fit === f ? "border-plum-600 bg-plum-600 text-on-ink" : "border-line bg-surface"}`}
                 >
                   {S.fits[f]}
                 </button>
@@ -142,7 +142,7 @@ export function SizeAdvisorButton({
                     onChoose(picked.id);
                     setOpen(false);
                   }}
-                  className="mt-3 h-11 w-full rounded-full bg-ink font-semibold text-on-ink"
+                  className="mt-3 h-11 w-full rounded-full bg-plum-600 font-semibold text-on-ink"
                 >
                   {S.choose(advice.size)}
                 </button>

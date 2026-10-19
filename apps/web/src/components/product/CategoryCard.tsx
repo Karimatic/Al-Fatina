@@ -23,7 +23,7 @@ export function CategoryCard({ c, sample, wide = false }: { c: CategoryDTO; samp
             {t.categories.products(c.productCount ?? 0)}
           </p>
         </div>
-        <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-on-ink transition group-hover:bg-plum-600 rtl:rotate-180">
+        <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-plum-600 text-on-ink transition group-hover:bg-plum-700 rtl:rotate-180">
           →
         </span>
       </div>

@@ -45,7 +45,7 @@ export function ContestCard() {
     <section className="mx-auto max-w-6xl px-4 py-6">
       <Reveal>
         <a href={IG} target="_blank" rel="noopener noreferrer" className="lift group relative flex items-center gap-4 overflow-hidden rounded-[1.75rem] bg-noir p-5 text-white md:p-8">
-          <span className="relative grid size-14 shrink-0 place-items-center bg-ink text-2xl transition group-hover:scale-105">🎁</span>
+          <span className="relative grid size-14 shrink-0 place-items-center bg-plum-600 text-2xl transition group-hover:scale-105">🎁</span>
           <span className="relative min-w-0 flex-1">
             <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-rose-300">{C.eyebrow}</span>
             <span className="heading-display mt-0.5 block text-xl leading-snug md:text-3xl">{C.title}</span>

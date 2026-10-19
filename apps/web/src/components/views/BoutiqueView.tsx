@@ -60,7 +60,7 @@ export function BoutiqueView() {
           ) : (
             <div className="grid aspect-[4/3] w-full place-items-center p-6 text-center md:aspect-auto md:h-full md:min-h-[24rem]">
               <div>
-                <button type="button" onClick={() => setMap(true)} className="inline-flex h-12 items-center rounded-full bg-ink px-6 font-semibold text-on-ink">
+                <button type="button" onClick={() => setMap(true)} className="inline-flex h-12 items-center rounded-full bg-plum-600 px-6 font-semibold text-on-ink">
                   {B.showMap}
                 </button>
                 <p className="mt-3 text-xs text-ink-soft">{B.mapNote}</p>

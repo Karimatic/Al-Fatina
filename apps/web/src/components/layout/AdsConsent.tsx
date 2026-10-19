@@ -44,7 +44,7 @@ export function AdsConsent() {
         </a>
       </p>
       <div className="mt-3 flex gap-2">
-        <button type="button" onClick={() => answer("yes")} className="h-11 flex-1 rounded-full bg-ink px-4 font-semibold text-on-ink">
+        <button type="button" onClick={() => answer("yes")} className="h-11 flex-1 rounded-full bg-plum-600 px-4 font-semibold text-on-ink">
           {t.ads.yes}
         </button>
         <button type="button" onClick={() => answer("no")} className="h-11 flex-1 rounded-full border border-line px-4 font-semibold">

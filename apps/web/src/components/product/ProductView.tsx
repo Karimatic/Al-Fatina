@@ -372,7 +372,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
                         type="button"
                         onClick={() => setSelected((s) => ({ ...s, [o.id]: v.id }))}
                         aria-pressed={on}
-                        className={`h-12 min-w-13 rounded-2xl border px-4 text-sm font-semibold transition active:scale-95 ${on ? "border-ink bg-ink text-on-ink" : "border-line bg-surface hover:border-ink/40"} ${soldOut ? "text-ink-soft line-through opacity-60" : ""}`}
+                        className={`h-12 min-w-13 rounded-2xl border px-4 text-sm font-semibold transition active:scale-95 ${on ? "border-plum-600 bg-plum-600 text-on-ink" : "border-line bg-surface hover:border-ink/40"} ${soldOut ? "text-ink-soft line-through opacity-60" : ""}`}
                       >
                         {ar ? v.labelAr : v.labelFr}
                       </button>
@@ -528,8 +528,8 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
           <div className="flex items-center gap-2.5">
             <div className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-xs text-ink-soft">{variant ? labels(ar ? "ar" : "fr") : t.product.selectVariant}</p>
-              <p className="text-lg font-bold">
-                <Price value={variant?.price ?? p.price} compareAt={p.compareAtPrice} />
+              <p className="text-[15px] font-medium">
+                <Price value={variant?.price ?? p.price} compareAt={p.compareAtPrice} className="gap-x-1.5" />
               </p>
             </div>
             <button
@@ -544,7 +544,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
               type="button"
               aria-disabled={!variant}
               onClick={buyNow}
-              className={`h-12 shrink-0 rounded-[2px] bg-ink px-6 text-[13px] font-medium uppercase tracking-[0.12em] text-white transition active:scale-[0.97] ${variant ? "" : "opacity-60"}`}
+              className={`h-12 min-w-0 max-w-[48%] rounded-[2px] bg-plum-600 px-4 text-[12px] font-medium uppercase leading-tight tracking-[0.06em] text-white transition active:scale-[0.97] ${variant ? "" : "opacity-60"}`}
             >
               {buyLabel}
             </button>

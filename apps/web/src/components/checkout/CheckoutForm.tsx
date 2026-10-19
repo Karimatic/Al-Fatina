@@ -514,7 +514,7 @@ export function CheckoutForm({ lines, channel, compact = false }: Props) {
             <button
               type="submit"
               disabled={submitting || problems.length > 0 || !lines.length}
-              className="flex h-12 shrink-0 items-center gap-2 rounded-[2px] bg-ink px-6 text-[13px] font-medium uppercase tracking-[0.12em] text-white transition active:scale-[0.97] disabled:opacity-50"
+              className="flex h-12 shrink-0 items-center gap-2 rounded-[2px] bg-plum-600 px-6 text-[13px] font-medium uppercase tracking-[0.12em] text-white transition active:scale-[0.97] disabled:opacity-50"
             >
               {submitting && <Spinner className="size-4" />}
               {submitting ? L.submitting : L.submit}
