@@ -70,7 +70,7 @@ authRoutes.post("/login", async (c) => {
   // account that sets up an authenticator keeps the second step.
   if (!m.totp_secret_enc && !mailReady(c.env)) {
     await createSession(c, m.id, input.remember);
-    await c.env.DB.batch([auditStmt(c.env, `member:${m.id}`, "login", "session", { method: "password" })]);
+    await c.env.DB.batch([auditStmt(c.env, `member:${m.id}`, "login", "session", null, { method: "password" })]);
     return c.json({ ok: true, method: "password" });
   }
   const ch = await createChallenge(c.env, m.id, "login", { remember: input.remember });
