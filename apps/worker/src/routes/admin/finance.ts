@@ -5,7 +5,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { cleanText, codTotals, EXPENSE_CATEGORIES, PAYMENT_METHODS, RECONCILIATION_STATUSES } from "@henine/shared";
+import { cleanText, codTotals, EXPENSE_CATEGORIES, PAYMENT_METHODS, RECONCILIATION_STATUSES } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { codInTransit, codRows, profitAndLoss } from "../../lib/finance";

@@ -6,6 +6,7 @@ import {
   classifySource,
   sourceLabel,
   assistantInput,
+  cartSaveInput,
   cleanText,
   CUSTOMER_CANCEL_REASONS,
   DEFAULT_BOUTIQUE,
@@ -36,7 +37,7 @@ import {
   type TrackedOrderDTO,
   JOURNEY_STEPS,
   isForeignClientError,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import type { AppEnv } from "../env";
 import { recordError } from "../lib/audit";
 import { answer } from "../lib/assistant-intents";
@@ -288,6 +289,7 @@ publicRoutes.post("/orders", async (c) => {
   const order = await createOrder(c.env, {
     ...input,
     communeId: input.communeId ?? null,
+    cartId: input.cartId,
     ipHash: await ipHash(c),
     uaShort: uaShort(c),
   });
@@ -315,6 +317,46 @@ publicRoutes.post("/orders", async (c) => {
   );
   const dto: CreatedOrderDTO = { code: order.code, token: order.token, total: order.total, status: order.status };
   return c.json(dto, 201);
+});
+
+/**
+ * Checkout autosave (abandoned checkouts). Called by the checkout form, debounced, once the
+ * phone number is valid. Separate (looser) rate-limit bucket so it can never block ordering.
+ */
+publicRoutes.post("/carts", async (c) => {
+  await rateLimit(c.env.RL_LOOKUP, `cart:${clientIp(c)}`);
+  const input = await body(c, cartSaveInput);
+  // saved checkouts are a convenience: past the shop-wide budget they are skipped
+  if (!(await counterAllowed(c, "cart"))) return c.json({ ok: true, skipped: true });
+  const q = await quote(c.env, { lines: input.lines, wilaya: input.wilaya, communeId: input.communeId, deliveryType: input.deliveryType });
+  const now = Date.now();
+  await c.env.DB.prepare(
+    `INSERT INTO carts (id, items, phone, name, wilaya_code, commune_id, delivery_type, channel, locale, value, step, consent, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET items = excluded.items, phone = excluded.phone, name = excluded.name,
+       wilaya_code = excluded.wilaya_code, commune_id = excluded.commune_id, delivery_type = excluded.delivery_type,
+       channel = excluded.channel, locale = excluded.locale, value = excluded.value, step = excluded.step, updated_at = excluded.updated_at
+     WHERE carts.recovered_order_id IS NULL`,
+  )
+    .bind(
+      input.id, JSON.stringify(input.lines), input.phone, input.name ?? null, input.wilaya ?? null, input.communeId ?? null,
+      input.deliveryType ?? null, input.channel, input.locale, q.shipping != null ? q.total : q.subtotal, input.step, now, now,
+    )
+    .run();
+  return c.json({ ok: true });
+});
+
+/**
+ * Reminder link sent to a customer who left her checkout ("نسيت شيئًا في سلتك 🛒"): opens
+ * her cart again on any phone. Only the items, never the phone number or address.
+ */
+publicRoutes.get("/carts/:id", async (c) => {
+  await rateLimit(c.env.RL_LOOKUP, `cartget:${clientIp(c)}`);
+  const id = c.req.param("id");
+  if (!/^[0-9a-f-]{36}$/i.test(id)) throw new HttpError(404, "not_found");
+  const row = await c.env.DB.prepare("SELECT items, recovered_order_id FROM carts WHERE id = ?").bind(id).first<{ items: string; recovered_order_id: number | null }>();
+  if (!row) throw new HttpError(404, "not_found");
+  return c.json({ lines: JSON.parse(row.items) as { variantId: number; qty: number }[], ordered: row.recovered_order_id != null });
 });
 
 /* ───────── Shopping assistant ───────── */

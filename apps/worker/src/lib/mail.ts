@@ -60,7 +60,7 @@ export function mailLayout(title: string, paragraphs: string[], highlight?: stri
     : "";
   return `<!doctype html><html><body style="margin:0;background:#fbf7f3;font-family:Segoe UI,Roboto,Arial,sans-serif;color:#2a1a24">
 <div style="max-width:480px;margin:0 auto;padding:28px 20px">
-<p style="font-size:22px;color:#57223f;margin:0 0 18px">🌸 Henine Boutique</p>
+<p style="font-size:22px;color:#57223f;margin:0 0 18px">✨ El Fatina</p>
 <div style="background:#fff;border:1px solid #e8dcd3;border-radius:16px;padding:22px">
 <h1 style="font-size:18px;margin:0 0 14px">${esc(title)}</h1>${ps}${code}${button}</div>
 <p style="font-size:12px;color:#5b4652;margin-top:16px">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>

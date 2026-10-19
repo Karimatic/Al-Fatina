@@ -1,5 +1,5 @@
 {
-  "name": "@henine/worker",
+  "name": "@elfatina/worker",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -17,8 +17,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@henine/db": "*",
-    "@henine/shared": "*",
+    "@elfatina/db": "*",
+    "@elfatina/shared": "*",
     "drizzle-orm": "^0.45.3",
     "hono": "^4.13.12",
     "jose": "^6.2.12",

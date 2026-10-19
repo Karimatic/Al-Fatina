@@ -1,9 +1,9 @@
-import { normalizeSearch, type ProductCardDTO } from "@henine/shared";
+import { normalizeSearch, type ProductCardDTO } from "@elfatina/shared";
 
 export type SimilarReason = "category" | "color" | "price" | "style";
 
 const GENERIC = new Set(["nouveaute", "best-seller", "promo"]);
-const STOP = new Set(["avec", "pour", "dans", "sans", "robe", "robes", "henine"]);
+const STOP = new Set(["avec", "pour", "dans", "sans", "robe", "robes", "elfatina"]);
 
 function hexDistance(a: string, b: string): number {
   const p = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));

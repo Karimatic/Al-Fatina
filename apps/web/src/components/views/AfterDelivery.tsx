@@ -15,7 +15,7 @@ import {
   type ReceiptIssue,
   type TrackedItemDTO,
   type TrackedOrderDTO,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import { inputCls, Spinner } from "@/components/ui/kit";
 import { ApiError, apiGet, apiPost } from "@/lib/api";
 import { useLocale } from "@/lib/locale";

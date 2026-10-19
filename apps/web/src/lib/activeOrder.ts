@@ -1,4 +1,4 @@
-import type { TrackedOrderDTO } from "@henine/shared";
+import type { TrackedOrderDTO } from "@elfatina/shared";
 import { useApi } from "./api";
 import { useEffect, useState } from "react";
 import { ordersStore, useSavedOrders } from "./stores";

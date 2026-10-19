@@ -1,4 +1,4 @@
-import { Blossom } from "@/components/ui/icons";
+import { BrandMark } from "@/components/ui/icons";
 import { useLocale } from "@/lib/locale";
 
 /** Any address that doesn't exist (dist/404.html): back to the shop in one tap. */
@@ -6,7 +6,7 @@ export function NotFoundView() {
   const { t, href } = useLocale();
   return (
     <section className="mx-auto flex max-w-xl flex-col items-center px-4 py-20 text-center">
-      <Blossom size={48} className="animate-bloom" />
+      <BrandMark size={48} />
       <p className="heading-display mt-6 text-6xl text-plum-600" dir="ltr">
         404
       </p>

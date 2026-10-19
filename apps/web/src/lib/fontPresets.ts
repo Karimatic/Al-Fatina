@@ -1,4 +1,4 @@
-import { designFonts, DEFAULT_FONTS, OWN_FONT, type DesignDTO } from "@henine/shared";
+import { designFonts, DEFAULT_FONTS, OWN_FONT, type DesignDTO } from "@elfatina/shared";
 
 /**
  * The design's 4 fonts → CSS variables pointing at the self-hosted families (declared in
@@ -23,7 +23,7 @@ const FAMILY_VAR: Record<string, string> = {
   "Reem Kufi": "--font-p-reem-kufi",
 };
 /** the uploaded file's family name in the store's CSS */
-export const OWN_FONT_FAMILY = "Henine Custom";
+export const OWN_FONT_FAMILY = "El Fatina Custom";
 
 const face = (name: string, fallback: string) =>
   name === OWN_FONT ? `"${OWN_FONT_FAMILY}", ${fallback}` : FAMILY_VAR[name] ? `var(${FAMILY_VAR[name]}), ${fallback}` : fallback;

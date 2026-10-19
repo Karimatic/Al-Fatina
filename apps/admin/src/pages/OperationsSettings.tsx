@@ -2,7 +2,7 @@
  * Paramètres → Alertes & délais: new-order sound and notifications (this device), the order
  * SLA (how long each step may take) and the packaging cost used in the real profit.
  */
-import { DEFAULT_DUPLICATE_SETTINGS, DEFAULT_SLA, type DuplicateSettings, type OrderCostLine, type SlaSettings } from "@henine/shared";
+import { DEFAULT_DUPLICATE_SETTINGS, DEFAULT_SLA, type DuplicateSettings, type OrderCostLine, type SlaSettings } from "@elfatina/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api, del, errorMessage, put, upload } from "../api";

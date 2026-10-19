@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assistantInput, type AssistantReplyDTO } from "@henine/shared";
+import { assistantInput, type AssistantReplyDTO } from "@elfatina/shared";
 import type { Env } from "../env";
 import { seedShop, testDb } from "../test/db";
 import { answer } from "./assistant-intents";
@@ -12,7 +12,7 @@ const product = (price: number) =>
   }) as AssistantReplyDTO["products"][number];
 
 const ruled: AssistantReplyDTO = { intent: "search", understood: ["Couleur : noir"], relaxed: false, products: [product(3500)] };
-const input = (q: string) => assistantInput.parse({ q, locale: "fr", context: { history: [{ q: "bonjour", a: "Bonjour 🌸" }] } });
+const input = (q: string) => assistantInput.parse({ q, locale: "fr", context: { history: [{ q: "bonjour", a: "Bonjour ✨" }] } });
 
 /** an env whose AI answers `content` (or fails) and records what it was asked */
 function envWith(answer: string | Error) {
@@ -40,9 +40,9 @@ describe("assistant AI voice", () => {
   });
 
   it("words the rules' facts and keeps their products", async () => {
-    const { env, calls } = envWith('{"reply":"Voici notre pyjama satin noir à 3 500 DA 🌸","showProducts":true}');
+    const { env, calls } = envWith('{"reply":"Voici notre pyjama satin noir à 3 500 DA ✨","showProducts":true}');
     const out = await withAiVoice(env, input("pyjama noir"), ruled, "1.2.3.4");
-    expect(out).toMatchObject({ ai: true, reply: "Voici notre pyjama satin noir à 3 500 DA 🌸", understood: ruled.understood });
+    expect(out).toMatchObject({ ai: true, reply: "Voici notre pyjama satin noir à 3 500 DA ✨", understood: ruled.understood });
     expect(out.products).toHaveLength(1);
     // the facts and the conversation reach the model
     const msgs = calls[0]!.inputs.messages;
@@ -58,7 +58,7 @@ describe("assistant AI voice", () => {
 
   // audit R3-4: promises without a number (free delivery, refund, discount) must come from the facts too
   it("keeps the rules' answer when the model promises something the shop doesn't offer", async () => {
-    for (const reply of ["La livraison est gratuite 🌸", "التوصيل مجاني لكل الولايات", "On vous rembourse sans problème", "Profitez d'une remise sur ce pyjama"]) {
+    for (const reply of ["La livraison est gratuite ✨", "التوصيل مجاني لكل الولايات", "On vous rembourse sans problème", "Profitez d'une remise sur ce pyjama"]) {
       const { env } = envWith(JSON.stringify({ reply, showProducts: true }));
       expect(await withAiVoice(env, input("livraison ?"), ruled, "ip"), reply).toBe(ruled);
     }
@@ -71,8 +71,8 @@ describe("assistant AI voice", () => {
       const env = { ...envWith(JSON.stringify({ reply, showProducts: false })).env, DB: db } as unknown as Env;
       return (await withAiVoice(env, input("livraison ?"), ruled, "ip")).ai === true;
     };
-    expect(await run("La livraison est gratuite 🌸")).toBe(false);
-    expect(await run("La livraison est gratuite dès 10 000 DA d'achat 🌸")).toBe(true);
+    expect(await run("La livraison est gratuite ✨")).toBe(false);
+    expect(await run("La livraison est gratuite dès 10 000 DA d'achat ✨")).toBe(true);
   });
 
   it("lets the promise through when the shop's facts make it", async () => {
@@ -89,7 +89,7 @@ describe("assistant AI voice", () => {
   });
 
   it("hides products only when the rules searched blindly", async () => {
-    const off = '{"reply":"Je suis là pour la boutique 🌸","showProducts":false}';
+    const off = '{"reply":"Je suis là pour la boutique ✨","showProducts":false}';
     const blind = { ...ruled, understood: [] };
     expect((await withAiVoice(envWith(off).env, input("tu aimes le foot ?"), blind, "ip")).products).toEqual([]);
     expect((await withAiVoice(envWith(off).env, input("pyjama noir"), ruled, "ip")).products).toHaveLength(1);
@@ -101,7 +101,7 @@ describe("assistant AI voice", () => {
     const env = { DB: db } as unknown as Env;
     const offTopic = await answer(env, assistantInput.parse({ q: "هل انت ai حقيقي", locale: "ar" }));
     expect(offTopic.products).toEqual([]);
-    expect(offTopic.reply).toContain("Henine");
+    expect(offTopic.reply).toContain("El Fatina");
     const search = await answer(env, assistantInput.parse({ q: "بيجامة", locale: "ar" }));
     expect(search.products.map((p) => p.slug)).toEqual(["pyjama"]);
   });

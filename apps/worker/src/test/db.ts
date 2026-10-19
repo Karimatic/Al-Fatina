@@ -151,7 +151,7 @@ export function addOrder(
        VALUES (?, 'x', ?, ?, ?, ?, 'Amina', ?, ?, ?, 'Cité 200 logements', ?, ?, ?, ?, ?, ?)`,
     )
     .run(
-      `HN-T${orderSeq}`, `key-${orderSeq}-${Math.random()}`, o.status ?? "livree", o.channel ?? "web", o.customerId ?? 1, o.phone ?? "0554650718", o.wilaya ?? 35,
+      `EF-T${orderSeq}`, `key-${orderSeq}-${Math.random()}`, o.status ?? "livree", o.channel ?? "web", o.customerId ?? 1, o.phone ?? "0554650718", o.wilaya ?? 35,
       o.deliveryType ?? "domicile", subtotal, shipping, total, o.source ?? null, o.createdAt ?? Date.now(), o.createdAt ?? Date.now(),
     );
   const id = Number(r.lastInsertRowid);

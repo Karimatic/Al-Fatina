@@ -18,9 +18,9 @@ import {
   type AssistantReplyDTO,
   type OrderStatus,
   type ProductCardDTO,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import type { z } from "zod";
-import type { assistantInput } from "@henine/shared";
+import type { assistantInput } from "@elfatina/shared";
 import type { Env } from "../env";
 import { recommend, understand } from "./assistant";
 import { getProductDetail, productCards } from "./catalog";
@@ -86,11 +86,11 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
 
   // ── small talk ──
   if (wordsCount <= 4 && hasAny(text, W.thanks)) {
-    return base(T(ar, "بكل سرور 🌸 إذا احتجتِ أي شيء آخر أنا هنا.", "Avec plaisir 🌸 Je suis là si vous avez besoin d'autre chose."), { intent: "thanks" });
+    return base(T(ar, "بكل سرور ✨ إذا احتجتِ أي شيء آخر أنا هنا.", "Avec plaisir ✨ Je suis là si vous avez besoin d'autre chose."), { intent: "thanks" });
   }
   if (wordsCount <= 3 && hasAny(text, W.greet)) {
     return base(
-      T(ar, "وعليكم السلام 🌸 أنا مساعدة Henine. أبحث لك عن قطعة (لون، مناسبة، مقاس، ميزانية)، أخبرك بسعر التوصيل إلى ولايتك، أين وصل طلبك، أو أين محلنا.", "Bonjour 🌸 Je suis l'assistante Henine. Je trouve une pièce pour vous (couleur, occasion, taille, budget), je donne le prix de livraison vers votre wilaya, où en est votre commande, ou l'adresse de la boutique."),
+      T(ar, "وعليكم السلام ✨ أنا مساعدة El Fatina. أبحث لك عن قطعة (لون، مناسبة، مقاس، ميزانية)، أخبرك بسعر التوصيل إلى ولايتك، أين وصل طلبك، أو أين محلنا.", "Bonjour ✨ Je suis l'assistante El Fatina. Je trouve une pièce pour vous (couleur, occasion, taille, budget), je donne le prix de livraison vers votre wilaya, où en est votre commande, ou l'adresse de la boutique."),
       { intent: "greet" },
     );
   }
@@ -190,7 +190,7 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
   }
   if (hasAny(text, W.contact) && !hasAny(text, W.price)) {
     const { contact } = await getSettings(env, ["contact"]);
-    const lines = [contact.whatsapp ? `WhatsApp ${contact.whatsapp}` : null, contact.phone ? `☎ ${contact.phone}` : null, "Instagram @henine.boutique"].filter(Boolean);
+    const lines = [contact.whatsapp ? `WhatsApp ${contact.whatsapp}` : null, contact.phone ? `☎ ${contact.phone}` : null, "Instagram @el_fatina_"].filter(Boolean);
     return base(T(ar, `تواصلي معنا: ${lines.join(" · ")}.`, `Pour nous joindre : ${lines.join(" · ")}.`), {
       intent: "contact",
       actions: [{ label: T(ar, "✉️ تواصلي معنا", "✉️ Nous écrire"), href: "/contact" }],
@@ -204,7 +204,7 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
     return base(
       list.length
         ? T(ar, `🔥 ${list.length} قطعة بتخفيض الآن:`, `🔥 ${list.length} pièce(s) en promotion en ce moment :`)
-        : T(ar, "لا توجد تخفيضات حاليًا. فعّلي «استقبال الجديد» لتعرفي أول تخفيض 🌸", "Pas de promotion en ce moment. Activez « Recevoir les nouveautés » pour être prévenue 🌸"),
+        : T(ar, "لا توجد تخفيضات حاليًا. فعّلي «استقبال الجديد» لتعرفي أول تخفيض ✨", "Pas de promotion en ce moment. Activez « Recevoir les nouveautés » pour être prévenue ✨"),
       { intent: "promo", products: withWhy(list, (p) => (p.compareAtPrice ? [`-${Math.round((1 - p.price / p.compareAtPrice) * 100)}%`] : [])) },
     );
   }
@@ -291,6 +291,6 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
       ? undefined
       : found.understood.length
         ? T(ar, "لم أجد قطعة متوفرة بهذه المواصفات. جربي لونًا أو مقاسًا آخر، أو اسأليني عن الجديد أو التخفيضات.", "Je n'ai rien trouvé en stock avec ces critères. Essayez une autre couleur ou taille, ou demandez-moi les nouveautés ou les promos.")
-        : T(ar, "أنا مساعدة Henine 🌸 أساعدك فقط في ما يخص المحل: البحث عن قطعة (لون، مقاس، ميزانية)، سعر التوصيل إلى ولايتك، طلبك، التبديل، أو عنوان المحل وأوقاته.", "Je suis l'assistante Henine 🌸 Je réponds seulement à ce qui concerne la boutique : trouver une pièce (couleur, taille, budget), le prix de livraison vers votre wilaya, votre commande, les échanges, l'adresse et les horaires."),
+        : T(ar, "أنا مساعدة El Fatina ✨ أساعدك فقط في ما يخص المحل: البحث عن قطعة (لون، مقاس، ميزانية)، سعر التوصيل إلى ولايتك، طلبك، التبديل، أو عنوان المحل وأوقاته.", "Je suis l'assistante El Fatina ✨ Je réponds seulement à ce qui concerne la boutique : trouver une pièce (couleur, taille, budget), le prix de livraison vers votre wilaya, votre commande, les échanges, l'adresse et les horaires."),
   };
 }

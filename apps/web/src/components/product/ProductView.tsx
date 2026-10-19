@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormGuard } from "@/lib/formGuard";
 import { buzz } from "@/lib/haptics";
-import { dateLocale, formatDA, imageUrl, normalizeDzPhone, type ImageRef, type ProductCardDTO, type ProductDetailDTO, type SiteConfigDTO } from "@henine/shared";
+import { dateLocale, formatDA, imageUrl, normalizeDzPhone, type ImageRef, type ProductCardDTO, type ProductDetailDTO, type SiteConfigDTO } from "@elfatina/shared";
 import { FlashPanel } from "@/components/home/HomeExtras";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { BagIcon, HeartIcon } from "@/components/ui/icons";
@@ -67,7 +67,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
   const site = useApi<SiteConfigDTO>("/site");
   const name = ar ? p.nameAr : p.nameFr;
   useEffect(() => {
-    document.title = `${name} · Henine Boutique`;
+    document.title = `${name} · El Fatina`;
     rememberViewed(p.slug); // "Vus récemment" on the home page
     markStep("product");
     trackAd("ViewContent", [{ id: p.id, price: p.price, name: p.nameFr }]);
@@ -224,7 +224,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
 
       <div className="grid gap-8 md:grid-cols-2 md:gap-12">
         {/* Gallery: swipeable on phones, thumbnails on larger screens */}
-        <div className="-mx-4 md:mx-0">
+        <div data-gallery className="-mx-4 scroll-mt-32 md:mx-0">
           <div className="relative">
             {/* phones: full-width swipe */}
             <div ref={swipeRef} onScroll={onSwipe} className="swipe-row flex snap-x snap-mandatory overflow-x-auto md:hidden" aria-label={name}>
@@ -296,7 +296,14 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
                 const img = isVideo ? (images[0] ?? null) : images[photoOf(s)]!;
                 return (
                   <li key={isVideo ? "video" : img?.src}>
-                    <button type="button" onClick={() => setActive(s)} className={`relative block overflow-hidden rounded-lg ring-2 ${s === active ? "ring-plum-600" : "ring-transparent"}`} aria-label={isVideo ? G.video : `${s + 1}/${slides}`}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        setActive(s);
+                        // the big frame fully in view, below the header (a video plays once it is seen)
+                        e.currentTarget.closest("[data-gallery]")?.scrollIntoView({ block: "start", behavior: "smooth" });
+                      }}
+                      className={`relative block overflow-hidden rounded-lg ring-2 ${s === active ? "ring-plum-600" : "ring-transparent"}`} aria-label={isVideo ? G.video : `${s + 1}/${slides}`}>
                       <ProductImage image={img} alt="" sizes="80px" className="aspect-[4/5] w-16" />
                       {isVideo && (
                         <span className="absolute inset-0 grid place-items-center bg-noir/35 text-lg text-white" aria-hidden="true">▶</span>
@@ -332,7 +339,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
           </div>
           {p.flash && <FlashPanel flash={p.flash} />}
 
-          <div id="variant-options" className="mt-6 space-y-5 scroll-mt-28">
+          <div id="variant-options" className="mt-6 space-y-5 scroll-mt-32">
             {p.options.map((o) => (
               <fieldset key={o.id} className={nudge && selected[o.id] == null ? "nudge [&>legend]:text-danger" : undefined}>
                 <legend className="mb-2 flex w-full items-center text-sm font-medium">
@@ -471,7 +478,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
           </div>
 
           {showExpress && variant && variant.available > 0 && (
-            <section id="express" className="mt-6 scroll-mt-24 rounded-card border border-plum-600/30 bg-surface/70 p-4">
+            <section id="express" className="mt-6 scroll-mt-32 rounded-card border border-plum-600/30 bg-surface/70 p-4">
               <h2 className="text-lg font-semibold">{t.product.express}</h2>
               <p className="mb-4 text-sm text-ink-soft">{t.product.expressHint}</p>
               <CheckoutForm key={variant.id} lines={[{ variantId: variant.id, qty: quantity }]} channel="express" compact />
@@ -537,7 +544,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
               type="button"
               aria-disabled={!variant}
               onClick={buyNow}
-              className={`h-12 shrink-0 rounded-full bg-plum-600 px-6 font-semibold text-white shadow-[0_8px_20px_-6px_rgb(142_16_72/0.6)] transition active:scale-[0.97] ${variant ? "" : "opacity-60"}`}
+              className={`h-12 shrink-0 rounded-[2px] bg-ink px-6 text-[13px] font-medium uppercase tracking-[0.12em] text-white transition active:scale-[0.97] ${variant ? "" : "opacity-60"}`}
             >
               {buyLabel}
             </button>
@@ -620,7 +627,7 @@ function Reviews({ p }: { p: ProductDetailDTO }) {
   const asImages = (list: string[]): ImageRef[] =>
     list.map((src) => ({ src, widths: [], width: 0, height: 0, lqip: null, altFr: null, altAr: null, optionValueId: null }));
   return (
-    <section id="avis" className="mt-12 scroll-mt-24">
+    <section id="avis" className="mt-12 scroll-mt-32">
       {photos && <Lightbox images={asImages(photos.list)} start={photos.start} name={t.plus.reviews.photoAlt} onClose={() => setPhotos(null)} />}
       <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
         <h2 className="heading-display text-3xl">
@@ -672,7 +679,7 @@ function Reviews({ p }: { p: ProductDetailDTO }) {
                   ))}
                 </div>
               )}
-              {r.reply && <p className="mt-2 border-s-2 border-rose-300 ps-3 text-sm text-ink">🌸 {r.reply}</p>}
+              {r.reply && <p className="mt-2 border-s-2 border-rose-300 ps-3 text-sm text-ink">✨ {r.reply}</p>}
               <p className="mt-2 text-xs text-ink-soft">{new Date(r.createdAt).toLocaleDateString(dateLocale(locale))}</p>
             </li>
           ))}

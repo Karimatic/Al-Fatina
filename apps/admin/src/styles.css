@@ -21,28 +21,28 @@
 @theme {
   /* thicker outlines for cards, inputs, chips and separators (border, border-t…, divide-y), both themes */
   --default-border-width: 2px;
-  --color-ivory: #fffbfc; /* same grounds and hairlines as the store */
-  --color-ivory-deep: #f8eef2;
-  --color-sidebar: #faf7f8;
+  --color-ivory: #ffffff; /* same grounds and hairlines as the store */
+  --color-ivory-deep: #f7f3ee;
+  --color-sidebar: #faf8f5;
   /* same "bold luxury" palette as the store: near-black plum ink, deep raspberry accent */
-  --color-ink: #170a10;
-  --color-ink-soft: #5c4852;
-  --color-line: #d6bfca; /* visible hairlines on white, like the dark theme */
-  --color-plum-600: #8e1048;
-  --color-plum-700: #6a0c36;
-  --color-rose-100: #fbe4ec;
-  --color-rose-300: #f2a5bf;
-  --color-rose-500: #e0487f;
-  --color-rose-700: #b0164f;
-  --color-gold: #a8824a;
+  --color-ink: #222222;
+  --color-ink-soft: #6b6259;
+  --color-line: #e0d7cc; /* visible hairlines on white, like the dark theme */
+  --color-plum-600: #2b2b2b;
+  --color-plum-700: #111111;
+  --color-rose-100: #f3ece3;
+  --color-rose-300: #d9cbb8;
+  --color-rose-500: #a8875a;
+  --color-rose-700: #7a5c33;
+  --color-gold: #a8875a;
   --color-lavender: #b39ddb;
   --color-peach: #ffab91;
   --color-surface: #ffffff; /* cards, sheets, inputs (dark in dark mode) */
-  --color-noir: #170a10; /* footer, photo overlays: dark in both modes */
-  --color-on-ink: #fffbfc; /* text on an ink chip (chips turn light in dark mode) */
-  --color-accent-text: #6a0c36; /* accent text on the page ground */
-  --color-chart: #8e1048; /* chart lines and bars */
-  --color-chart-strong: #6a0c36;
+  --color-noir: #222222; /* footer, photo overlays: dark in both modes */
+  --color-on-ink: #ffffff; /* text on an ink chip (chips turn light in dark mode) */
+  --color-accent-text: #6e5330; /* accent text on the page ground */
+  --color-chart: #8a6a3f; /* chart lines and bars */
+  --color-chart-strong: #5c4526;
   /* order outcomes (validated categorical steps: light here, dark in the dark block) */
   --color-o-delivered: #1baf7a;
   --color-o-progress: #2a78d6;
@@ -230,24 +230,26 @@ html[lang="ar"] body {
  * Screen only: printing (slips, invoices) always uses the light colours. */
 @media screen {
 :root[data-theme="dark"] {
-  --color-ivory: #140c10;
-  --color-ivory-deep: #22161c;
-  --color-surface: #1d1318;
-  --color-ink: #f6eaef;
-  --color-ink-soft: #c9b3bd;
-  --color-line: #3a2a32;
-  --color-rose-100: #3b1828;
-  --color-noir: #0b0609;
-  --color-on-ink: #170a10;
-  --color-accent-text: #f49ac0;
-  --color-chart: #e8679a;
-  --color-chart-strong: #f7a8c8;
+  --color-ivory: #141210;
+  --color-ivory-deep: #1f1c18;
+  --color-surface: #1a1815;
+  --color-ink: #f3eee7;
+  --color-ink-soft: #bdb3a6;
+  --color-line: #36302a;
+  --color-rose-100: #2e271f;
+  --color-noir: #0b0a09;
+  --color-on-ink: #141210;
+  --color-accent-text: #d8b98c;
+  --color-chart: #c9a66b;
+  --color-chart-strong: #e3c99c;
   --color-o-delivered: #199e70;
   --color-o-progress: #3987e5;
   --color-o-pending: #c98500;
   --color-o-cancelled: #9085e9;
   --color-o-returned: #e66767;
-  --color-sidebar: #181015;
+  --color-sidebar: #171512;
+  --color-plum-600: #8a6a3f;
+  --color-plum-700: #6e5330;
   --color-emerald-50: #0f2a20;
   --color-emerald-100: #123526;
   --color-emerald-700: #7fdcb0;
@@ -300,24 +302,24 @@ html[lang="ar"] body {
 :root[data-theme="dark"] .text-success { color: #72dfa9; }
 @media (prefers-color-scheme: dark) {
 :root:not([data-theme="light"]) {
-  --color-ivory: #140c10;
-  --color-ivory-deep: #22161c;
-  --color-surface: #1d1318;
-  --color-ink: #f6eaef;
-  --color-ink-soft: #c9b3bd;
-  --color-line: #3a2a32;
-  --color-rose-100: #3b1828;
-  --color-noir: #0b0609;
-  --color-on-ink: #170a10;
-  --color-accent-text: #f49ac0;
-  --color-chart: #e8679a;
-  --color-chart-strong: #f7a8c8;
+  --color-ivory: #141210;
+  --color-ivory-deep: #1f1c18;
+  --color-surface: #1a1815;
+  --color-ink: #f3eee7;
+  --color-ink-soft: #bdb3a6;
+  --color-line: #36302a;
+  --color-rose-100: #2e271f;
+  --color-noir: #0b0a09;
+  --color-on-ink: #141210;
+  --color-accent-text: #d8b98c;
+  --color-chart: #c9a66b;
+  --color-chart-strong: #e3c99c;
   --color-o-delivered: #199e70;
   --color-o-progress: #3987e5;
   --color-o-pending: #c98500;
   --color-o-cancelled: #9085e9;
   --color-o-returned: #e66767;
-  --color-sidebar: #181015;
+  --color-sidebar: #171512;
   --color-emerald-50: #0f2a20;
   --color-emerald-100: #123526;
   --color-emerald-700: #7fdcb0;

@@ -3,7 +3,7 @@
  * throwaway local database (apps/worker/.wrangler/restore-drill, never the dev or live one), and
  * every table's row count is compared with the counts recorded at backup time.
  *
- *   BACKUP_PASSPHRASE=… node scripts/restore-drill.mjs <backups/henine-….sql.enc>
+ *   BACKUP_PASSPHRASE=… node scripts/restore-drill.mjs <backups/elfatina-….sql.enc>
  *   BACKUP_PASSPHRASE=… node scripts/restore-drill.mjs --decrypt <file.enc> <out.sql>   (real restore, see docs/RUNBOOK.md)
  */
 import { spawnSync } from "node:child_process";
@@ -22,7 +22,7 @@ if (!pass) {
 
 function decrypt(file) {
   const b = readFileSync(file);
-  if (b.subarray(0, 4).toString() !== "HNB1") throw new Error("not a Henine backup file");
+  if (b.subarray(0, 4).toString() !== "HNB1") throw new Error("not a El Fatina backup file");
   const salt = b.subarray(4, 20);
   const iv = b.subarray(20, 32);
   const tag = b.subarray(32, 48);
@@ -70,7 +70,7 @@ if (process.argv[2] === "--decrypt") {
 
 const enc = resolve(process.argv[2] ?? "");
 if (!existsSync(enc)) {
-  console.error("Usage: node scripts/restore-drill.mjs <backups/henine-….sql.enc>");
+  console.error("Usage: node scripts/restore-drill.mjs <backups/elfatina-….sql.enc>");
   process.exit(1);
 }
 const expected = JSON.parse(readFileSync(enc.replace(/\.sql\.enc$/, ".counts.json"), "utf8")).counts;

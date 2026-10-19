@@ -1,4 +1,4 @@
-import { formatDzPhone, resolveStoreTexts, STORE_TEXTS, type StoreTexts } from "@henine/shared";
+import { formatDzPhone, resolveStoreTexts, STORE_TEXTS, type StoreTexts } from "@elfatina/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -730,7 +730,7 @@ export function NotifierPage() {
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {(w.phones ?? "").split(", ").filter(Boolean).map((p) => (
-                    <a key={p} href={waLink(p, `Bonjour 🌸 Bonne nouvelle : « ${w.name_fr} (${w.options}) » est de retour chez Henine Boutique ! ${location.origin}`)} target="_blank" rel="noreferrer" className="rounded-full bg-[#25D366] px-3 py-1 text-xs font-semibold text-white">
+                    <a key={p} href={waLink(p, `Bonjour ✨ Bonne nouvelle : « ${w.name_fr} (${w.options}) » est de retour chez El Fatina ! ${location.origin}`)} target="_blank" rel="noreferrer" className="rounded-full bg-[#25D366] px-3 py-1 text-xs font-semibold text-white">
                       <bdi dir="ltr">{formatDzPhone(p)}</bdi>
                     </a>
                   ))}
@@ -786,7 +786,7 @@ export function LinksPage() {
     <div className="space-y-4">
       <PageHeader group={tr("Marketing")} title={tr("Liens")} subtitle={tr("La page « lien en bio » Instagram.")} />
       {q.error ? <ErrorState error={q.error} onRetry={q.refetch} /> : !q.data ? <ListSkeleton /> : (
-        <Card title={tr("🌸 Page lien en bio")} actions={<Button size="sm" variant="primary" onClick={() => setEdit({ kind: "bio", is_active: 1, sort: bio.length })}>{tr("+ Lien")}</Button>}>
+        <Card title={tr("✨ Page lien en bio")} actions={<Button size="sm" variant="primary" onClick={() => setEdit({ kind: "bio", is_active: 1, sort: bio.length })}>{tr("+ Lien")}</Button>}>
           <p className="mb-1 text-sm text-ink-soft">{tr("À mettre dans la bio Instagram :")} <a href="/liens" target="_blank" rel="noreferrer" className="font-mono font-semibold text-plum-600">{origin}/liens</a></p>
           <p className="mb-3 text-xs text-ink-soft">{tr("Glissez pour changer l'ordre (ou les flèches sur téléphone) : il est enregistré tout de suite.")}</p>
           <ol className="space-y-1.5">
@@ -882,7 +882,7 @@ export function ContactPage() {
                   </div>
                   <p className="mt-1 whitespace-pre-line text-sm">{m.message}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {m.phone && <a href={waLink(m.phone, `Bonjour ${m.name} 🌸 Ici Henine Boutique, suite à votre message : `)} target="_blank" rel="noreferrer" className="inline-flex h-9 items-center rounded-lg bg-[#25D366] px-3.5 text-sm font-semibold text-white">{tr("Répondre sur WhatsApp")}</a>}
+                    {m.phone && <a href={waLink(m.phone, `Bonjour ${m.name} ✨ Ici El Fatina, suite à votre message : `)} target="_blank" rel="noreferrer" className="inline-flex h-9 items-center rounded-lg bg-[#25D366] px-3.5 text-sm font-semibold text-white">{tr("Répondre sur WhatsApp")}</a>}
                     {m.status !== "done" && <Button size="sm" variant="primary" onClick={() => setMsg.mutate({ id: m.id, s: "done" })}>{tr("✓ Traité")}</Button>}
                     {m.status !== "spam" && <Button size="sm" variant="ghost" onClick={() => setMsg.mutate({ id: m.id, s: "spam" })}>{tr("Spam")}</Button>}
                   </div>
@@ -1256,8 +1256,8 @@ function BroadcastCard({ subscribers, campaigns }: { subscribers: number; campai
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2">
-            <TextField label={tr("Titre (français)")} placeholder={tr("Nouvelle collection 🌸")} value={f.titleFr} onChange={(e) => setF({ ...f, titleFr: e.target.value })} maxLength={60} />
-            <TextField label={tr("Titre (arabe)")} dir="rtl" placeholder="تشكيلة جديدة 🌸" value={f.titleAr} onChange={(e) => setF({ ...f, titleAr: e.target.value })} maxLength={60} />
+            <TextField label={tr("Titre (français)")} placeholder={tr("Nouvelle collection ✨")} value={f.titleFr} onChange={(e) => setF({ ...f, titleFr: e.target.value })} maxLength={60} />
+            <TextField label={tr("Titre (arabe)")} dir="rtl" placeholder="تشكيلة جديدة ✨" value={f.titleAr} onChange={(e) => setF({ ...f, titleAr: e.target.value })} maxLength={60} />
             <TextArea label={tr("Message (français)")} rows={2} value={f.bodyFr} onChange={(e) => setF({ ...f, bodyFr: e.target.value })} maxLength={160} />
             <TextArea label={tr("Message (arabe)")} rows={2} dir="rtl" value={f.bodyAr} onChange={(e) => setF({ ...f, bodyAr: e.target.value })} maxLength={160} />
             <TextField label={tr("Page ouverte au toucher")} dir="ltr" placeholder="/nouveautes" value={f.path} onChange={(e) => setF({ ...f, path: e.target.value.trim() })} hint={tr("/ = accueil, /c/robes, /produit/…, /collection/…")} />

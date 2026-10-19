@@ -108,7 +108,7 @@ export function AlertsBell() {
             )}
           </div>
           <ul className="max-h-[60vh] divide-y divide-line overflow-y-auto">
-            {rows.length === 0 && <li className="px-4 py-8 text-center text-sm text-ink-soft">{tr("Rien à signaler 🌸")}</li>}
+            {rows.length === 0 && <li className="px-4 py-8 text-center text-sm text-ink-soft">{tr("Rien à signaler ✨")}</li>}
             {rows.map((a) => (
               <li key={a.id} className={`flex gap-3 px-4 py-3 ${a.read_at ? "" : "bg-rose-100/40"}`}>
                 <span className="relative mt-0.5 text-lg" aria-hidden="true">

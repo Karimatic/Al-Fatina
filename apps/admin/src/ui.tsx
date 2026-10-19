@@ -222,7 +222,7 @@ export function SearchBox({ value, onChange, placeholder = "Rechercher…" }: { 
   );
 }
 
-export function Empty({ icon = "🌸", title, children }: { icon?: string; title: string; children?: ReactNode }) {
+export function Empty({ icon = "✨", title, children }: { icon?: string; title: string; children?: ReactNode }) {
   return (
     <div className="rounded-xl border border-dashed border-line bg-surface/60 px-6 py-12 text-center">
       <p className="mx-auto grid size-12 place-items-center rounded-full bg-rose-100 text-2xl">{icon}</p>

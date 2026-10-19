@@ -4,7 +4,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { cleanText, DEFAULT_BOUTIQUE, OUTCOME_REASON_LABEL, type OutcomeReason } from "@henine/shared";
+import { cleanText, DEFAULT_BOUTIQUE, OUTCOME_REASON_LABEL, type OutcomeReason } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { mediaUrl, variantLabels } from "../../lib/catalog";

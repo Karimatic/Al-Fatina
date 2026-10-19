@@ -1,4 +1,4 @@
-import { boutiqueStatus, DAY_NAMES, DEFAULT_BOUTIQUE, type BoutiqueDTO } from "@henine/shared";
+import { boutiqueStatus, DAY_NAMES, DEFAULT_BOUTIQUE, type BoutiqueDTO } from "@elfatina/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api, errorMessage, put } from "../api";

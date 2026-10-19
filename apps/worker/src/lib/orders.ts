@@ -20,7 +20,7 @@ import { askableSources, classifySource, sourceOfChannel, timingSafeEqual,
   type RiskFlag,
   type QuoteDTO,
   type QuoteLineDTO,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import type { Env } from "../env";
 import { activeFlash, flashPrice, imageRef, lockedSql, variantLabels, type ImageRow } from "./catalog";
 import { HttpError } from "./http";
@@ -285,6 +285,8 @@ export interface NewOrder {
   heardFrom?: string;
   ipHash?: string;
   uaShort?: string;
+  /** checkout autosave to mark as recovered */
+  cartId?: string;
   /** admin manual sale: initial status + actor */
   initialStatus?: "nouvelle" | "confirmee" | "livree";
   actor?: string;
@@ -491,6 +493,13 @@ export async function createOrder(env: Env, input: NewOrder): Promise<CreatedOrd
         env.DB.prepare(
           `INSERT INTO loyalty_ledger (customer_id, delta, reason, order_id, actor, note, created_at) VALUES ((SELECT id FROM customers WHERE phone = ?), ?, 'redeem', ${orderRef}, ?, ?, ?)`,
         ).bind(input.phone, -q.pointsUsed, code, actor, `−${q.pointsDiscount} DA`, now),
+      );
+    }
+    if (input.cartId) {
+      stmts.push(
+        env.DB.prepare(`UPDATE carts SET recovered_order_id = ${orderRef}, step = 'ready', updated_at = ? WHERE id = ? AND recovered_order_id IS NULL`).bind(
+          code, now, input.cartId,
+        ),
       );
     }
     if (status === "livree") {
@@ -849,6 +858,7 @@ export async function deleteOrder(env: Env, id: number, actor: string, restock: 
     env.DB.prepare("DELETE FROM loyalty_ledger WHERE order_id = ?").bind(id),
     env.DB.prepare("UPDATE stock_movements SET order_id = NULL WHERE order_id = ?").bind(id),
     env.DB.prepare("UPDATE reviews SET order_id = NULL WHERE order_id = ?").bind(id),
+    env.DB.prepare("UPDATE carts SET recovered_order_id = NULL WHERE recovered_order_id = ?").bind(id),
     env.DB.prepare("DELETE FROM order_events WHERE order_id = ?").bind(id),
     // an accepted exchange had set a piece aside: give it back
     env.DB.prepare(

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { AppEnv } from "../env";
 import { apiHeaders, httpsOnly, sameOriginWrites } from "./security";
 
-const env = { PUBLIC_ORIGIN: "https://henine.example" } as AppEnv["Bindings"];
+const env = { PUBLIC_ORIGIN: "https://elfatina.example" } as AppEnv["Bindings"];
 
 function makeApp() {
   const app = new Hono<AppEnv>();
@@ -14,11 +14,11 @@ function makeApp() {
 }
 
 const post = (headers: Record<string, string>) =>
-  makeApp().request("https://henine.example/x", { method: "POST", headers, body: "{}" }, env);
+  makeApp().request("https://elfatina.example/x", { method: "POST", headers, body: "{}" }, env);
 
 describe("sameOriginWrites", () => {
   it("allows same-origin JSON writes", async () => {
-    const res = await post({ Origin: "https://henine.example", "Content-Type": "application/json" });
+    const res = await post({ Origin: "https://elfatina.example", "Content-Type": "application/json" });
     expect(res.status).toBe(200);
   });
 
@@ -33,19 +33,19 @@ describe("sameOriginWrites", () => {
   });
 
   it("rejects form posts (classic CSRF vector)", async () => {
-    const res = await post({ Origin: "https://henine.example", "Content-Type": "application/x-www-form-urlencoded" });
+    const res = await post({ Origin: "https://elfatina.example", "Content-Type": "application/x-www-form-urlencoded" });
     expect(res.status).toBe(415);
   });
 
   it("lets reads through", async () => {
-    const res = await makeApp().request("https://henine.example/x", {}, env);
+    const res = await makeApp().request("https://elfatina.example/x", {}, env);
     expect(res.status).toBe(200);
   });
 });
 
 describe("apiHeaders", () => {
   it("sets security headers and no-store by default", async () => {
-    const res = await makeApp().request("https://henine.example/x", {}, env);
+    const res = await makeApp().request("https://elfatina.example/x", {}, env);
     expect(res.headers.get("Cache-Control")).toBe("no-store");
     expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(res.headers.get("Content-Security-Policy")).toContain("frame-ancestors 'none'");
@@ -59,13 +59,13 @@ describe("httpsOnly", () => {
   app.get("/x", (c) => c.text("ok"));
 
   it("sends plain http to https in production", async () => {
-    const res = await app.request("http://henine.example/x?a=1", {}, env);
+    const res = await app.request("http://elfatina.example/x?a=1", {}, env);
     expect(res.status).toBe(301);
-    expect(res.headers.get("Location")).toBe("https://henine.example/x?a=1");
+    expect(res.headers.get("Location")).toBe("https://elfatina.example/x?a=1");
   });
 
   it("leaves https alone, and http on the local dev server", async () => {
-    expect((await app.request("https://henine.example/x", {}, env)).status).toBe(200);
+    expect((await app.request("https://elfatina.example/x", {}, env)).status).toBe(200);
     expect((await app.request("http://127.0.0.1:8787/x", {}, { ...env, ENVIRONMENT: "development" })).status).toBe(200);
   });
 });

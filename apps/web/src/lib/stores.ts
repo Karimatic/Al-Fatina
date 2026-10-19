@@ -4,7 +4,7 @@
  * useSyncExternalStore, synced across tabs through the "storage" event.
  */
 import { useSyncExternalStore } from "react";
-import type { ImageRef } from "@henine/shared";
+import type { ImageRef } from "@elfatina/shared";
 import { markStep } from "./attribution";
 import { trackAd } from "./pixels";
 
@@ -79,7 +79,7 @@ export interface CartItem {
   color: string | null;
 }
 
-export const cartStore = createStore<CartItem[]>("henine.cart.v1", []);
+export const cartStore = createStore<CartItem[]>("elfatina.cart.v1", []);
 export const useCart = () => useStore(cartStore);
 
 export const cart = {
@@ -110,7 +110,7 @@ export const cartCount = (items: CartItem[]) => items.reduce((s, i) => s + i.qty
 
 /* ── Favourites ── */
 
-export const favoritesStore = createStore<string[]>("henine.favorites.v1", []);
+export const favoritesStore = createStore<string[]>("elfatina.favorites.v1", []);
 export const useFavorites = () => useStore(favoritesStore);
 export function toggleFavorite(slug: string) {
   favoritesStore.set((list) => (list.includes(slug) ? list.filter((s) => s !== slug) : [slug, ...list].slice(0, 100)));
@@ -125,7 +125,7 @@ export interface SavedOrder {
   createdAt: number;
 }
 
-export const ordersStore = createStore<SavedOrder[]>("henine.orders.v1", []);
+export const ordersStore = createStore<SavedOrder[]>("elfatina.orders.v1", []);
 export const useSavedOrders = () => useStore(ordersStore);
 export function saveOrder(o: SavedOrder) {
   ordersStore.set((list) => [o, ...list.filter((x) => x.code !== o.code)].slice(0, 20));
@@ -141,11 +141,11 @@ export interface CheckoutMemory {
   address: string;
   deliveryType: "domicile" | "bureau";
 }
-export const checkoutMemory = createStore<CheckoutMemory | null>("henine.checkout.v1", null);
+export const checkoutMemory = createStore<CheckoutMemory | null>("elfatina.checkout.v1", null);
 
 /* ── Recently viewed products (newest first, max 12) ── */
 
-export const recentStore = createStore<string[]>("henine.recent.v1", []);
+export const recentStore = createStore<string[]>("elfatina.recent.v1", []);
 export const useRecent = () => useStore(recentStore);
 export function rememberViewed(slug: string) {
   recentStore.set((list) => [slug, ...list.filter((s) => s !== slug)].slice(0, 12));
@@ -153,7 +153,7 @@ export function rememberViewed(slug: string) {
 
 /* ── Recent searches (newest first, max 8) ── */
 
-export const searchesStore = createStore<string[]>("henine.searches.v1", []);
+export const searchesStore = createStore<string[]>("elfatina.searches.v1", []);
 export const useSearches = () => useStore(searchesStore);
 export function rememberSearch(q: string) {
   const s = q.trim().slice(0, 60);
@@ -163,7 +163,7 @@ export function rememberSearch(q: string) {
 
 /* ── Promo code brought by a link (cart reminder, campaign): applied at checkout, 7 days ── */
 
-export const pendingCoupon = createStore<{ code: string; at: number } | null>("henine.coupon.v1", null);
+export const pendingCoupon = createStore<{ code: string; at: number } | null>("elfatina.coupon.v1", null);
 export function takePendingCoupon(): string | null {
   const c = pendingCoupon.get();
   return c && Date.now() - c.at < 7 * 86400_000 ? c.code : null;

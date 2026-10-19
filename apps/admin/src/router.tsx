@@ -51,6 +51,7 @@ const appRoutes = [
   page("/commandes", lazy(() => import("./pages/Orders"), "OrdersPage")),
   page("/expeditions", lazy(() => import("./pages/Logistics"), "LogisticsPage")),
   page("/clients", lazy(Customers, "CustomersPage")),
+  page("/paniers", lazy(Customers, "CartsPage")),
   page("/promos", lazy(Marketing, "PromosPage")),
   page("/fidelite", lazy(Customers, "LoyaltyPage")),
   page("/accueil", lazy(Settings, "HomeSettingsPage")),
@@ -63,8 +64,8 @@ const appRoutes = [
   page("/finance", lazy(() => import("./pages/Finance"), "FinancePage")),
   page("/sources", lazy(() => import("./pages/Sources"), "SourcesPage")),
   page("/equipe", lazy(() => import("./pages/Team"), "TeamPage")),
-  // the old « Comptes » page is now part of Équipe
-  page("/comptes", lazy(() => import("./pages/Team"), "TeamPage")),
+  // Comptes: every sign-in account with its own rights and sessions (Équipe shows the people)
+  page("/comptes", lazy(() => import("./pages/Accounts"), "AccountsPage")),
   page("/parametres", lazy(Settings, "SettingsPage")),
   page("/contenu", lazy(System, "ContentPage")),
   page("/erreurs", lazy(System, "ErrorsPage")),

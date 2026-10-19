@@ -232,7 +232,7 @@ export interface SiteConfigDTO {
   flash: FlashSaleDTO | null;
   /** logo, colours, fonts, banners, home sections (Admin → Page d'accueil) */
   design: DesignDTO;
-  /** the shop in Boumerdès: address, map, opening hours */
+  /** the physical shop (if any): address, map, opening hours */
   boutique: BoutiqueDTO;
   /** whose pyjamas come first right now (Paramètres → Boutique → Saison) */
   season: "summer" | "winter";

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { isForeignClientError } from "@henine/shared";
+import { isForeignClientError } from "@elfatina/shared";
 
 /**
  * Sends uncaught browser errors to Admin → Erreurs (sampled, capped per page view). Errors from

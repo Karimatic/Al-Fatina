@@ -5,7 +5,7 @@
  * One alert per situation (`dedupe_key`): the 5-minute cron refreshes the counts, reopens an
  * alert when the situation comes back, and resolves it by itself once it's gone.
  */
-import { slaLimitMinutes, type SlaSettings } from "@henine/shared";
+import { slaLimitMinutes, type SlaSettings } from "@elfatina/shared";
 import type { Env } from "../env";
 import { liveEvent } from "./live";
 import { getSettings } from "./settings";

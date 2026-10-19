@@ -76,7 +76,7 @@ describe("text helpers", () => {
   });
 
   it("fills templates", () => {
-    expect(fillTemplate("Bonjour {name}, commande {code}", { name: "Amina", code: "HN-1" })).toBe("Bonjour Amina, commande HN-1");
+    expect(fillTemplate("Bonjour {name}, commande {code}", { name: "Amina", code: "EF-1" })).toBe("Bonjour Amina, commande EF-1");
   });
 });
 
@@ -89,11 +89,11 @@ describe("parseMarkdown", () => {
   });
 
   it("never produces unsafe links", () => {
-    const [p] = parseMarkdown("[clique](javascript:alert(1)) [ok](https://henine.dz)");
+    const [p] = parseMarkdown("[clique](javascript:alert(1)) [ok](https://elfatina.dz)");
     expect(p).toMatchObject({ t: "p" });
     const content = (p as { content: unknown[] }).content;
     expect(content).toContainEqual({ t: "text", v: "clique" });
-    expect(content).toContainEqual({ t: "a", v: "ok", href: "https://henine.dz" });
+    expect(content).toContainEqual({ t: "a", v: "ok", href: "https://elfatina.dz" });
   });
 });
 

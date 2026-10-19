@@ -1,19 +1,8 @@
-/**
- * Henine Boutique brand assets, same as the storefront: the five-petal blossom and the
- * Playfair Display italic wordmark. In the admin the wordmark is "written" in on load,
- * then a slow flow of pink, rose, gold, lavender and peach runs through the letters,
- * with a few gold sparkles (CSS only, see .wordmark in styles.css).
- */
-
-export function Blossom({ size = 28, className = "", light = false }: { size?: number; className?: string; light?: boolean }) {
+/** El Fatina's mark: "EF" in Jost, in the text colour (the app icon's letters). */
+export function BrandMark({ size = 28, className, light = false }: { size?: number; className?: string; light?: boolean }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" className={className}>
-      <g fill={light ? "#ffffff" : "var(--color-rose-300)"} stroke={light ? "var(--color-rose-300)" : "var(--color-rose-500)"} strokeWidth="0.8">
-        {[0, 72, 144, 216, 288].map((deg) => (
-          <ellipse key={deg} cx="16" cy="8.5" rx="5.2" ry="7" transform={`rotate(${deg} 16 16)`} />
-        ))}
-      </g>
-      <circle cx="16" cy="16" r="3.2" fill="var(--color-gold)" />
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" className={className}>
+      <path fill={light ? "#ffffff" : "currentColor"} d="M30.08 16.18L12 16.18L12 47.82L30.08 47.82L30.08 44.20L15.84 44.20L15.84 32.45L29.18 32.45L29.18 28.84L15.84 28.84L15.84 19.80L30.08 19.80L30.08 16.18ZM52 16.18L35.73 16.18L35.73 47.82L39.57 47.82L39.57 32.45L51.55 32.45L51.55 28.84L39.57 28.84L39.57 19.80L52 19.80L52 16.18Z" />
     </svg>
   );
 }
@@ -41,18 +30,18 @@ export function Wordmark({
 }) {
   const s = SIZES[size];
   return (
-    <span className={`relative inline-flex items-center ${s.gap} ${className}`} aria-label="Henine Boutique">
+    <span className={`relative inline-flex items-center ${s.gap} ${className}`} aria-label="El Fatina">
       {badge ? (
         <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-rose-500 via-plum-600 to-plum-700 shadow-[0_2px_8px_-2px_rgb(157_23_77/0.5)]">
-          <Blossom size={22} light className="wordmark-blossom" />
+          <BrandMark size={22} light className="wordmark-blossom" />
         </span>
       ) : (
-        <Blossom size={s.blossom} className="wordmark-blossom shrink-0" />
+        <BrandMark size={s.blossom} className="wordmark-blossom shrink-0" />
       )}
       {!iconOnly && (
         <span className="relative flex min-w-0 flex-col" aria-hidden="true">
           <span className={`wordmark whitespace-nowrap ${s.text}`} dir="ltr">
-            Henine Boutique
+            El Fatina
           </span>
           {subtitle && <span className={`${s.sub} font-semibold uppercase tracking-[0.22em] text-ink-soft`}>{subtitle}</span>}
           {/* twinkles just past the end of the word, never over the letters */}

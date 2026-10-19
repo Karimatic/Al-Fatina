@@ -1,4 +1,4 @@
-/* Henine Boutique service worker: notifications (back in stock, store news), and saved copies
+/* El Fatina service worker: notifications (back in stock, store news), and saved copies
  * for flaky mobile networks (audit REL-3).
  *  - Public pages (home, shop, categories, products, info pages): network first, 4 s at most;
  *    no answer → the copy saved last time she opened that page (marked with a Server-Timing
@@ -11,10 +11,10 @@
  *    (the last 120).
  * Every other request (orders, forms, the admin) goes straight to the network, untouched. */
 
-const OFFLINE = "henine-offline-v2";
-const PAGES = "henine-pages-v1";
-const DATA_CACHE = "henine-data-v1";
-const FILES = "henine-files-v1";
+const OFFLINE = "elfatina-offline-v2";
+const PAGES = "elfatina-pages-v1";
+const DATA_CACHE = "elfatina-data-v1";
+const FILES = "elfatina-files-v1";
 const KEEP = [OFFLINE, PAGES, DATA_CACHE, FILES];
 const WAIT_MS = 4000;
 const MAX_SAVED = { [PAGES]: 40, [DATA_CACHE]: 60, [FILES]: 120 };
@@ -108,7 +108,7 @@ self.addEventListener("push", (event) => {
     data = { body: event.data ? event.data.text() : "" };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || "Henine Boutique 🌸", {
+    self.registration.showNotification(data.title || "El Fatina ✨", {
       body: data.body || "",
       icon: data.icon || "/icon.svg",
       image: data.icon || undefined,

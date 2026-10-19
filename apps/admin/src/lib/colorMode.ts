@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
  * no flash); a choice is applied before the first render (see main.tsx).
  */
 export type ColorMode = "auto" | "light" | "dark";
-const KEY = "henine.admin.mode";
-const EVENT = "henine:mode";
+const KEY = "elfatina.admin.mode";
+const EVENT = "elfatina:mode";
 
 export function getColorMode(): ColorMode {
   try {

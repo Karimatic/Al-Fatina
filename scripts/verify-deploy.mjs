@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const origin = (process.argv[2] ?? process.env.PUBLIC_ORIGIN ?? "https://henineboutique.com").replace(/\/$/, "");
+const origin = (process.argv[2] ?? process.env.PUBLIC_ORIGIN ?? "https://el-fatina.karimmaticmz.workers.dev").replace(/\/$/, "");
 const built = readFileSync(join(root, "dist", "index.html"), "utf8");
 const entry = /<script type="module" src="([^"]+)"/.exec(built)?.[1];
 if (!entry) {
@@ -20,7 +20,7 @@ if (!entry) {
 }
 
 const get = async (path) => {
-  const res = await fetch(`${origin}${path}${path.includes("?") ? "&" : "?"}deploycheck=${Date.now()}`, { signal: AbortSignal.timeout(20_000), headers: { "User-Agent": "henine-deploy-check" } });
+  const res = await fetch(`${origin}${path}${path.includes("?") ? "&" : "?"}deploycheck=${Date.now()}`, { signal: AbortSignal.timeout(20_000), headers: { "User-Agent": "elfatina-deploy-check" } });
   return { status: res.status, text: await res.text() };
 };
 

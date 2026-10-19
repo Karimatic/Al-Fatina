@@ -5,7 +5,7 @@
  */
 import { Hono, type Context } from "hono";
 import { z } from "zod";
-import { canCountTransition, cleanText, COUNT_REASON_LABEL, COUNT_REASONS, countSummary, stockAfterCount, type CountReason, type CountStatus } from "@henine/shared";
+import { canCountTransition, cleanText, COUNT_REASON_LABEL, COUNT_REASONS, countSummary, stockAfterCount, type CountReason, type CountStatus } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { body, HttpError, intParam } from "../../lib/http";

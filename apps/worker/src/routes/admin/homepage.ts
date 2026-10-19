@@ -4,7 +4,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { ANNOUNCEMENT_ANIMATIONS, cleanText, DEFAULT_DESIGN, FONT_FAMILIES, FONT_PRESETS, HOME_SECTIONS, isHexColor, isSafeLink, OWN_FONT, type DesignDTO, type FontPreset } from "@henine/shared";
+import { ANNOUNCEMENT_ANIMATIONS, cleanText, DEFAULT_DESIGN, FONT_FAMILIES, FONT_PRESETS, HOME_SECTIONS, isHexColor, isSafeLink, OWN_FONT, type DesignDTO, type FontPreset } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { mediaUrl } from "../../lib/catalog";
@@ -54,7 +54,7 @@ homepageRoutes.put("/home", requirePermission("marketing.edit"), async (c) => {
 
 /**
  * Store texts, one language at a time: only what the team changed is stored, everything
- * else keeps the built-in text of that language (STORE_TEXTS in @henine/shared).
+ * else keeps the built-in text of that language (STORE_TEXTS in @elfatina/shared).
  */
 const textsInput = z
   .object({

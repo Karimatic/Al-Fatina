@@ -2,7 +2,7 @@
  * Uploads to R2 (review photos, logo, banners, home video, sounds). The type is read from the
  * file's first bytes, never trusted from the browser; the media route only serves these types.
  */
-import { DEFAULT_DESIGN, resolveSections, type DesignDTO } from "@henine/shared";
+import { DEFAULT_DESIGN, resolveSections, type DesignDTO } from "@elfatina/shared";
 import type { Env } from "../env";
 import { mediaUrl } from "./catalog";
 import { HttpError } from "./http";

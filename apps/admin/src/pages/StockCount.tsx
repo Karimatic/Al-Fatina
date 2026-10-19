@@ -3,7 +3,7 @@
  * Nothing changes in the stock before the approval; the API then applies the differences
  * through the normal stock history (reason "inventaire").
  */
-import { COUNT_REASON_LABEL, COUNT_REASONS, COUNT_STATUS_LABEL, type CountReason, type CountStatus } from "@henine/shared";
+import { COUNT_REASON_LABEL, COUNT_REASONS, COUNT_STATUS_LABEL, type CountReason, type CountStatus } from "@elfatina/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";

@@ -1,4 +1,4 @@
-import type { CategoryDTO, ProductCardDTO } from "@henine/shared";
+import type { CategoryDTO, ProductCardDTO } from "@elfatina/shared";
 import { ProductImage } from "@/components/ui/kit";
 import { useLocale } from "@/lib/locale";
 

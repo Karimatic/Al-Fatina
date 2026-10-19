@@ -1,4 +1,4 @@
-import { base64url } from "@henine/shared";
+import { base64url } from "@elfatina/shared";
 import { describe, expect, it } from "vitest";
 import { encryptPayload, isPushEndpoint, unb64url } from "./webpush";
 

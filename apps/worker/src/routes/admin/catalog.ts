@@ -4,7 +4,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { hasPermission, salePrice, slugify } from "@henine/shared";
+import { hasPermission, salePrice, slugify } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { imageRef, mediaUrl, variantLabels, type ImageRow } from "../../lib/catalog";

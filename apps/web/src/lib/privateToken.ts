@@ -4,7 +4,7 @@
  * TikTok's pixels read the page address (audit R5-1). Read it once, keep it on this phone for the
  * session, and put back an address with the code only.
  */
-export const KEY = (code: string) => `henine.link.${code}`;
+export const KEY = (code: string) => `elfatina.link.${code}`;
 
 /** Removes the token (and anything like it) from the address bar; returns what was there. */
 export function hidePrivateToken(): { code: string | null; token: string | null } {

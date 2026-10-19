@@ -2,86 +2,89 @@
 @import "./fonts.css";
 
 /*
- * Henine design tokens, "bold luxury": a white ground with a blush undertone, near-black plum
- * ink, a deep raspberry-plum accent and soft pink fills, gold hairlines.
- * WCAG contrast on the ground: ink 18.6:1, ink-soft 8.1:1, plum-600 9.4:1, plum-700 12.6:1,
- * rose-700 6.4:1 (all AA ✓). rose-300/500 are decorative only, never text.
+ * El Fatina design tokens, "silk luxe": a white page with cream sections, charcoal text and buttons,
+ * warm hairlines, widely spaced capitals, soft 2 px corners, a muted gold for small details and a
+ * deep burgundy for sales only.
+ * WCAG contrast on white: ink 15.9:1, ink-soft 6.1:1 (5.6:1 on cream), sale 7.5:1 (AA ✓).
+ * rose-300/500 and gold are decoration only, never text.
  */
 @theme {
-  /* thicker outlines for cards, inputs, chips and separators (border, border-t…, divide-y), both themes */
-  --default-border-width: 2px;
-  --color-ivory: #fffbfc;
-  --color-ivory-deep: #f8eef2;
-  --color-ink: #170a10;
-  --color-ink-soft: #5c4852;
-  --color-line: #d6bfca; /* visible hairlines on white, like the dark theme */
-  --color-rose-800: #a3124f;
-  --color-plum-600: #8e1048;
-  --color-plum-700: #6a0c36;
-  --color-rose-100: #fbe4ec;
-  --color-rose-300: #f2a5bf;
-  --color-rose-500: #e0487f;
-  --color-rose-700: #b0164f;
-  --color-gold: #a8824a;
-  --color-success: #2f7a55;
-  --color-danger: #b3261e;
-  --color-surface: #ffffff; /* cards, sheets, inputs (dark in dark mode) */
-  --color-noir: #170a10; /* footer, photo overlays: dark in both modes */
-  --color-on-ink: #fffbfc; /* text on an ink chip (chips turn light in dark mode) */
-  --color-accent-text: #6a0c36; /* accent text on the page ground */
+  --default-border-width: 1px;
+  --color-ivory: #ffffff;
+  --color-ivory-deep: #f7f3ee;
+  --color-ink: #222222;
+  --color-ink-soft: #6b6259;
+  --color-line: #e6ded4;
+  --color-rose-800: #111111;
+  --color-plum-600: #222222;
+  --color-plum-700: #111111;
+  --color-rose-100: #f7f3ee;
+  --color-rose-300: #d9cfc3;
+  --color-rose-500: #a8875a;
+  --color-rose-700: #222222;
+  --color-gold: #a8875a;
+  --color-success: #2f6b4a;
+  --color-danger: #a3122a;
+  --color-surface: #ffffff;
+  --color-noir: #222222;
+  --color-on-ink: #ffffff;
+  --color-accent-text: #111111;
+  /* sales and discounts: the one colour that is never the theme's */
+  --color-sale: #a3122a;
+  --color-cream: #f7f3ee;
 
-  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-p-jost), "Century Gothic", Arial, sans-serif;
+  --font-sans: var(--font-p-jost), system-ui, sans-serif;
   --font-arabic: var(--font-arabic-sans), "Segoe UI", Tahoma, sans-serif;
-  --font-arabic-display: var(--font-arabic-display-face), var(--font-arabic-sans), serif;
+  --font-arabic-display: var(--font-arabic-sans), "Segoe UI", Tahoma, sans-serif;
 
-  --radius-card: 1.25rem;
-  --shadow-soft: 0 1px 2px rgb(23 10 16 / 0.05), 0 10px 30px rgb(23 10 16 / 0.08);
-  --shadow-lift: 0 2px 4px rgb(23 10 16 / 0.06), 0 18px 40px -12px rgb(106 12 54 / 0.35);
+  /* soft corners: 2 px on buttons, fields, cards and sheets */
+  --radius-card: 2px;
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
+  --radius-4xl: 2px;
+  --shadow-soft: 0 1px 2px rgb(34 34 34 / 0.04), 0 8px 24px rgb(34 34 34 / 0.06);
+  --shadow-lift: 0 4px 16px rgb(34 34 34 / 0.1);
 
   --animate-shimmer: shimmer 1.4s ease-in-out infinite;
-  --animate-bloom: bloom 2.4s ease-out 1;
 
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
-  @keyframes bloom {
-    0% { transform: scale(0.85) rotate(-20deg); opacity: 0; }
-    60% { transform: scale(1.08) rotate(4deg); opacity: 1; }
-    100% { transform: scale(1) rotate(0); opacity: 1; }
-  }
 }
 
-/* ── Animated brand wordmark (header logo): rises in once, then a slow gold-pink shine ──
- * Same gradient-clip technique as the hero tagline, paced slower (8s) since the header is
- * visible on every page rather than once on the home hero. */
+/* ── The wordmark: EL FATINA in light Jost capitals, widely spaced ── */
 .brand-mark {
   display: inline-block;
-  /* same as the tagline: the "q" of Boutique keeps its tail */
-  padding-block: 0.1em 0.22em;
-  margin-block: -0.1em -0.22em;
-  opacity: 0;
-  transform: translateY(0.35em);
-  color: transparent;
-  background: linear-gradient(100deg, var(--color-accent-text) 0%, var(--color-accent-text) 40%, var(--color-gold) 50%, var(--color-rose-500) 58%, var(--color-accent-text) 68%, var(--color-accent-text) 100%);
-  background-size: 260% 100%;
-  background-position: 100% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: brand-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s forwards, brand-shine 8s ease-in-out 1s infinite;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  /* the spacing after the last letter would push it off centre */
+  margin-inline-end: -0.32em;
+  color: var(--color-ink);
 }
-@keyframes brand-rise {
-  to { opacity: 1; transform: none; }
+
+/* Pills and chips get the soft 2 px corner like the buttons; round things with a fixed size stay
+   round (colour dots, icon buttons, avatars). */
+:where(a, button, span, label, p, div, input, select).rounded-full:not([class*="size-"]) {
+  border-radius: 2px;
 }
-@keyframes brand-shine {
-  0% { background-position: 160% 0; }
-  20% { background-position: -30% 0; }
-  100% { background-position: -30% 0; }
+
+/* Arabic letters are never spaced apart (they would break) */
+html[lang="ar"] :is(.uppercase, .heading-display, .title-silk, .eyebrow-silk) {
+  letter-spacing: 0;
 }
 
 /* ── Splash screen: brand intro shown once per tab, for ~1s (see SplashScreen.tsx) ── */
-.henine-splash {
+.elfatina-splash {
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -90,32 +93,35 @@
   align-items: center;
   justify-content: center;
   gap: 0.9rem;
-  background: radial-gradient(ellipse at 50% 38%, var(--color-rose-100) 0%, var(--color-ivory) 62%, var(--color-ivory) 100%);
+  background: var(--color-cream);
   /* 1s hold, then a quick fade: a single compositor-only (opacity) animation, so the timing
      stays accurate even if the main thread is busy hydrating — a JS timer could run late. */
-  animation: henine-splash-cycle 1.15s ease forwards;
+  animation: elfatina-splash-cycle 1.15s ease forwards;
 }
-@keyframes henine-splash-cycle {
+@keyframes elfatina-splash-cycle {
   0%, 87% { opacity: 1; }
   100% { opacity: 0; visibility: hidden; pointer-events: none; }
 }
-.henine-splash-mark { animation: splash-pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.elfatina-splash-mark { animation: splash-pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 @keyframes splash-pop {
   0% { transform: scale(0.6); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
-.henine-splash-word {
-  font-style: italic;
-  font-size: 1.5rem;
-  letter-spacing: 0.02em;
-  color: var(--color-accent-text);
+.elfatina-splash-word {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  margin-inline-end: -0.4em;
+  color: var(--color-ink);
   opacity: 0;
   animation: splash-fade 0.6s ease 0.2s both;
 }
 @keyframes splash-fade {
   to { opacity: 1; }
 }
-.henine-splash-bar {
+.elfatina-splash-bar {
   display: block;
   width: 7rem;
   height: 2px;
@@ -123,16 +129,16 @@
   background: var(--color-line);
   overflow: hidden;
 }
-.henine-splash-bar-fill {
+.elfatina-splash-bar-fill {
   display: block;
   height: 100%;
   width: 100%;
   transform-origin: left;
   transform: scaleX(0);
-  background: linear-gradient(90deg, var(--color-gold), var(--color-rose-500));
+  background: var(--color-gold);
   animation: splash-progress 1s linear forwards; /* fills exactly as the 1s hold ends */
 }
-[dir="rtl"] .henine-splash-bar-fill { transform-origin: right; }
+[dir="rtl"] .elfatina-splash-bar-fill { transform-origin: right; }
 @keyframes splash-progress {
   to { transform: scaleX(1); }
 }
@@ -177,59 +183,56 @@
   }
   .heading-display {
     font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.25;
   }
-  /* Latin brand text (dir="ltr") keeps the display serif on Arabic pages */
+  /* Latin brand text (dir="ltr") keeps the Latin face on Arabic pages */
   html[lang="ar"] .heading-display:not([dir="ltr"]) {
     font-family: var(--font-arabic-display);
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0;
   }
-}
-
-/* ── Animated brand tagline ──
- * 1) the words rise in one after another;
- * 2) then a soft rose light travels through the letters themselves (gradient clipped to the
- *    text, each word starting slightly after the previous one), so the sweep reads as one
- *    wave along the line and nothing is drawn on the background. Animation delays are set
- *    per word in AnimatedTagline.tsx. */
-.tagline-word {
-  display: inline-block;
-  /* the letters are painted inside the word's box: room for accents (É) and for the parts
-     below the line (g, q, p) so they are never cut; the negative margins keep the layout */
-  padding-block: 0.12em 0.22em;
-  margin-block: -0.12em -0.22em;
-  opacity: 0;
-  transform: translateY(0.55em);
-  filter: blur(6px);
-  color: transparent;
-  background: linear-gradient(100deg, var(--color-ink) 0%, var(--color-ink) 42%, var(--color-rose-300) 50%, var(--color-rose-500) 56%, var(--color-ink) 64%, var(--color-ink) 100%);
-  background-size: 300% 100%;
-  background-position: 100% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation-name: tagline-rise, tagline-shine;
-  animation-duration: 0.9s, 6s;
-  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1), ease-in-out;
-  animation-iteration-count: 1, infinite;
-  animation-fill-mode: forwards, none;
-}
-@keyframes tagline-rise {
-  to { opacity: 1; transform: none; filter: none; }
-}
-@keyframes tagline-shine {
-  0% { background-position: 100% 0; }
-  22% { background-position: 0% 0; }
-  100% { background-position: 0% 0; }
-}
-/* on a photo: white letters, a soft pearl-and-rose light passing through them (no gold) */
-.tagline-light .tagline-word {
-  background-image: linear-gradient(100deg, #fff 0%, #fff 40%, #ffe4ee 47%, var(--color-rose-300) 52%, #fde8f0 57%, #fff 64%, #fff 100%);
-}
-@media (prefers-reduced-motion: reduce) {
-  .tagline-word { opacity: 1; transform: none; filter: none; animation: none; color: var(--color-ink); background: none; }
-  .tagline-light .tagline-word { color: #fff; }
+  /* section and page titles: light, widely spaced capitals */
+  .title-silk {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    line-height: 1.2;
+  }
+  html[lang="ar"] .title-silk {
+    font-family: var(--font-arabic-display);
+    font-weight: 700;
+  }
+  /* the small capitals above a title ("Nouvelle collection") */
+  .eyebrow-silk {
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+  }
+  /* the shop's buttons: charcoal filled, or a thin outline; capitals, soft corners */
+  .btn-silk, .btn-silk-line {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding-inline: 2rem;
+    border-radius: 2px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .btn-silk { background: var(--color-ink); color: #fff; }
+  .btn-silk:hover { background: #000; }
+  .btn-silk-line { border: 1px solid currentColor; }
+  .btn-silk-line:hover { background: var(--color-ink); color: #fff; border-color: var(--color-ink); }
+  html[lang="ar"] :is(.btn-silk, .btn-silk-line) { letter-spacing: 0; font-size: 0.9375rem; font-weight: 700; }
 }
 
 /* ── Home hero: the photo slowly settles in ── */
@@ -349,27 +352,22 @@
 .swipe-row > * { scroll-snap-align: start; }
 
 /* buttons that lift a little when pressed / hovered */
-.lift { transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s ease, background-color 0.2s ease; }
-.lift:hover { transform: translateY(-1px); box-shadow: var(--shadow-lift); }
-.lift:active { transform: scale(0.98); }
+.lift { transition: opacity 0.2s ease, background-color 0.2s ease; }
+.lift:hover { opacity: 0.9; }
+.lift:active { opacity: 0.78; }
 
 /* ── Announcement bar: flowing rose gradient + endless marquee ── */
 .announce {
   position: relative;
-  isolation: isolate;
-  background: var(--color-rose-800);
+  background: var(--color-cream);
+  color: var(--color-ink) !important;
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  border-bottom: 1px solid var(--color-line);
 }
-.announce::before {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  width: 300%;
-  z-index: -1;
-  background: linear-gradient(90deg, var(--color-rose-700), var(--color-rose-800), var(--color-plum-600), var(--color-rose-800), var(--color-rose-700));
-  will-change: transform;
-  animation: announce-flow 14s ease-in-out infinite alternate;
-}
+html[lang="ar"] .announce { letter-spacing: 0; font-size: 13px !important; }
 .announce-track { will-change: transform; }
 .announce-track {
   display: flex;
@@ -378,15 +376,6 @@
 }
 .announce:hover .announce-track { animation-play-state: paused; }
 [dir="rtl"] .announce-track { animation-name: marquee-rtl; }
-@keyframes announce-flow {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-66.666%, 0, 0); }
-}
-[dir="rtl"] .announce::before { animation-name: announce-flow-rtl; }
-@keyframes announce-flow-rtl {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(66.666%, 0, 0); }
-}
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -452,16 +441,15 @@
 .faq-item summary { list-style: none; }
 .faq-item summary::-webkit-details-marker { display: none; }
 .faq-plus { transition: transform 0.3s ease, background-color 0.3s ease; }
-.faq-item[open] .faq-plus { transform: rotate(45deg); background: var(--color-plum-600); color: #fff; }
+.faq-item[open] .faq-plus { transform: rotate(45deg); }
 
 @media (prefers-reduced-motion: reduce) {
   .announce, .announce-track, .announce-sparkle, .announce-fade, .announce-slide, .ig-card, .ig-btn::after, .hero-zoom-img, .hero-cine-solo, .hero-cine-a, .hero-cine-b, .hero-grain, .hero-sweep, .story-ring, .toast-in { animation: none; }
-  .brand-mark { opacity: 1; transform: none; animation: none; color: var(--color-accent-text); background: none; }
   .story { opacity: 1; animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .menu-panel, .nudge { animation: none; }
   /* reduced motion: skip the splash entirely rather than leaving it stuck on screen */
-  .henine-splash { animation: none; display: none; }
+  .elfatina-splash { animation: none; display: none; }
   /* still banner: the first photo only */
   .hero-cine-b { display: none; }
 }
@@ -483,15 +471,15 @@
   20%, 60% { transform: translateX(-6px); }
   40%, 80% { transform: translateX(6px); }
 }
-/* ☰ menu panel slides in from the end edge, where its button is (right in French, left in Arabic) */
+/* ☰ menu panel slides in from the start edge, where its button is (left in French, right in Arabic) */
 .menu-panel { animation: menu-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
 [dir="rtl"] .menu-panel { animation-name: menu-in-rtl; }
 @keyframes menu-in {
-  from { transform: translateX(100%); }
+  from { transform: translateX(-100%); }
   to { transform: none; }
 }
 @keyframes menu-in-rtl {
-  from { transform: translateX(-100%); }
+  from { transform: translateX(100%); }
   to { transform: none; }
 }
 .animate-fade { animation: fade-in 0.2s ease-out; }
@@ -512,133 +500,7 @@
   }
 }
 
-/* ── Dark mode ────────────────────────────────────────────────────────────────────────
- * Follows the phone / computer setting, or the choice saved in the menu (data-theme).
- * Screen only: printing (slips, invoices) always uses the light colours. */
-@media screen {
-:root[data-theme="dark"] {
-  --color-ivory: #140c10;
-  --color-ivory-deep: #22161c;
-  --color-surface: #1d1318;
-  --color-ink: #f6eaef;
-  --color-ink-soft: #c9b3bd;
-  --color-line: #3a2a32;
-  --color-rose-100: #3b1828;
-  --color-noir: #0b0609;
-  --color-on-ink: #170a10;
-  --color-accent-text: #f49ac0;
-  --color-sidebar: #181015;
-  --color-emerald-50: #0f2a20;
-  --color-emerald-100: #123526;
-  --color-emerald-700: #7fdcb0;
-  --color-emerald-800: #8fe4bc;
-  --color-red-50: #2f1214;
-  --color-red-100: #3d1518;
-  --color-red-200: #6b2a2e;
-  --color-red-700: #ff9b93;
-  --color-red-800: #ffaaa3;
-  --color-amber-50: #2b210b;
-  --color-amber-100: #36290d;
-  --color-amber-200: #5e4815;
-  --color-amber-300: #7a5d18;
-  --color-amber-700: #f2c96b;
-  --color-amber-800: #f5d27e;
-  --color-amber-900: #f8dc95;
-  --color-orange-100: #3a210f;
-  --color-orange-700: #ffb27a;
-  --color-orange-800: #ffbd8c;
-  --color-sky-100: #0f2638;
-  --color-sky-700: #8cc8f2;
-  --color-sky-800: #9dd2f6;
-  --color-stone-100: #2a2226;
-  --color-stone-200: #332a2f;
-  --color-stone-300: #463b41;
-  --color-stone-500: #b3a5ac;
-  --color-stone-600: #c4b7bd;
-  --color-stone-700: #d4c8ce;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px rgb(0 0 0 / 0.35);
-  color-scheme: dark;
-}
-:root[data-theme="dark"] .text-plum-600,
-:root[data-theme="dark"] .hover\:text-plum-600:hover,
-:root[data-theme="dark"] .group:hover .group-hover\:text-plum-600,
-:root[data-theme="dark"] .text-plum-700,
-:root[data-theme="dark"] .hover\:text-plum-700:hover,
-:root[data-theme="dark"] .group:hover .group-hover\:text-plum-700,
-:root[data-theme="dark"] .text-rose-700,
-:root[data-theme="dark"] .hover\:text-rose-700:hover,
-:root[data-theme="dark"] .group:hover .group-hover\:text-rose-700,
-:root[data-theme="dark"] .text-rose-800,
-:root[data-theme="dark"] .hover\:text-rose-800:hover,
-:root[data-theme="dark"] .group:hover .group-hover\:text-rose-800,
-:root[data-theme="dark"] .md\:text-plum-700 {
-  color: var(--color-accent-text);
-}
-:root[data-theme="dark"] .text-danger { color: #ff9b93; }
-:root[data-theme="dark"] .text-success { color: #72dfa9; }
-@media (prefers-color-scheme: dark) {
-:root:not([data-theme="light"]) {
-  --color-ivory: #140c10;
-  --color-ivory-deep: #22161c;
-  --color-surface: #1d1318;
-  --color-ink: #f6eaef;
-  --color-ink-soft: #c9b3bd;
-  --color-line: #3a2a32;
-  --color-rose-100: #3b1828;
-  --color-noir: #0b0609;
-  --color-on-ink: #170a10;
-  --color-accent-text: #f49ac0;
-  --color-sidebar: #181015;
-  --color-emerald-50: #0f2a20;
-  --color-emerald-100: #123526;
-  --color-emerald-700: #7fdcb0;
-  --color-emerald-800: #8fe4bc;
-  --color-red-50: #2f1214;
-  --color-red-100: #3d1518;
-  --color-red-200: #6b2a2e;
-  --color-red-700: #ff9b93;
-  --color-red-800: #ffaaa3;
-  --color-amber-50: #2b210b;
-  --color-amber-100: #36290d;
-  --color-amber-200: #5e4815;
-  --color-amber-300: #7a5d18;
-  --color-amber-700: #f2c96b;
-  --color-amber-800: #f5d27e;
-  --color-amber-900: #f8dc95;
-  --color-orange-100: #3a210f;
-  --color-orange-700: #ffb27a;
-  --color-orange-800: #ffbd8c;
-  --color-sky-100: #0f2638;
-  --color-sky-700: #8cc8f2;
-  --color-sky-800: #9dd2f6;
-  --color-stone-100: #2a2226;
-  --color-stone-200: #332a2f;
-  --color-stone-300: #463b41;
-  --color-stone-500: #b3a5ac;
-  --color-stone-600: #c4b7bd;
-  --color-stone-700: #d4c8ce;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px rgb(0 0 0 / 0.35);
-  color-scheme: dark;
-}
-:root:not([data-theme="light"]) .text-plum-600,
-:root:not([data-theme="light"]) .hover\:text-plum-600:hover,
-:root:not([data-theme="light"]) .group:hover .group-hover\:text-plum-600,
-:root:not([data-theme="light"]) .text-plum-700,
-:root:not([data-theme="light"]) .hover\:text-plum-700:hover,
-:root:not([data-theme="light"]) .group:hover .group-hover\:text-plum-700,
-:root:not([data-theme="light"]) .text-rose-700,
-:root:not([data-theme="light"]) .hover\:text-rose-700:hover,
-:root:not([data-theme="light"]) .group:hover .group-hover\:text-rose-700,
-:root:not([data-theme="light"]) .text-rose-800,
-:root:not([data-theme="light"]) .hover\:text-rose-800:hover,
-:root:not([data-theme="light"]) .group:hover .group-hover\:text-rose-800,
-:root:not([data-theme="light"]) .md\:text-plum-700 {
-  color: var(--color-accent-text);
-}
-:root:not([data-theme="light"]) .text-danger { color: #ff9b93; }
-:root:not([data-theme="light"]) .text-success { color: #72dfa9; }
-}
-}
+/* The store is light only (white and cream pages): no dark mode. */
 
 /* ── ✨ assistant button: a light sweep every few seconds and a twinkling star ── */
 .assistant-fab::after {

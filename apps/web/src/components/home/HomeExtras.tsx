@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LoopVideo } from "@/components/ui/LoopVideo";
-import type { FlashInfoDTO, ProductCardDTO } from "@henine/shared";
+import type { FlashInfoDTO, ProductCardDTO } from "@elfatina/shared";
 import { ProductGrid } from "@/components/product/ProductCard";
 import { InstagramIcon } from "@/components/ui/icons";
 import { Countdown, useCountdown } from "@/components/views/DropViews";
@@ -19,7 +19,7 @@ export function FlashBlock({ products }: { products: ProductCardDTO[] }) {
   const list = products.filter((p) => p.flash?.saleId === sale.id);
   if (!list.length) return null;
   return (
-    <section id="flash" className="mx-auto max-w-6xl scroll-mt-24 px-3 py-6 md:px-4">
+    <section id="flash" className="mx-auto max-w-6xl scroll-mt-32 px-3 py-6 md:px-4">
       <div className="overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-noir via-plum-700 to-plum-600 p-4 text-white md:p-7">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -54,7 +54,7 @@ export function FlashStock({ flash, compact = false }: { flash: FlashInfoDTO; co
         {!compact && <span className="text-ink-soft">{t.plus.flash.sold(flash.sold, flash.limit)}</span>}
       </div>
       <span className="block h-2 overflow-hidden rounded-full bg-rose-100" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-        <span className="block h-full rounded-full bg-gradient-to-r from-rose-500 to-plum-600 rtl:bg-gradient-to-l" style={{ width: `${Math.max(6, pct)}%` }} />
+        <span className="block h-full rounded-full bg-sale" style={{ width: `${Math.max(6, pct)}%` }} />
       </span>
     </div>
   );
@@ -66,7 +66,7 @@ export function FlashPanel({ flash }: { flash: FlashInfoDTO }) {
   const { left, done } = useCountdown(flash.endsAt);
   if (done) return null;
   return (
-    <div className="mt-4 rounded-2xl bg-gradient-to-br from-plum-600 to-plum-700 p-4 text-white">
+    <div className="mt-4 bg-ink p-4 text-white">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-bold">⚡ {t.plus.flash.title} · -{flash.percent}%</p>
         <div className="flex items-center gap-2 text-xs">
@@ -155,7 +155,7 @@ export function Newsletter() {
       if (ios && !standalone) setState("ios");
     }
   }, []);
-  const ig = site.data?.contact.instagram ?? "https://www.instagram.com/henine.boutique/";
+  const ig = site.data?.contact.instagram ?? "https://www.instagram.com/el_fatina_/";
   return (
     <section className="mx-auto max-w-6xl px-3 py-6 md:px-4">
       <Reveal>

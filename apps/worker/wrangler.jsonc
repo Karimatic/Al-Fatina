@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "henine-boutique",
+  "name": "el-fatina",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": [
@@ -33,20 +33,16 @@
       "/fr/collection/*"
     ]
   },
-  // The shop's address: henineboutique.com (and www., which redirects to it). The old workers.dev
-  // address stays on: its pages redirect to the domain, its API keeps answering (saved pages,
-  // the Telegram webhook).
-  "routes": [
-    { "pattern": "henineboutique.com", "custom_domain": true },
-    { "pattern": "www.henineboutique.com", "custom_domain": true }
-  ],
+  // No custom domain yet: the shop answers on its workers.dev address. With a domain, add
+  // "routes": [{ "pattern": "example.dz", "custom_domain": true }] and set PUBLIC_ORIGIN.
   "workers_dev": true,
   "preview_urls": false,
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "henine-boutique-db",
-      "database_id": "fd580fa9-10fc-4ee0-a64a-edd046116c37",
+      "database_name": "el-fatina-db",
+      // El Fatina's own database (created 2026-10-13, location weur). Never another shop's id.
+      "database_id": "808962b0-3ca1-499b-81e8-70b83507adb3",
       // Local development keeps its own database (npm run dev), never the production one: this
       // id only names the local copy (.wrangler/state). Query it from the repo root with
       // `npm run db:sql:local -- "SELECT …"` (the team table is team_members).
@@ -57,7 +53,7 @@
   "r2_buckets": [
     {
       "binding": "MEDIA",
-      "bucket_name": "henine-media"
+      "bucket_name": "el-fatina-media"
     }
   ],
   // Live admin (new orders, alerts) over WebSockets. SQLite-backed Durable Objects are on the
@@ -78,10 +74,12 @@
       ]
     }
   ],
+  // namespace ids are shared by every Worker of the Cloudflare account: Henine uses 1001-1006,
+  // El Fatina 2001-2006 (the same ids would make both shops count against one limit)
   "ratelimits": [
     {
       "name": "RL_WRITE",
-      "namespace_id": "1001",
+      "namespace_id": "2001",
       "simple": {
         "limit": 10,
         "period": 60
@@ -89,7 +87,7 @@
     },
     {
       "name": "RL_LOOKUP",
-      "namespace_id": "1002",
+      "namespace_id": "2002",
       "simple": {
         "limit": 60,
         "period": 60
@@ -97,7 +95,7 @@
     },
     {
       "name": "RL_AUTH",
-      "namespace_id": "1003",
+      "namespace_id": "2003",
       "simple": {
         "limit": 10,
         "period": 60
@@ -107,7 +105,7 @@
       // shop-wide (not per visitor) budget of database writes from counters: visits, error
       // reports, saved checkouts. Past it they are skipped: the daily D1 write quota stays for orders
       "name": "RL_BEACON",
-      "namespace_id": "1005",
+      "namespace_id": "2005",
       "simple": {
         "limit": 20,
         "period": 60
@@ -117,7 +115,7 @@
       // each visitor's own share of those counters, checked first: one script can no longer
       // empty the shop-wide budget for everyone (a real visit sends a few per minute)
       "name": "RL_BEACON_IP",
-      "namespace_id": "1006",
+      "namespace_id": "2006",
       "simple": {
         "limit": 10,
         "period": 60
@@ -125,7 +123,7 @@
     },
     {
       "name": "RL_AI",
-      "namespace_id": "1004",
+      "namespace_id": "2004",
       "simple": {
         "limit": 10,
         "period": 60
@@ -142,21 +140,18 @@
   "images": {
     "binding": "IMAGES"
   },
-  // 21:00 Algiers = 20:00 UTC (Algeria has no DST)
+  // one trigger: the account's free plan allows 5 and Henine uses 3. src/scheduled.ts picks the
+  // work from the time (21:00 Algiers = 20:00 UTC, Algeria has no DST)
   "triggers": {
-    "crons": [
-      "*/5 * * * *",
-      "*/30 * * * *",
-      "0 20 * * *"
-    ]
+    "crons": ["*/5 * * * *"]
   },
   "vars": {
     "ENVIRONMENT": "production",
-    "PUBLIC_ORIGIN": "https://henineboutique.com",
+    "PUBLIC_ORIGIN": "https://el-fatina.karimmaticmz.workers.dev",
     "MEDIA_ORIGIN": "",
     // "console": no email service, admins sign in with an authenticator app
     "MAIL_PROVIDER": "console",
-    "MAIL_FROM": "Henine Boutique <no-reply@example.com>",
+    "MAIL_FROM": "El Fatina <no-reply@example.com>",
     // "off" = assistant without AI
     "ASSISTANT_MODEL": "@cf/google/gemma-4-26b-a4b-it"
   },

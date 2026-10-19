@@ -3,7 +3,7 @@
  * up (or renewed in Mon compte). Each replaces the app's 6-digit code for one sign-in, so a lost
  * phone does not lock the shop out. Only peppered hashes are stored.
  */
-import { sha256Hex, timingSafeEqual } from "@henine/shared";
+import { sha256Hex, timingSafeEqual } from "@elfatina/shared";
 import type { Env } from "../env";
 
 const ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"; // no 0/O, 1/I/L

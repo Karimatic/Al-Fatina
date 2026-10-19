@@ -3,13 +3,13 @@
  * (TOTP) for members who set one up, else sent by email.
  *
  * Password handling (see team_members.password_hash):
- *   browser:  key  = PBKDF2-SHA256(password, "henine-admin|" + email, 600 000 it.) → hex
+ *   browser:  key  = PBKDF2-SHA256(password, "elfatina-admin|" + email, 600 000 it.) → hex
  *   server:   hash = SHA-256(AUTH_PEPPER | salt | key)   (salt: random per member)
  * Sessions: random 256-bit token in an HttpOnly/SameSite=Strict cookie; only its hash is stored.
  */
 import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { timingSafeEqual } from "@henine/shared";
+import { timingSafeEqual } from "@elfatina/shared";
 import type { AppEnv, Env } from "../env";
 import { isDev } from "../env";
 import { decryptSecret, randomCode, randomToken, sha256Hex } from "./crypto";
@@ -29,7 +29,7 @@ const LOCK_MS = 15 * 60_000;
 
 export function cookieName(env: Env): string {
   // __Host- requires Secure, which browsers only honour on https (and localhost in Chromium).
-  return isDev(env) ? "henine_admin" : "__Host-henine_admin";
+  return isDev(env) ? "elfatina_admin" : "__Host-elfatina_admin";
 }
 
 /* ── password hashes ── */

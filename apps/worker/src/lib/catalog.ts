@@ -13,7 +13,7 @@ import {
   type ReviewDTO,
   type SizeGuideDTO,
   type VariantDTO,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import type { Env } from "../env";
 
 interface ProductRow {

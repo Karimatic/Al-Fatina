@@ -16,10 +16,10 @@ type Ids = { meta: string | null; tiktok: string | null };
 type Fn = ((...args: unknown[]) => void) & Record<string, unknown>;
 type W = Window & { fbq?: Fn; _fbq?: Fn; ttq?: unknown[] & Record<string, unknown>; TiktokAnalyticsObject?: string };
 
-const CONSENT_KEY = "henine.adsConsent";
-export const CONSENT_EVENT = "henine:ads-consent";
+const CONSENT_KEY = "elfatina.adsConsent";
+export const CONSENT_EVENT = "elfatina:ads-consent";
 /** « Publicités » in the footer: shows the choice again */
-export const CONSENT_OPEN_EVENT = "henine:ads-consent-open";
+export const CONSENT_OPEN_EVENT = "elfatina:ads-consent-open";
 export const openConsent = () => window.dispatchEvent(new Event(CONSENT_OPEN_EVENT));
 let ids: Ids | null = null;
 let loaded = false;
@@ -139,8 +139,8 @@ export function trackAd(event: "ViewContent" | "AddToCart" | "InitiateCheckout" 
   }
   const w = window as W;
   const value = opts.value ?? items.reduce((s, i) => s + i.price * (i.qty ?? 1), 0);
-  // the same ids as the Meta catalogue feed (/feeds/meta.csv: item_group_id HN-P<product>)
-  const ids_ = items.map((i) => `HN-P${i.id}`);
+  // the same ids as the Meta catalogue feed (/feeds/meta.csv: item_group_id EF-P<product>)
+  const ids_ = items.map((i) => `EF-P${i.id}`);
   try {
     w.fbq?.(
       "track",
@@ -163,7 +163,7 @@ export function trackAd(event: "ViewContent" | "AddToCart" | "InitiateCheckout" 
 /** Purchase once per order on this phone (the thank-you page can be opened again). */
 export function trackPurchaseOnce(code: string, total: number, items: Item[]) {
   if (consent() !== "yes") return;
-  const key = `henine.px.${code}`;
+  const key = `elfatina.px.${code}`;
   try {
     if (localStorage.getItem(key)) return;
     localStorage.setItem(key, "1");

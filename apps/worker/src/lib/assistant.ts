@@ -1,10 +1,10 @@
 /**
- * "✨ Assistante Henine": turns a free-text wish ("robe noire pour un mariage, moins de
+ * "✨ Assistante El Fatina": turns a free-text wish ("robe noire pour un mariage, moins de
  * 8000 DA", "بيجامة حمراء مقاس L") into filters and answers with real products only:
  * published, in stock, with their price. Rules, no paid AI: colours, sizes, budget,
  * occasions and categories in French, Arabic and Darija.
  */
-import { formatDA, normalizeSearch, type AssistantReplyDTO, type ProductCardDTO } from "@henine/shared";
+import { formatDA, normalizeSearch, type AssistantReplyDTO, type ProductCardDTO } from "@elfatina/shared";
 import type { Env } from "../env";
 import { productCards } from "./catalog";
 

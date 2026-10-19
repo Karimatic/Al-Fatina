@@ -2,7 +2,7 @@
  * Possible duplicate orders, checked right after an order is placed (website, express form or
  * the team's manual orders; never shop sales). Only flags: the team decides in the order sheet.
  */
-import { DEFAULT_DUPLICATE_SETTINGS, DUPLICATE_REASON_LABEL, duplicateScore, type DuplicateReason, type DuplicateSettings, type OrderForDuplicate } from "@henine/shared";
+import { DEFAULT_DUPLICATE_SETTINGS, DUPLICATE_REASON_LABEL, duplicateScore, type DuplicateReason, type DuplicateSettings, type OrderForDuplicate } from "@elfatina/shared";
 import type { Env } from "../env";
 import { raiseAlert } from "./alerts";
 import { CANCELLED_SQL } from "./orders";

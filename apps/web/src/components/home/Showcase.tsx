@@ -1,213 +1,23 @@
-import { artKey, mainCategories, type CategoryDTO, type ProductCardDTO, type ReviewWallDTO } from "@henine/shared";
+import type { ProductCardDTO, ReviewWallDTO } from "@elfatina/shared";
 import { ProductGrid } from "@/components/product/ProductCard";
-import { InstagramIcon, TRUST_ICONS } from "@/components/ui/icons";
+import { InstagramIcon } from "@/components/ui/icons";
 import { Stars } from "@/components/ui/kit";
 import { useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { useRecent } from "@/lib/stores";
 import { Reveal, SectionHead } from "./Sections";
 
-const IG = "https://www.instagram.com/henine.boutique/";
-
-/* ───────── Instagram-style story bubbles (the shop's own highlights) ───────── */
-
-type Story = { key: string; label: string; href: string; external?: boolean; category?: string; art?: string };
-
-/* Story artwork: a soft gradient per bubble with a fine white line drawing (no photos). */
-const STORY_GRADIENT: Record<string, string> = {
-  new: "from-[#f3d9a4] via-rose-500 to-plum-600",
-  robes: "from-rose-300 via-rose-500 to-plum-700",
-  lingerie: "from-[#f6b9cf] via-rose-500 to-[#7b1747]",
-  djebba: "from-[#f3d9a4] via-rose-500 to-[#7b1747]",
-  pyjamas: "from-[#fbd3e1] via-rose-300 to-plum-600",
-  set: "from-[#f9c6d6] via-rose-500 to-plum-700",
-  sport: "from-[#d9c8f2] via-plum-600 to-noir",
-  promo: "from-plum-600 via-plum-700 to-noir",
-};
-
-const STORY_LINES: Record<string, React.ReactNode> = {
-  // 4-point sparkle with two small ones
-  new: (
-    <>
-      <path d="M32 12c1.6 9 4 11.4 13 13-9 1.6-11.4 4-13 13-1.6-9-4-11.4-13-13 9-1.6 11.4-4 13-13Z" />
-      <path d="M47 38c.6 3 1.4 3.8 4.4 4.4-3 .6-3.8 1.4-4.4 4.4-.6-3-1.4-3.8-4.4-4.4 3-.6 3.8-1.4 4.4-4.4Z" />
-      <path d="M17 40c.5 2.2 1 2.8 3.2 3.2-2.2.5-2.7 1-3.2 3.2-.5-2.2-1-2.7-3.2-3.2 2.2-.4 2.7-1 3.2-3.2Z" />
-    </>
-  ),
-  // dress
-  robes: <path d="M26 12h12l-1.5 7 6 6-3 5c3 8 6 15 8 22H17c2-7 5-14 8-22l-3-5 6-6L26 12Zm1.5 7h9M24.5 30c5 1.5 10 1.5 15 0" />,
-  // nightwear: long covered nightgown with sleeves
-  lingerie: (
-    <>
-      <path d="M27 9c1 3 3 4 5 4s4-1 5-4l7 3 7 17-5 2-5-10c1 11 3 22 6 33H17c3-11 5-22 6-33l-5 10-5-2 7-17Z" />
-      <path d="M27 9c1 3 3 4 5 4s4-1 5-4M21 50h22" />
-    </>
-  ),
-  // djebba: long traditional dress, wide sleeves, embroidered neckline and hem
-  djebba: (
-    <>
-      <path d="M27 10h10l2 5 9 5-3 10-4-2c1 8 3 16 6 24H17c3-8 5-16 6-24l-4 2-3-10 9-5 2-5Z" />
-      <path d="M27 10c1 4 9 4 10 0M29 15l3 4 3-4M20 48h24M22 44l2 2 2-2 2 2 2-2 2 2 2-2 2 2 2-2 2 2 2-2" />
-    </>
-  ),
-  // pyjama shirt + trousers
-  pyjamas: (
-    <>
-      <path d="M24 10h16l9 6-4 7-4-2v12H23V21l-4 2-4-7 9-6Zm8 0v23m-3-18h6" />
-      <path d="M23 37h18l2 18h-7l-4-12-4 12h-7l2-18Z" />
-    </>
-  ),
-  // discreet gift box with a ribbon
-  set: (
-    <>
-      <path d="M14 28h36v24H14ZM12 21h40v7H12ZM32 21v31" />
-      <path d="M32 21c-4-7-13-9-13-3 0 3 6 4 13 3Zm0 0c4-7 13-9 13-3 0 3-6 4-13 3Z" />
-    </>
-  ),
-  // tracksuit: hoodie + joggers
-  sport: (
-    <>
-      <path d="M26 9c2 3 4 4 6 4s4-1 6-4l9 5-3 12-5-2v10H25V24l-5 2-3-12Z" />
-      <path d="M25 38h14l3 18h-6l-4-12-4 12h-6Z" />
-    </>
-  ),
-  // hanger, for any other category
-  other: <path d="M32 18a4 4 0 1 1 4-4c0 3-4 3-4 7l18 12c2 1.4 1 4-1.5 4H15.5c-2.5 0-3.5-2.6-1.5-4L32 21" />,
-};
-
-export function StoryArt({ kind }: { kind: string }) {
-  const gradient = STORY_GRADIENT[kind] ?? "from-rose-300 via-rose-500 to-plum-600";
-  return (
-    <span className={`grid size-full place-items-center bg-gradient-to-br ${gradient} text-white transition duration-500 group-hover:scale-110`}>
-      {kind === "promo" ? (
-        <span className="text-[1.35rem] font-bold leading-none">%</span>
-      ) : (
-        <svg viewBox="0 0 64 64" className="size-[66%]" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          {STORY_LINES[kind] ?? STORY_LINES.other}
-        </svg>
-      )}
-    </span>
-  );
-}
-
-/**
- * The shop's categories as cards: a soft colour tile with a fine drawing, the full name on two
- * lines and how many pieces, plus a "Promotions" card when something is on sale.
- */
-export function Stories({ categories, products }: { categories: CategoryDTO[] | undefined; products: ProductCardDTO[] }) {
-  const { t, href, ar } = useLocale();
-  const S = t.home.stories;
-  const onSale = products.filter((p) => p.compareAtPrice != null && p.compareAtPrice > p.price).length;
-  const stories: (Story & { count?: number })[] = [
-    // main categories only (their sub-categories are one tap further)
-    // (none has a piece yet, e.g. while the shop fills its catalogue: all of them, so the row
-    // doesn't vanish and move the page, audit R5-3)
-    ...((mains) => (mains.some((c) => (c.productCount ?? 0) > 0) ? mains.filter((c) => (c.productCount ?? 0) > 0) : mains))(mainCategories(categories ?? []))
-      .map((c) => ({ key: c.slug, label: ar ? c.nameAr : c.nameFr, href: href(`/c/${c.slug}`), category: c.slug, art: artKey(c.slug), count: c.productCount || undefined })),
-    ...(onSale ? [{ key: "promo", label: S.promo, href: href("/promotions"), art: "promo", count: onSale }] : []),
-  ];
-  // while the categories load: the same heading and card boxes as the real row, empty (a
-  // skeleton of another height moved everything below it when the row arrived)
-  if (!categories)
-    return (
-      <div className="mx-auto max-w-6xl px-4" aria-hidden="true">
-        <div className="mb-3 flex items-end justify-between gap-3">
-          <p className="heading-display text-[1.45rem] leading-tight md:text-3xl">{t.categories.title}</p>
-        </div>
-        <ul className="-mx-4 flex gap-3 overflow-hidden px-4 pb-2 md:mx-0 md:grid md:grid-cols-6 md:px-0">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <li key={i} className="w-[8.25rem] shrink-0 md:w-auto">
-              <span className="flex flex-col overflow-hidden rounded-[1.4rem] border border-line bg-surface">
-                <span className="skeleton block aspect-square rounded-none" />
-                <span className="flex flex-col gap-1 px-2.5 pb-2.5 pt-2">
-                  <span className="block min-h-[2.25rem]" />
-                  <span className="block text-[11px]">&nbsp;</span>
-                </span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  if (!stories.length) return null;
-  return (
-    <section aria-label={t.categories.title} className="mx-auto max-w-6xl px-4">
-      <div className="mb-3 flex items-end justify-between gap-3">
-        <h2 className="heading-display text-[1.45rem] leading-tight md:text-3xl">{t.categories.title}</h2>
-        <a href={href("/categories")} className="shrink-0 text-sm font-semibold text-plum-600">
-          {t.categories.all} <span className="inline-block rtl:rotate-180" aria-hidden="true">→</span>
-        </a>
-      </div>
-      <ul className="swipe-row -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-6 md:overflow-visible md:px-0">
-        {stories.map((s, i) => (
-          <li key={s.key} className="w-[8.25rem] shrink-0 md:w-auto">
-            <a
-              href={s.href}
-              className="story lift group flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-line bg-surface shadow-[0_8px_24px_-16px_rgb(23_10_16/0.35)]"
-              style={{ animationDelay: `${i * 60}ms` }}
-            >
-              <span className="relative block aspect-square overflow-hidden">
-                <StoryArt kind={s.art ?? s.key} />
-                {s.key === "promo" && (
-                  <span className="absolute start-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-bold text-plum-700">%</span>
-                )}
-              </span>
-              <span className="flex flex-1 flex-col justify-between gap-1 px-2.5 pb-2.5 pt-2">
-                {/* two lines kept for every name: all cards (and the loading ones) the same height */}
-                <span className="line-clamp-2 min-h-[2.25rem] text-[13px] font-semibold leading-snug">{s.label}</span>
-                {s.count != null && (
-                  <span className="text-[11px] text-ink-soft">
-                    {t.categories.products(s.count)}
-                  </span>
-                )}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-/* ───────── The 3 promises: a dark band ───────── */
-
-export function PromiseBand() {
-  const { t, href } = useLocale();
-  return (
-    <div className="mx-auto max-w-6xl px-4">
-      <ul className="grid grid-cols-3 overflow-hidden rounded-[1.4rem] bg-noir text-white">
-        {t.trust.slice(0, 3).map((item, i) => {
-          const Icon = TRUST_ICONS[item.icon as keyof typeof TRUST_ICONS];
-          return (
-            <li key={item.title} className={i ? "border-s border-white/10" : ""}>
-              <a
-                href={href(item.icon === "truck" ? "/p/livraison-retours" : item.icon === "swap" ? "/p/livraison-retours" : "/p/cgv")}
-                className="flex h-full flex-col items-center gap-1 px-2 py-3 text-center transition hover:bg-white/5 md:flex-row md:justify-center md:gap-3 md:py-5"
-              >
-                <Icon size={22} className="shrink-0 text-[#e9c98f]" />
-                <span className="text-[11.5px] font-semibold leading-tight md:text-sm">{item.title}</span>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
+const IG = "https://www.instagram.com/el_fatina_/";
 
 /* ───────── Lookbook: the shop's Instagram posts ───────── */
 
-const LOOKS = [
-  "/ig/pyjamas-rose.jpg",
-  "/ig/ensemble-maille.jpg",
-  "/ig/pantalons-pyjama.jpg",
-  "/ig/sweat-noir.jpg",
-  "/ig/chaussettes.jpg",
-  "/ig/boutique.jpg",
-];
+// El Fatina's own Instagram photos go in apps/web/public/ig/ and are listed here (6 square
+// JPGs, the first shown large). Empty: the Instagram block shows no photo grid.
+const LOOKS: string[] = [];
 
 /** The shop's Instagram photos (shown inside the Instagram card). */
 export function LookbookGrid() {
+  if (LOOKS.length === 0) return null;
   return (
     <ul className="grid grid-cols-3 gap-1.5 md:grid-cols-6 md:gap-3">
         {LOOKS.map((src, i) => (
@@ -235,8 +45,7 @@ export function ContestCard() {
     <section className="mx-auto max-w-6xl px-4 py-6">
       <Reveal>
         <a href={IG} target="_blank" rel="noopener noreferrer" className="lift group relative flex items-center gap-4 overflow-hidden rounded-[1.75rem] bg-noir p-5 text-white md:p-8">
-          <img src="/ig/pyjamas-rose.jpg" alt="" loading="lazy" className="absolute inset-y-0 end-0 h-full w-1/2 object-cover opacity-45 [mask-image:linear-gradient(to_left,black,transparent)] rtl:[mask-image:linear-gradient(to_right,black,transparent)]" />
-          <span className="relative grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#e9c98f] via-rose-500 to-plum-600 text-2xl shadow-lg transition group-hover:scale-105">🎁</span>
+          <span className="relative grid size-14 shrink-0 place-items-center bg-ink text-2xl transition group-hover:scale-105">🎁</span>
           <span className="relative min-w-0 flex-1">
             <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-rose-300">{C.eyebrow}</span>
             <span className="heading-display mt-0.5 block text-xl leading-snug md:text-3xl">{C.title}</span>

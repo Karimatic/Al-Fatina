@@ -1,5 +1,5 @@
 /**
- * The physical shop in Boumerdès: where it is, when it is open, and whether it is open now
+ * The physical shop (off by default: El Fatina sells online): where it is, when it is open, and whether it is open now
  * (Algiers time, UTC+1, no daylight saving). Edited in Admin → Paramètres → Contact & réseaux.
  */
 
@@ -23,15 +23,15 @@ export interface BoutiqueDTO {
 }
 
 export const DEFAULT_BOUTIQUE: BoutiqueDTO = {
-  enabled: true,
-  addressFr: "Dellys, Laqhaoui · à côté du tribunal",
-  addressAr: "دلس، لقهاوي · بجانب المحكمة",
+  enabled: false,
+  addressFr: "",
+  addressAr: "",
   /** Google plus code of the shop's door */
-  mapQuery: "WV9Q+4RW, Dellys",
+  mapQuery: "",
   hours: Array.from({ length: 7 }, () => ({ open: "09:30", close: "20:00" })),
   noteFr: "",
   noteAr: "",
-  showOnProducts: true,
+  showOnProducts: false,
 };
 
 export const DAY_NAMES = {

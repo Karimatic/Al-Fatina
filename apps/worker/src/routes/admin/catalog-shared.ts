@@ -3,7 +3,7 @@
  * sees purchase prices, and which photo files are no longer used.
  */
 import { z } from "zod";
-import { hasPermission } from "@henine/shared";
+import { hasPermission } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 
 export const text = (max: number) => z.string().trim().max(max);

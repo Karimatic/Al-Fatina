@@ -4,7 +4,7 @@
  * The person opens the link, chooses a password, then confirms with a code sent by email.
  *
  *   npm run admin:invite -- --email ilyas@example.com --name Ilyas --role owner
- *   npm run admin:invite -- --email ilyas@example.com --name Ilyas --role owner --remote --origin https://henine.xxx.workers.dev
+ *   npm run admin:invite -- --email ilyas@example.com --name Ilyas --role owner --remote --origin https://elfatina.xxx.workers.dev
  *
  * Roles: owner, manager, confirmation, fulfilment, marketing, readonly
  */
@@ -50,7 +50,7 @@ const sql = [
 
 const workerDir = join(dirname(fileURLToPath(import.meta.url)), "../apps/worker");
 // SQL goes through a temp file: passing it as an argument breaks on Windows shells
-const dir = mkdtempSync(join(tmpdir(), "henine-invite-"));
+const dir = mkdtempSync(join(tmpdir(), "elfatina-invite-"));
 const file = join(dir, "invite.sql");
 writeFileSync(file, sql);
 try {

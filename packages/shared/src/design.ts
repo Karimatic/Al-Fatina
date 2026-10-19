@@ -7,35 +7,35 @@
 /** Home page building blocks, in their default order. */
 export const HOME_SECTIONS = [
   "hero",
-  "promise",
+  "new",
   "stories",
   "drop",
   "flash",
-  "new",
+  "promos",
   "banners",
   "featured",
-  "promos",
-  "best",
+  "promise",
+  "reviews",
   "instagram",
   "contest",
-  "reviews",
   "recent",
   "faq",
   "newsletter",
+  "best",
 ] as const;
 export type HomeSectionKey = (typeof HOME_SECTIONS)[number];
 
 export const HOME_SECTION_LABEL: Record<HomeSectionKey, { fr: string; icon: string }> = {
-  stories: { fr: "Catégories (cartes)", icon: "🗂️" },
+  stories: { fr: "Catégories (grandes bannières)", icon: "🗂️" },
   hero: { fr: "Grande photo (hero)", icon: "🖼️" },
   promise: { fr: "Nos promesses", icon: "✅" },
   drop: { fr: "Lancement de collection", icon: "🚀" },
   flash: { fr: "Vente flash", icon: "⚡" },
-  new: { fr: "Nouveautés", icon: "🆕" },
+  new: { fr: "Tendances (carrousel)", icon: "🆕" },
   banners: { fr: "Bannières", icon: "🏷️" },
   featured: { fr: "Produits mis en avant", icon: "⭐" },
-  promos: { fr: "Promos", icon: "💸" },
-  best: { fr: "Les plus vendus", icon: "🔥" },
+  promos: { fr: "La sélection (onglets)", icon: "💸" },
+  best: { fr: "À explorer", icon: "🧭" },
   instagram: { fr: "Instagram (photos + abonnement)", icon: "📸" },
   contest: { fr: "Concours", icon: "🎁" },
   reviews: { fr: "Avis des clientes", icon: "💬" },
@@ -71,7 +71,7 @@ export const OWN_FONT = "upload";
 
 /** Font pairs: Latin display + Latin text + Arabic text + Arabic display (all self-hosted). */
 export const FONT_PRESETS = {
-  classic: { label: "Classique (Playfair)", display: null, sans: null, arabic: null, arabicDisplay: null },
+  classic: { label: "El Fatina (Jost)", display: null, sans: null, arabic: null, arabicDisplay: null },
   elegant: { label: "Élégant (Cormorant)", display: "Cormorant Garamond", sans: "Jost", arabic: "Noto Kufi Arabic", arabicDisplay: "Amiri" },
   modern: { label: "Moderne (Montserrat)", display: "Montserrat", sans: "Inter", arabic: "Cairo", arabicDisplay: "Cairo" },
   soft: { label: "Doux (Lora)", display: "Lora", sans: "Nunito", arabic: "Almarai", arabicDisplay: "Reem Kufi" },
@@ -91,7 +91,7 @@ export interface FontChoice {
   arabic: string;
   arabicDisplay: string;
 }
-export const DEFAULT_FONTS: FontChoice = { display: "Playfair Display", sans: "DM Sans", arabic: "Tajawal", arabicDisplay: "El Messiri" };
+export const DEFAULT_FONTS: FontChoice = { display: "Jost", sans: "Jost", arabic: "Tajawal", arabicDisplay: "Tajawal" };
 
 /** The 4 fonts a design uses: its preset's, or its own choice ("Personnalisé"). */
 export function designFonts(d: Pick<DesignDTO, "font" | "customFont">): FontChoice {
@@ -102,7 +102,8 @@ export function designFonts(d: Pick<DesignDTO, "font" | "customFont">): FontChoi
 
 /** Ready-made colour themes. `accent` carries white text (buttons): every preset is ≥ 4.5:1. */
 export const COLOR_PRESETS = [
-  { key: "plum", label: "Prune (actuel)", accent: "#8e1048", soft: "#fbe4ec" },
+  { key: "soie", label: "Soie (El Fatina)", accent: "#222222", soft: "#f7f3ee" },
+  { key: "plum", label: "Prune", accent: "#8e1048", soft: "#fbe4ec" },
   { key: "rose", label: "Rose poudré", accent: "#b03a6a", soft: "#fdeaf1" },
   { key: "noir", label: "Noir & or", accent: "#1f1a17", soft: "#f4ede4" },
   { key: "emeraude", label: "Émeraude", accent: "#0f6b52", soft: "#e2f3ec" },
@@ -150,9 +151,9 @@ export interface DesignDTO {
 
 export const DEFAULT_DESIGN: DesignDTO = {
   logo: null,
-  colors: { accent: "#8e1048", soft: "#fbe4ec" },
+  colors: { accent: "#222222", soft: "#f7f3ee" },
   font: "classic",
-  customFont: { display: "Playfair Display", sans: "DM Sans", arabic: "Tajawal", arabicDisplay: "El Messiri" },
+  customFont: { display: "Jost", sans: "Jost", arabic: "Tajawal", arabicDisplay: "Tajawal" },
   fontFile: null,
   fontFileName: null,
   heroImage: null,

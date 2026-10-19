@@ -28,12 +28,15 @@ describe("shop-wide write budget of the counters", () => {
     expect(await rows(db, "analytics_daily")).toBeGreaterThan(0);
   });
 
-  it("past it, visits and error reports answer without writing", async () => {
+  it("past it, visits, error reports and saved checkouts answer without writing", async () => {
     const { db, post } = setup(false);
     expect((await post("/visit", { source: "instagram" })).status).toBe(204);
     expect((await post("/log", { message: "boom", url: "/x" })).status).toBe(200);
+    const cart = await post("/carts", { id: crypto.randomUUID(), lines: [{ variantId: 1, qty: 1 }], phone: "0554650718", channel: "web", locale: "ar" });
+    expect(cart.status).toBe(200);
     expect(await rows(db, "analytics_daily")).toBe(0);
     expect(await rows(db, "error_events")).toBe(0);
+    expect(await rows(db, "carts")).toBe(0);
   });
 });
 

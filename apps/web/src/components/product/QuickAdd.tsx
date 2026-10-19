@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { buzz } from "@/lib/haptics";
 import { createPortal } from "react-dom";
-import type { ProductCardDTO, ProductDetailDTO } from "@henine/shared";
+import type { ProductCardDTO, ProductDetailDTO } from "@elfatina/shared";
 import { Price, ProductImage, Spinner } from "@/components/ui/kit";
 import { apiGet } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
@@ -22,7 +22,7 @@ export function QuickAddButton({ p }: { p: ProductCardDTO }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t.quickAdd.open}
-        className="absolute bottom-2 end-2 grid size-10 place-items-center rounded-full bg-surface/95 text-xl font-light text-ink shadow-md transition hover:bg-ink hover:text-on-ink active:scale-90"
+        className="absolute bottom-2 end-2 grid size-9 place-items-center rounded-full bg-white/90 text-xl font-light text-ink transition hover:bg-ink hover:text-white active:scale-90"
       >
         +
       </button>

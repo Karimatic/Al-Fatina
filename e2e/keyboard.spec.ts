@@ -8,8 +8,8 @@ import { expect, test } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     try {
-      localStorage.setItem("henine.pwaPrompt", "1");
-      sessionStorage.setItem("henine.assistantHint", "1");
+      localStorage.setItem("elfatina.pwaPrompt", "1");
+      sessionStorage.setItem("elfatina.assistantHint", "1");
     } catch {}
   });
 });

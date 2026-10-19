@@ -4,7 +4,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { assessRisk, cleanText, customerSegment, segmentSql, EXTRA_SEGMENTS, extraSegmentSql, type CustomerSegment } from "@henine/shared";
+import { assessRisk, cleanText, customerSegment, segmentSql, EXTRA_SEGMENTS, extraSegmentSql, type CustomerSegment } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { body, HttpError, intParam } from "../../lib/http";
@@ -19,7 +19,7 @@ export const customerRoutes = new Hono<AppEnv>();
 
 /**
  * Customers (identified by phone). Segments come from real order history with the same
- * rules as the risk score (see @henine/shared risk.ts), so filters and badges always agree.
+ * rules as the risk score (see @elfatina/shared risk.ts), so filters and badges always agree.
  */
 customerRoutes.get("/customers", requirePermission("customers.view"), async (c) => {
   const q = (c.req.query("q") ?? "").trim();
@@ -201,6 +201,7 @@ customerRoutes.delete("/customers/:id", requireOwner, async (c) => {
           `UPDATE orders SET name = 'Cliente effacée', phone = '', address = NULL, customer_note = NULL, internal_note = NULL,
                   ip_hash = NULL, ua_short = NULL, referrer = NULL WHERE customer_id = ?1 OR phone = ?2`,
         ).bind(id, cust.phone),
+        c.env.DB.prepare("DELETE FROM carts WHERE phone = ?").bind(cust.phone),
         c.env.DB.prepare("DELETE FROM contact_messages WHERE phone = ?").bind(cust.phone),
         c.env.DB.prepare("DELETE FROM stock_alerts WHERE phone = ?").bind(cust.phone),
       ]

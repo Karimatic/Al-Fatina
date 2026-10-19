@@ -1,8 +1,8 @@
-# Henine Boutique
+# El Fatina
 
-[![CI](https://github.com/Karimatic/Henine-Boutique/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Karimatic/Henine-Boutique/actions/workflows/ci.yml)
+[![CI](https://github.com/Karimatic/El-Fatina/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Karimatic/El-Fatina/actions/workflows/ci.yml)
 
-Storefront + admin panel for **Henine Boutique** (Boumerdès), running entirely on the Cloudflare free tier.
+Storefront + admin panel for **El Fatina** (online women's clothing, Algeria), running entirely on the Cloudflare free tier.
 The full product/architecture plan is in [`PLAN.md`](PLAN.md).
 
 ```
@@ -19,7 +19,7 @@ Every push to `main` runs, on a fresh GitHub machine: `npm ci` → `npm run type
 `npm test` → `npm run build` → `npm run test:e2e` (the badge above). To check it yourself:
 
 ```sh
-git clone https://github.com/Karimatic/Henine-Boutique && cd Henine-Boutique
+git clone https://github.com/Karimatic/El-Fatina && cd El-Fatina
 npm ci              # once, at the root (never `npm install` inside apps/… or packages/…)
 npm run typecheck   # 5 workspaces, 0 errors
 npm test            # 30 test files: worker, db, shared
@@ -86,18 +86,18 @@ Admin → **Paramètres** (⚙️ in the top bar) → **Connexions → Telegram*
 3. **Envoyer un message test**. Every new order now arrives with ✅ Confirmer / 📵 Injoignable / ❌ Annuler buttons.
 
 Locally the buttons work while the admin panel is open (it polls Telegram). In production click **Activer les boutons** (webhook).
-Bot commands: `/id` (your Telegram ID, to link it in Équipe), `/jour` (today's numbers), `/cmd HN-XXXXXX`.
+Bot commands: `/id` (your Telegram ID, to link it in Équipe), `/jour` (today's numbers), `/cmd EF-XXXXXX`.
 
 ## First deploy (one-time Cloudflare setup)
 
 1. `npx wrangler login`
-2. `npx wrangler d1 create henine-boutique-db --location weur` → paste the `database_id` into `apps/worker/wrangler.jsonc`
-3. `npx wrangler r2 bucket create henine-media`
+2. `npx wrangler d1 create el-fatina-db --location weur` → paste the `database_id` into `apps/worker/wrangler.jsonc`
+3. `npx wrangler r2 bucket create el-fatina-media`
 4. Secrets (from `apps/worker`): `npx wrangler secret put <NAME>` for `IP_HASH_SALT`, `TRACK_TOKEN_PEPPER`, `AUTH_PEPPER`,
    `SETTINGS_KEY` (32 random bytes, base64). Email is optional: `MAIL_API_KEY` as a secret with `MAIL_PROVIDER` (`resend`) and `MAIL_FROM`
    in `wrangler.jsonc` vars (without it, admins sign in with an authenticator app).
 5. Set `PUBLIC_ORIGIN` (your `*.workers.dev` URL for now) in `wrangler.jsonc` vars.
-6. `npm run migrate:remote --workspace @henine/worker`, `npm run seed:remote --workspace @henine/worker`, then `npm run deploy`
+6. `npm run migrate:remote --workspace @elfatina/worker`, `npm run seed:remote --workspace @elfatina/worker`, then `npm run deploy`
 7. Create the owner: `npm run admin:invite -- --email <email> --name Ilyas --role owner --remote --origin https://<your-url>`
 8. Optional extra wall: Cloudflare Access on `/admin*` (set `ACCESS_AUD` + `ACCESS_TEAM_DOMAIN`).
 
@@ -108,7 +108,7 @@ runs only when the repository variable `DEPLOY_ENABLED` is `true` and the `CLOUD
 
 - **Wilayas:** 69 (loi 26-06, décret 26-206). New wilayas 59–69 carry `parent_code`, because carriers still using the 58-wilaya layout ship to the parent.
 - **Shipping prices** in the seed are **estimates from Boumerdès by zone**. Replace them with the real ZR Express grid (Admin → Contenu → Livraison) before launch.
-- Regenerate the geo seed with `npm run seed:geo --workspace @henine/db`.
+- Regenerate the geo seed with `npm run seed:geo --workspace @elfatina/db`.
 
 ## Licence
 

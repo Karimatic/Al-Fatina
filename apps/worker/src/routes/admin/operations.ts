@@ -15,7 +15,7 @@ import {
   isEditable,
   manualDiscountAmount,
   type OrderStatus,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { resolveAlertStmt } from "../../lib/alerts";

@@ -19,7 +19,7 @@ function fakeEnv(order: Record<string, unknown>): Env {
 }
 
 const base = {
-  id: 7, public_code: "HN-PHYVGE", status: "nouvelle", channel: "express", name: "Karim", phone: "0793672479", wilaya_code: 35,
+  id: 7, public_code: "EF-PHYVGE", status: "nouvelle", channel: "express", name: "Karim", phone: "0793672479", wilaya_code: 35,
   wilaya_fr: "Boumerdès", commune_fr: "Dellys", commune_text: null, delivery_type: "domicile", address: "Sidi El Medjni",
   subtotal: 2500, discount_total: 0, shipping_price: 400, total: 2900, coupon_code: null, customer_note: null, risk_score: 0,
   telegram_message_id: 55, orders_count: 0, returned_count: 0, delivered_count: 0, is_blacklisted: 0, prev_orders: 0, prev_cancelled: 6,
@@ -56,7 +56,7 @@ describe("Telegram order message", () => {
     expect(rows.flat().some((b) => b.callback_data?.startsWith("v:"))).toBe(false);
     const wa = rows.flat().find((b) => b.url)!;
     expect(wa.url!.startsWith("https://wa.me/213793672479?text=")).toBe(true);
-    expect(decodeURIComponent(wa.url!.split("text=")[1]!)).toContain("HN-PHYVGE");
+    expect(decodeURIComponent(wa.url!.split("text=")[1]!)).toContain("EF-PHYVGE");
     // no admin link button on a non-https origin (Telegram rejects such URLs)
     expect(rows.flat().some((b) => b.url?.includes("/admin/"))).toBe(false);
   });

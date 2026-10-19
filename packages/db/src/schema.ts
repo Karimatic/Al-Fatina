@@ -288,7 +288,7 @@ export const orders = sqliteTable(
     publicCode: text("public_code").notNull().unique(),
     trackTokenHash: text("track_token_hash").notNull(),
     idempotencyKey: text("idempotency_key").notNull().unique(),
-    status: text("status").notNull().default("nouvelle"), // see @henine/shared ORDER_STATUSES
+    status: text("status").notNull().default("nouvelle"), // see @elfatina/shared ORDER_STATUSES
     channel: text("channel", { enum: ["web", "express", "instagram", "facebook", "whatsapp", "boutique", "telephone"] })
       .notNull()
       .default("web"),
@@ -332,7 +332,7 @@ export const orders = sqliteTable(
     receivedAt: integer("received_at"),
     receiptIssue: text("receipt_issue"),
     riskScore: integer("risk_score").notNull().default(0),
-    /** order-level risk signals captured at creation (see RISK_FLAGS in @henine/shared) */
+    /** order-level risk signals captured at creation (see RISK_FLAGS in @elfatina/shared) */
     riskFlags: text("risk_flags", { mode: "json" }).$type<string[]>(),
     /** why it was cancelled / returned (OUTCOME_REASONS) */
     outcomeReason: text("outcome_reason"),
@@ -348,7 +348,7 @@ export const orders = sqliteTable(
     utmMedium: text("utm_medium"),
     utmCampaign: text("utm_campaign"),
     referrer: text("referrer"),
-    /** where the order came from (ORDER_SOURCES in @henine/shared): campaign link, ad click, referrer or the team's channel */
+    /** where the order came from (ORDER_SOURCES in @elfatina/shared): campaign link, ad click, referrer or the team's channel */
     source: text("source"),
     /** the store page where that visit started */
     landingPath: text("landing_path"),
@@ -471,6 +471,30 @@ export const alerts = sqliteTable(
     resolvedBy: text("resolved_by"),
   },
   (t) => [index("alerts_open_idx").on(t.resolvedAt, t.priority, t.createdAt)],
+);
+
+export const carts = sqliteTable(
+  "carts",
+  {
+    id: text("id").primaryKey(), // client-generated uuid
+    items: text("items", { mode: "json" }).$type<{ variantId: number; qty: number }[]>().notNull(),
+    phone: text("phone"),
+    name: text("name"),
+    wilayaCode: integer("wilaya_code"),
+    communeId: integer("commune_id"),
+    deliveryType: text("delivery_type"),
+    channel: text("channel"),
+    locale: text("locale"),
+    value: integer("value").notNull().default(0),
+    /** details | address | delivery | ready */
+    step: text("step"),
+    consent: bool("consent").notNull().default(false),
+    recoveredOrderId: integer("recovered_order_id"),
+    lastContactedAt: integer("last_contacted_at"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("carts_updated_idx").on(t.updatedAt)],
 );
 
 /* ───────────────────────────── Marketing ───────────────────────────── */

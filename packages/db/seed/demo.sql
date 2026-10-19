@@ -360,7 +360,7 @@ La taille ne vous va pas ? **Contactez-nous dans les 48 h** suivant la réceptio
 
 ## Notre boutique
 
-Vous pouvez aussi essayer et acheter sur place, dans notre boutique à **Dellys (Laqhaoui, à côté du tribunal)**, ouverte **7j/7**. Voir [l''adresse et les horaires](/fr/boutique).', '## التوصيل
+Nous sommes une boutique **100 % en ligne** : commandez sur le site **7j/7**, ou écrivez-nous depuis la page [Contact](/fr/contact).', '## التوصيل
 
 نوصل إلى **69 ولاية** في الجزائر مع شريكنا **ZR Express**.
 
@@ -395,10 +395,10 @@ Vous pouvez aussi essayer et acheter sur place, dans notre boutique à **Dellys 
 
 ## محلنا
 
-يمكنك أيضًا القياس والشراء مباشرة في محلنا في **دلس (لقهاوي، بجانب المحكمة)**، المفتوح **7 أيام في الأسبوع**. شاهدي [العنوان وأوقات العمل](/boutique).', 1);
+نحن متجر **أونلاين 100%**: اطلبي من الموقع **7 أيام في الأسبوع**، أو راسلينا من صفحة [تواصلي معنا](/contact).', 1);
 INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (2, 'cgv', 'Conditions générales de vente', 'الشروط العامة للبيع', '## 1. Objet
 
-Ces conditions s''appliquent à toutes les commandes passées sur le site Henine Boutique. Passer commande signifie les accepter.
+Ces conditions s''appliquent à toutes les commandes passées sur le site El Fatina. Passer commande signifie les accepter.
 
 ## 2. Produits
 
@@ -435,9 +435,9 @@ Vos informations servent uniquement à traiter votre commande : voir la [Politiq
 
 ## 9. Contact
 
-Pour toute question : la page [Contact](/fr/contact), ou notre boutique à Dellys. Ces conditions sont soumises au droit algérien.', '## 1. الموضوع
+Pour toute question : la page [Contact](/fr/contact) ou notre Instagram. Ces conditions sont soumises au droit algérien.', '## 1. الموضوع
 
-تنطبق هذه الشروط على كل الطلبات عبر موقع Henine Boutique. إتمام الطلب يعني الموافقة عليها.
+تنطبق هذه الشروط على كل الطلبات عبر موقع El Fatina. إتمام الطلب يعني الموافقة عليها.
 
 ## 2. المنتجات
 
@@ -474,8 +474,8 @@ Pour toute question : la page [Contact](/fr/contact), ou notre boutique à Delly
 
 ## 9. التواصل
 
-لأي سؤال: صفحة [تواصلي معنا](/contact)، أو محلنا في دلس. تخضع هذه الشروط للقانون الجزائري.', 1);
-INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (3, 'confidentialite', 'Politique de confidentialité', 'سياسة الخصوصية', 'Henine Boutique protège vos données conformément à la **loi 18-07** relative à la protection des personnes physiques dans le traitement des données à caractère personnel.
+لأي سؤال: صفحة [تواصلي معنا](/contact) أو حسابنا على إنستغرام. تخضع هذه الشروط للقانون الجزائري.', 1);
+INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (3, 'confidentialite', 'Politique de confidentialité', 'سياسة الخصوصية', 'El Fatina protège vos données conformément à la **loi 18-07** relative à la protection des personnes physiques dans le traitement des données à caractère personnel.
 
 ## Ce que nous collectons
 
@@ -504,7 +504,7 @@ Votre panier, vos favoris et vos préférences (langue, mode sombre) sont enregi
 
 ## Vos droits
 
-Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nous écrivant depuis la page [Contact](/fr/contact).', 'تحمي Henine Boutique معطياتك وفقًا **للقانون 18-07** المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
+Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nous écrivant depuis la page [Contact](/fr/contact).', 'تحمي El Fatina معطياتك وفقًا **للقانون 18-07** المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
 
 ## ما الذي نجمعه
 
@@ -534,9 +534,9 @@ Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nou
 ## حقوقك
 
 يمكنك طلب **الاطلاع على معطياتك أو تصحيحها أو حذفها** بمراسلتنا من صفحة [تواصلي معنا](/contact).', 1);
-INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (4, 'a-propos', 'À propos', 'من نحن', '## Henine Boutique
+INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (4, 'a-propos', 'À propos', 'من نحن', '## El Fatina
 
-**L''élégance et la qualité au meilleur prix.** Henine Boutique, c''est une boutique de mode féminine née à Dellys, dans la wilaya de Boumerdès : robes, djebbas et pyjamas choisis pour leur tombé, leur confort et leurs finitions.
+**L''élégance et la qualité au meilleur prix.** El Fatina, c''est une boutique de mode féminine en ligne, livrée partout en Algérie : des pièces choisies pour leur tombé, leur confort et leurs finitions.
 
 ## Notre promesse
 
@@ -547,11 +547,11 @@ INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is
 
 ## Venez nous voir
 
-Notre boutique vous accueille **7j/7** à **Dellys (Laqhaoui, à côté du tribunal)**. Venez essayer vos pièces préférées : [adresse et horaires](/fr/boutique).
+Commandez en ligne **7j/7**, payez à la livraison, et échangez si la taille ne convient pas : [livraison et retours](/fr/p/livraison-retours).
 
-Suivez nos nouveautés et nos essayages en vidéo sur Instagram.', '## Henine Boutique
+Suivez nos nouveautés et nos essayages en vidéo sur Instagram.', '## El Fatina
 
-**الأناقة والجودة بأفضل سعر.** Henine Boutique محل أزياء نسائية وُلد في دلس، ولاية بومرداس: فساتين، جبات وبيجامات نختارها لانسدالها وراحتها وجودة تفاصيلها.
+**الأناقة والجودة بأفضل سعر.** الفاتنة El Fatina متجر أزياء نسائية أونلاين يوصل إلى كل أنحاء الجزائر: قطع نختارها لانسدالها وراحتها وجودة تفاصيلها.
 
 ## وعدنا
 
@@ -562,12 +562,12 @@ Suivez nos nouveautés et nos essayages en vidéo sur Instagram.', '## Henine Bo
 
 ## زوري محلنا
 
-محلنا يستقبلك **7 أيام في الأسبوع** في **دلس (لقهاوي، بجانب المحكمة)**. تعالي وقيسي قطعك المفضلة: [العنوان وأوقات العمل](/boutique).
+اطلبي أونلاين **7 أيام في الأسبوع**، ادفعي عند الاستلام، وبدّلي إذا لم يناسبك المقاس: [التوصيل والإرجاع](/p/livraison-retours).
 
 تابعي جديدنا وقياساتنا بالفيديو على إنستغرام.', 1);
 INSERT OR REPLACE INTO links (id, kind, slug, label_fr, label_ar, target, icon, sort, is_active) VALUES (1, 'bio', NULL, '🛍️ Voir la boutique', '🛍️ تصفحي المتجر', '/', 'shop', 0, 1);
 INSERT OR REPLACE INTO links (id, kind, slug, label_fr, label_ar, target, icon, sort, is_active) VALUES (2, 'bio', NULL, '📦 Suivre ma commande', '📦 تتبع طلبي', '/suivi', 'package', 1, 1);
-INSERT OR REPLACE INTO links (id, kind, slug, label_fr, label_ar, target, icon, sort, is_active) VALUES (3, 'bio', NULL, '📸 Instagram', '📸 إنستغرام', 'https://www.instagram.com/henine.boutique/', 'instagram', 2, 1);
+INSERT OR REPLACE INTO links (id, kind, slug, label_fr, label_ar, target, icon, sort, is_active) VALUES (3, 'bio', NULL, '📸 Instagram', '📸 إنستغرام', 'https://www.instagram.com/el_fatina_/', 'instagram', 2, 1);
 INSERT OR REPLACE INTO links (id, kind, slug, label_fr, label_ar, target, icon, sort, is_active) VALUES (4, 'bio', NULL, '📍 Nous contacter', '📍 تواصلي معنا', '/contact', 'pin', 3, 1);
 INSERT OR REPLACE INTO links (id, kind, slug, label_fr, label_ar, target, icon, sort, is_active) VALUES (5, 'short', 'insta', 'Instagram bio', 'Instagram bio', '/?utm_source=instagram&utm_medium=bio', NULL, 4, 1);
 INSERT OR IGNORE INTO coupons (code, type, value, min_subtotal, is_active) VALUES ('BIENVENUE10', 'percent', 10, 3000, 1);

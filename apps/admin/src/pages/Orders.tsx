@@ -9,7 +9,7 @@ import {
   type RiskAssessment,
   type RiskLevel,
   ORDER_STATUSES,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -531,7 +531,7 @@ function OrderSheet({ id, onClose }: { id: number | null; onClose: () => void })
   }
 
   const waText = o
-    ? `Bonjour ${o.name} 🌸 Ici Henine Boutique. Nous confirmons votre commande ${o.public_code} (${da(o.total)}), livraison ${o.delivery_type === "bureau" ? "au bureau" : "à domicile"} à ${o.wilaya_fr}. Merci !`
+    ? `Bonjour ${o.name} ✨ Ici El Fatina. Nous confirmons votre commande ${o.public_code} (${da(o.total)}), livraison ${o.delivery_type === "bureau" ? "au bureau" : "à domicile"} à ${o.wilaya_fr}. Merci !`
     : "";
 
   return (

@@ -11,6 +11,7 @@ export const PERMISSIONS = [
   "customers.view",
   "customers.edit",
   "customers.export",
+  "carts.view",
   "products.view",
   "products.edit",
   "stock.view",
@@ -49,7 +50,7 @@ export const ROLE_PRESETS: Record<string, { name: string; permissions: readonly 
   },
   confirmation: {
     name: "Confirmatrice",
-    permissions: ["dashboard.view", "orders.view", "orders.edit", "orders.confirm", "customers.view", "products.view", "stock.view"],
+    permissions: ["dashboard.view", "orders.view", "orders.edit", "orders.confirm", "customers.view", "carts.view", "products.view", "stock.view"],
   },
   fulfilment: {
     name: "Préparation / Stock",

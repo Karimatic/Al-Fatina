@@ -84,7 +84,7 @@ describe("codes", () => {
     const codes = new Set(Array.from({ length: 500 }, newOrderCode));
     expect(codes.size).toBe(500);
     for (const c of codes) expect(isOrderCode(c)).toBe(true);
-    expect(isOrderCode("HN-ILOU00")).toBe(false);
+    expect(isOrderCode("EF-ILOU00")).toBe(false);
   });
 
   it("compares secrets in constant time", () => {
@@ -136,7 +136,7 @@ describe("createOrderInput", () => {
 
 describe("isSafeLink", () => {
   it("accepts site pages and https addresses", () => {
-    for (const l of ["/boutique", "/fr/c/robes?x=1", "https://wa.me/213555000000", "https://www.instagram.com/henine"]) expect(isSafeLink(l)).toBe(true);
+    for (const l of ["/boutique", "/fr/c/robes?x=1", "https://wa.me/213555000000", "https://www.instagram.com/elfatina"]) expect(isSafeLink(l)).toBe(true);
   });
   it("refuses other websites in disguise and other schemes", () => {
     for (const l of ["//evil.example", "/\\evil.example", "http://evil.example", "javascript:alert(1)", "data:text/html,x", "https://", " /x"]) expect(isSafeLink(l)).toBe(false);

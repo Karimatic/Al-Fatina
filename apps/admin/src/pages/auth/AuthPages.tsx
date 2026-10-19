@@ -121,7 +121,7 @@ export function LoginPage() {
         title={challenge.totp ? tr("Code de votre application") : tr("Vérification par email")}
         subtitle={
           challenge.totp ? (
-            tr("Ouvrez votre application d'authentification (Google Authenticator…) et tapez le code à 6 chiffres de Henine Boutique.")
+            tr("Ouvrez votre application d'authentification (Google Authenticator…) et tapez le code à 6 chiffres de El Fatina.")
           ) : (
             <>
               {tr("Nous avons envoyé un code à 6 chiffres à")} <b>{challenge.hint}</b>.
@@ -163,7 +163,7 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout title={tr("Connexion")} subtitle={tr("Espace réservé à l'équipe Henine.")}>
+    <AuthLayout title={tr("Connexion")} subtitle={tr("Espace réservé à l'équipe El Fatina.")}>
       <form onSubmit={submitPassword} className="space-y-4">
         <TextField label={tr("Email")} type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
         <TextField label={tr("Mot de passe")} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -249,7 +249,7 @@ export function InvitationPage() {
             <b>1.</b> {tr("Installez une application d'authentification gratuite : Google Authenticator ou Microsoft Authenticator.")}
           </li>
           <li>
-            <b>2.</b> {tr("Ajoutez Henine Boutique :")}
+            <b>2.</b> {tr("Ajoutez El Fatina :")}
             <a href={uri} className="mt-2 flex h-11 items-center justify-center rounded-xl bg-plum-600 px-4 font-semibold text-white">
               {tr("📲 Ajouter à mon application")}
             </a>
@@ -315,7 +315,7 @@ export function InvitationPage() {
     );
   }
   return (
-    <AuthLayout title={tr("Bienvenue {0} 🌸", { 0: info.name })} subtitle={<>{tr("Vous rejoignez l'équipe en tant que")} <b>{info.role}</b>{tr(". Choisissez votre mot de passe pour")} <b>{info.email}</b>.</>}>
+    <AuthLayout title={tr("Bienvenue {0} ✨", { 0: info.name })} subtitle={<>{tr("Vous rejoignez l'équipe en tant que")} <b>{info.role}</b>{tr(". Choisissez votre mot de passe pour")} <b>{info.email}</b>.</>}>
       <NewPasswordForm
         email={info.email}
         submitLabel="Activer mon compte"

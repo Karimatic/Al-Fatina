@@ -24,7 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { api } from "../api";
-import { Blossom } from "../brand";
+import { BrandMark } from "../brand";
 import { ago, CHANNEL_LABEL, da, date } from "../lib/format";
 import { useCan, useMe } from "../Shell";
 import { Card, ErrorState, ListSkeleton, StatusBadge } from "../ui";
@@ -105,6 +105,7 @@ function todos(a: DashboardData["attention"]): Todo[] {
     { key: "stale_preparing", icon: "📦", label: tr("En préparation depuis plus de 48 h"), hint: tr("à expédier"), count: a.stale_preparing, to: "/commandes", search: { attention: "stale_preparing" }, perm: "orders.view" },
     { key: "stale_shipped", icon: "🚚", label: tr("Expédiées depuis plus de 7 jours"), hint: tr("vérifier le suivi ZR Express"), count: a.stale_shipped, to: "/commandes", search: { attention: "stale_shipped" }, perm: "orders.view" },
     { key: "returns", icon: "↩️", label: tr("Retours à réceptionner"), hint: tr("remettre en stock à l'arrivée"), count: a.returns, to: "/commandes", search: { attention: "returns" }, perm: "orders.view" },
+    { key: "abandoned", icon: "🛒", label: tr("Paniers abandonnés (24 h)"), hint: a.abandonedValue ? tr("{0} non commandés", { 0: da(a.abandonedValue) }) : undefined, count: a.abandoned, to: "/paniers", perm: "carts.view" },
     { key: "restocked", icon: "🔔", label: tr("De retour en stock : clientes à prévenir"), count: a.restocked, to: "/notifier", perm: "marketing.edit" },
     { key: "out", icon: "⛔", label: tr("Variantes en rupture"), hint: a.lowStock ? tr("+ {0} en stock bas", { 0: a.lowStock }) : undefined, count: a.outOfStock, to: "/stock", search: { filter: "out" }, perm: "stock.view" },
     { key: "reviews", icon: "⭐", label: tr("Avis à valider"), count: a.pendingReviews, to: "/avis", perm: "reviews.moderate" },
@@ -227,7 +228,7 @@ function ProductInsight({ p }: { p: DashboardData["topProduct"] }) {
           <img src={p.image} alt="" className="h-16 w-20 shrink-0 rounded-md object-cover" />
         ) : (
           <span className="grid h-16 w-20 shrink-0 place-items-center rounded-md bg-ivory-deep">
-            <Blossom size={30} />
+            <BrandMark size={30} />
           </span>
         )}
       </div>
@@ -312,11 +313,11 @@ function SalesMetrics({ month, prevMonth }: { month: Period; prevMonth: Period }
           <p className="text-lg font-semibold">{tr("Ventes des 30 derniers jours")}</p>
           <div className="flex items-center gap-3">
             <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-rose-500 via-plum-600 to-plum-700">
-              <Blossom size={26} light />
+              <BrandMark size={26} light />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-xl font-medium">{tr("Henine Boutique")}</p>
-              <p className="truncate text-sm text-ink-soft">{tr("Boumerdès · livraison 69 wilayas")}</p>
+              <p className="truncate text-xl font-medium">{tr("El Fatina")}</p>
+              <p className="truncate text-sm text-ink-soft">{tr("En ligne · livraison 69 wilayas")}</p>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -393,7 +394,7 @@ function Loyalty({ share }: { share: number | null }) {
         <div>
           <p className="text-lg font-semibold">{tr("Retour des clientes")}</p>
           <p className="mt-2 text-sm text-ink-soft md:text-base">
-            {tr("Part des commandes des 30 derniers jours passées par des clientes qui avaient déjà commandé chez Henine Boutique.")}
+            {tr("Part des commandes des 30 derniers jours passées par des clientes qui avaient déjà commandé chez El Fatina.")}
           </p>
         </div>
       </div>
@@ -420,7 +421,7 @@ export function Dashboard() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{tr("Bonjour")} {firstName} 🌸</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{tr("Bonjour")} {firstName} ✨</h1>
           <p className="text-sm text-ink-soft">{tr("Voici l'activité de la boutique et ce qui demande votre attention.")}</p>
         </div>
       </div>

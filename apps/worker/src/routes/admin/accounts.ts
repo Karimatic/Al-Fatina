@@ -5,7 +5,7 @@
 import { Hono } from "hono";
 import { newRecoveryCodes, recoveryLeft } from "../../lib/recovery";
 import { z } from "zod";
-import { cleanText } from "@henine/shared";
+import { cleanText } from "@elfatina/shared";
 import type { AppEnv, Env } from "../../env";
 import { isDev } from "../../env";
 import { auditStmt } from "../../lib/audit";
@@ -161,13 +161,13 @@ accountRoutes.post("/integrations/telegram/chat", requirePermission("integration
   // the order buttons work right away on the live site
   let webhookUrl: string | null = null;
   if (cfg.token && c.env.PUBLIC_ORIGIN.startsWith("https://")) webhookUrl = await enableTelegramWebhook(c.env, cfg.token).catch(() => null);
-  const tested = await sendTelegramText(c.env, `🌸 Henine Boutique : ce groupe reçoit maintenant les nouvelles commandes.`);
+  const tested = await sendTelegramText(c.env, `✨ El Fatina : ce groupe reçoit maintenant les nouvelles commandes.`);
   c.executionCtx.waitUntil(processOutbox(c.env, 20).catch(() => 0));
   return c.json({ ok: true, tested, webhookUrl });
 });
 
 accountRoutes.post("/integrations/telegram/test", requirePermission("integrations.manage"), async (c) => {
-  const ok = await sendTelegramText(c.env, `🌸 Test Henine Boutique : les commandes arriveront ici.\nEnvoyé par ${c.get("member").name.replace(/[<>&]/g, "")}.`);
+  const ok = await sendTelegramText(c.env, `✨ Test El Fatina : les commandes arriveront ici.\nEnvoyé par ${c.get("member").name.replace(/[<>&]/g, "")}.`);
   if (!ok) throw new HttpError(409, "telegram_test_failed");
   return c.json({ ok: true });
 });
@@ -209,9 +209,9 @@ accountRoutes.post("/integrations/mail/test", requirePermission("integrations.ma
   const m = c.get("member");
   const res = await sendMail(c.env, {
     to: m.email,
-    subject: "Test d'envoi Henine Boutique",
+    subject: "Test d'envoi El Fatina",
     text: "Si vous lisez ceci, l'envoi d'emails fonctionne.",
-    html: mailLayout("Test d'envoi", ["Si vous lisez ceci, l'envoi d'emails fonctionne. 🌸"]),
+    html: mailLayout("Test d'envoi", ["Si vous lisez ceci, l'envoi d'emails fonctionne. ✨"]),
   });
   return c.json({ ...res, devNote: devEcho(c, "Mode développement : aucun email réel n'est envoyé (voir la console du serveur).") });
 });

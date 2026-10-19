@@ -1,6 +1,6 @@
 -- Privacy page: no more saved checkouts, the ad pixels (with consent), how long data is kept.
 -- Only when the page is still the original text: a version edited by the shop is kept.
-UPDATE `pages` SET `body_fr` = 'Henine Boutique protège vos données conformément à la **loi 18-07** relative à la protection des personnes physiques dans le traitement des données à caractère personnel.
+UPDATE `pages` SET `body_fr` = 'El Fatina protège vos données conformément à la **loi 18-07** relative à la protection des personnes physiques dans le traitement des données à caractère personnel.
 
 ## Ce que nous collectons
 
@@ -37,7 +37,7 @@ Votre panier, vos favoris et vos préférences (langue, mode sombre) sont enregi
 
 ## Vos droits
 
-Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nous écrivant depuis la page [Contact](/fr/contact).', `body_ar` = 'تحمي Henine Boutique معطياتك وفقًا **للقانون 18-07** المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
+Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nous écrivant depuis la page [Contact](/fr/contact).', `body_ar` = 'تحمي El Fatina معطياتك وفقًا **للقانون 18-07** المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
 
 ## ما الذي نجمعه
 
@@ -75,7 +75,7 @@ Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nou
 ## حقوقك
 
 يمكنك طلب **الاطلاع على معطياتك أو تصحيحها أو حذفها** بمراسلتنا من صفحة [تواصلي معنا](/contact).', `updated_at` = (unixepoch() * 1000)
- WHERE `slug` = 'confidentialite' AND `body_fr` = 'Henine Boutique protège vos données conformément à la **loi 18-07** relative à la protection des personnes physiques dans le traitement des données à caractère personnel.
+ WHERE `slug` = 'confidentialite' AND `body_fr` = 'El Fatina protège vos données conformément à la **loi 18-07** relative à la protection des personnes physiques dans le traitement des données à caractère personnel.
 
 ## Ce que nous collectons
 

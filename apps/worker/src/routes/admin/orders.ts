@@ -4,7 +4,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { assessRisk, cleanText, customerRiskSql, customerSegment, dzPhone, formatDzPhone, nextStatuses, ORDER_STATUSES, OUTCOME_REASON_LABEL, OUTCOME_REASONS, RISK_LEVELS, sourceLabel, STATUS_LABELS, statusPath, type OrderStatus } from "@henine/shared";
+import { assessRisk, cleanText, customerRiskSql, customerSegment, dzPhone, formatDzPhone, nextStatuses, ORDER_STATUSES, OUTCOME_REASON_LABEL, OUTCOME_REASONS, RISK_LEVELS, sourceLabel, STATUS_LABELS, statusPath, type OrderStatus } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { variantLabels } from "../../lib/catalog";
@@ -15,7 +15,7 @@ import { getSettings } from "../../lib/settings";
 import { permissionFor, syncOrderMessage } from "../../lib/telegram";
 import { actorOf, requireOwner, requirePermission } from "../../middleware/access";
 import { OPEN_DUPLICATE_SQL } from "../../lib/duplicates";
-import { DEFAULT_SLA, hasPermission, isEditable, orderProfit, slaLateMinutes, slaLimitMinutes, slaStage, type ProfitResult, type SlaSettings } from "@henine/shared";
+import { DEFAULT_SLA, hasPermission, isEditable, orderProfit, slaLateMinutes, slaLimitMinutes, slaStage, type ProfitResult, type SlaSettings } from "@elfatina/shared";
 import { lateOrdersSql } from "../../lib/alerts";
 
 export const orderRoutes = new Hono<AppEnv>();

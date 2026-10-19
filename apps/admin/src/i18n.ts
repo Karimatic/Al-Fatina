@@ -8,7 +8,7 @@
 import { AR } from "./i18n-ar";
 
 export type AdminLang = "fr" | "ar";
-const KEY = "henine.admin.lang";
+const KEY = "elfatina.admin.lang";
 
 export const lang: AdminLang = (() => {
   try {

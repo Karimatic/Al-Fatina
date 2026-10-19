@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { localePath, type Locale } from "@henine/shared";
+import { localePath, type Locale } from "@elfatina/shared";
 import type { Dictionary } from "./i18n/fr";
 
 const LocaleContext = createContext<{ locale: Locale; t: Dictionary } | null>(null);

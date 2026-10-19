@@ -3,11 +3,11 @@
  * orders): prices kept for unchanged variants, stock reserved / released, every change written
  * to the order's history and the audit log. Refused once the parcel has left.
  */
-import type { OrderStatus } from "@henine/shared";
+import type { OrderStatus } from "@elfatina/shared";
 import type { Env } from "../env";
 import { auditStmt } from "./audit";
 import { HttpError } from "./http";
-import { isEditable } from "@henine/shared";
+import { isEditable } from "@elfatina/shared";
 import { quote } from "./orders";
 
 interface ItemRow {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { formatDA, type CategoryDTO, type ProductCardDTO, type ProductDetailDTO } from "@henine/shared";
+import { formatDA, type CategoryDTO, type ProductCardDTO, type ProductDetailDTO } from "@elfatina/shared";
 import { ErrorBox, PageTitle, ProductImage } from "@/components/ui/kit";
 import { useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
@@ -134,7 +134,7 @@ export function OutfitView() {
                 type="button"
                 disabled={!ready}
                 onClick={() => {
-                  window.dispatchEvent(new CustomEvent("henine:outfit-add"));
+                  window.dispatchEvent(new CustomEvent("elfatina:outfit-add"));
                   setAdded(true);
                 }}
                 className="h-12 shrink-0 rounded-full bg-plum-600 px-5 font-semibold text-white disabled:opacity-50"
@@ -182,8 +182,8 @@ function OutfitLine({ slug, variantId, onVariant, onRemove }: { slug: string; va
         optionsFr: labels("fr"), optionsAr: labels("ar"), price: variant.price, image: p.images[0] ?? null, color: p.colors[0] ?? null,
       });
     };
-    window.addEventListener("henine:outfit-add", add);
-    return () => window.removeEventListener("henine:outfit-add", add);
+    window.addEventListener("elfatina:outfit-add", add);
+    return () => window.removeEventListener("elfatina:outfit-add", add);
   }, [p, variant, sel]);
 
   if (!p) return <li className="skeleton h-24 rounded-2xl" />;

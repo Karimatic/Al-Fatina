@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { boutiqueStatus, DAY_NAMES, DEFAULT_BOUTIQUE, type BoutiqueDTO } from "@henine/shared";
+import { boutiqueStatus, DAY_NAMES, DEFAULT_BOUTIQUE, type BoutiqueDTO } from "@elfatina/shared";
 import { WhatsAppIcon } from "@/components/layout/FloatingHelp";
 import { PageTitle } from "@/components/ui/kit";
 import { useLocale } from "@/lib/locale";

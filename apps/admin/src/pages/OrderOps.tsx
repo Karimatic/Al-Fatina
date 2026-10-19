@@ -21,7 +21,7 @@ import {
   type ProfitResult,
   type RiskAssessment,
   RISK_LEVEL_LABEL,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { api, errorMessage, post, put } from "../api";

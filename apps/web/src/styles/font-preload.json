@@ -1,4 +1,9 @@
 {
-  "ar": ["/fonts/4b676bcffc00356a-s.24y4-vc3jpn8m.woff2", "/fonts/henine-logo.woff2"],
-  "fr": ["/fonts/5c285b27cdda1fe8-s.p.2_mbdogr7ni8i.woff2", "/fonts/2a65768255d6b625-s.p.3u4lli0-axodc.woff2", "/fonts/70e3db2de7f94926-s.p.39pl-v7c3qrze.woff2"]
+  "ar": [
+    "/fonts/4b676bcffc00356a-s.24y4-vc3jpn8m.woff2",
+    "/fonts/81cef6a21128489e-s.2csanl8cs02r-.woff2"
+  ],
+  "fr": [
+    "/fonts/81cef6a21128489e-s.2csanl8cs02r-.woff2"
+  ]
 }

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { recommendSize, type SizeAdvice, type SizeGuideDTO } from "@henine/shared";
+import { recommendSize, type SizeAdvice, type SizeGuideDTO } from "@elfatina/shared";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { inputCls } from "@/components/ui/kit";
 import { useLocale } from "@/lib/locale";
 
-const KEY = "henine.measures.v1";
+const KEY = "elfatina.measures.v1";
 type Measures = { height: string; weight: string; bust: string; waist: string; hips: string; fit: "fitted" | "regular" | "loose" };
 const EMPTY: Measures = { height: "", weight: "", bust: "", waist: "", hips: "", fit: "regular" };
 

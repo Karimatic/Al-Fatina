@@ -40,7 +40,7 @@ async function sendCode(c: Parameters<typeof devEcho>[0], to: string, name: stri
     purpose === "login" ? `Votre code de connexion : ${value}` : purpose === "reset" ? `Réinitialisation du mot de passe : ${value}` : `Activez votre compte : ${value}`;
   const intro =
     purpose === "login"
-      ? "Voici votre code pour vous connecter à l'administration Henine Boutique."
+      ? "Voici votre code pour vous connecter à l'administration El Fatina."
       : purpose === "reset"
         ? "Voici votre code pour choisir un nouveau mot de passe."
         : "Voici votre code pour activer votre compte d'équipe.";

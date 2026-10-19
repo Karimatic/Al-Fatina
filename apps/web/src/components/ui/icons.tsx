@@ -61,16 +61,11 @@ export const InstagramIcon = (p: IconProps) => (
 
 export const TRUST_ICONS = { truck: TruckIcon, cash: CashIcon, swap: SwapIcon, pin: PinIcon } as const;
 
-/** The 🌸 brand mark, drawn as five petals so it inherits brand colours. */
-export function Blossom({ size = 28, className }: { size?: number; className?: string }) {
+/** El Fatina's mark: "EF" in Jost, in the text colour (the app icon's letters). */
+export function BrandMark({ size = 28, className }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" className={className}>
-      <g fill="var(--color-rose-300)" stroke="var(--color-rose-500)" strokeWidth="0.8">
-        {[0, 72, 144, 216, 288].map((deg) => (
-          <ellipse key={deg} cx="16" cy="8.5" rx="5.2" ry="7" transform={`rotate(${deg} 16 16)`} />
-        ))}
-      </g>
-      <circle cx="16" cy="16" r="3.2" fill="var(--color-gold)" />
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" className={className}>
+      <path fill="currentColor" d="M30.08 16.18L12 16.18L12 47.82L30.08 47.82L30.08 44.20L15.84 44.20L15.84 32.45L29.18 32.45L29.18 28.84L15.84 28.84L15.84 19.80L30.08 19.80L30.08 16.18ZM52 16.18L35.73 16.18L35.73 47.82L39.57 47.82L39.57 32.45L51.55 32.45L51.55 28.84L39.57 28.84L39.57 19.80L52 19.80L52 16.18Z" />
     </svg>
   );
 }

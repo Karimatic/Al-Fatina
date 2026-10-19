@@ -1,4 +1,4 @@
-import { SIZE_GUIDE_TEMPLATE } from "@henine/shared";
+import { SIZE_GUIDE_TEMPLATE } from "@elfatina/shared";
 import { RecoveryCodesBox } from "../lib/recoveryCodes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "../api";
-import { OUTCOME_REASON_LABEL, type OutcomeReason } from "@henine/shared";
+import { OUTCOME_REASON_LABEL, type OutcomeReason } from "@elfatina/shared";
 import { da, ltr } from "../lib/format";
 import { Card, ErrorState, ListSkeleton, PageHeader, Pills, Stat } from "../ui";
 import { isAr, tr } from "../i18n";

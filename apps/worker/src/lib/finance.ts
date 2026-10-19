@@ -1,6 +1,6 @@
 /**
  * Finance: cash on delivery per order, and the business result of a period. One model with the
- * rest of the admin: the per-order profit (orderProfit in @henine/shared) is reused as is; the
+ * rest of the admin: the per-order profit (orderProfit in @elfatina/shared) is reused as is; the
  * courier's real fee, once recorded from its statement, replaces the wilaya-rate estimate here
  * and everywhere the profit is shown.
  */
@@ -13,7 +13,7 @@ import {
   type CodOrderResult,
   type PnlResult,
   type ReconciliationStatus,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import type { Env } from "../env";
 import { algiersDate } from "./orders";
 import { getSettings } from "./settings";

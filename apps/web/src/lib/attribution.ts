@@ -5,10 +5,10 @@
  * session goes to /api/visit (no personal data). The server classifies the source itself.
  */
 
-import type { JourneyStep } from "@henine/shared";
+import type { JourneyStep } from "@elfatina/shared";
 
-const KEY = "henine.visit.v1";
-const SESSION = "henine.visited";
+const KEY = "elfatina.visit.v1";
+const SESSION = "elfatina.visited";
 const TTL = 30 * 86_400_000;
 
 export interface Visit {
@@ -57,7 +57,7 @@ export function captureVisit() {
  */
 export function markStep(step: JourneyStep) {
   try {
-    const key = `henine.step.${step}`;
+    const key = `elfatina.step.${step}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, "1");
     navigator.sendBeacon?.("/api/step", new Blob([JSON.stringify({ step })], { type: "application/json" }));

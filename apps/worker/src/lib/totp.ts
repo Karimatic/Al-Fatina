@@ -74,6 +74,6 @@ export async function verifyTotp(secret: string, code: string, after: number | n
 
 /** What the authenticator app reads (QR code or a tap on the phone). */
 export function totpUri(secret: string, account: string): string {
-  const label = encodeURIComponent(`Henine Boutique:${account}`);
-  return `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent("Henine Boutique")}&algorithm=SHA1&digits=6&period=30`;
+  const label = encodeURIComponent(`El Fatina:${account}`);
+  return `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent("El Fatina")}&algorithm=SHA1&digits=6&period=30`;
 }

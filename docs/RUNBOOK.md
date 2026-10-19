@@ -1,8 +1,8 @@
-# Henine Boutique — runbook
+# El Fatina — runbook
 
 What to do, step by step, for the things that go wrong or need care. Commands run from the repository
-root unless written otherwise. Live shop: https://henineboutique.com (old address henine-boutique.karimmaticmz.workers.dev redirects to it; Worker
-`henine-boutique`, D1 `henine-boutique-db`, R2 `henine-media`).
+root unless written otherwise. Live shop: https://el-fatina.karimmaticmz.workers.dev (no custom domain yet; Worker
+`el-fatina`, D1 `el-fatina-db`, R2 `el-fatina-media`).
 
 ## 1. Deploy
 
@@ -14,7 +14,7 @@ One path only (audit DEP-1). Either:
   that passes CI (typecheck, lint, tests, build, browser tests) then: backs up and restore-tests the
   database (if `BACKUP_PASSPHRASE`), checks the migration history, applies migrations, deploys, and
   checks the new build is live. **Then turn off Cloudflare's own Git build** (Cloudflare dashboard →
-  Workers & Pages → henine-boutique → Settings → Builds → disconnect, or set it to non-production
+  Workers & Pages → el-fatina → Settings → Builds → disconnect, or set it to non-production
   branches only), otherwise every push is deployed twice, once without tests or migrations.
 - **By hand:**
   ```sh
@@ -49,8 +49,8 @@ locally (`npm run db:migrate:local`), then deploy it.
 **Recent mistake (less than 7 days): D1 Time Travel**, nothing to prepare:
 ```sh
 cd apps/worker
-npx wrangler d1 time-travel info henine-boutique-db --timestamp=2026-10-14T09:00:00+01:00
-npx wrangler d1 time-travel restore henine-boutique-db --timestamp=2026-10-14T09:00:00+01:00
+npx wrangler d1 time-travel info el-fatina-db --timestamp=2026-10-14T09:00:00+01:00
+npx wrangler d1 time-travel restore el-fatina-db --timestamp=2026-10-14T09:00:00+01:00
 ```
 This replaces the whole database with its state at that moment: orders placed since are lost —
 note them first (Admin → Commandes → Export CSV).
@@ -59,11 +59,11 @@ note them first (Admin → Commandes → Export CSV).
 `backup-N`, kept 8 weeks; or `npm run backup` by hand). Each file is encrypted; you need
 `BACKUP_PASSPHRASE`.
 ```sh
-BACKUP_PASSPHRASE=… node scripts/restore-drill.mjs backups/henine-….sql.enc          # proves it restores
-BACKUP_PASSPHRASE=… node scripts/restore-drill.mjs --decrypt backups/henine-….sql.enc restore.sql
+BACKUP_PASSPHRASE=… node scripts/restore-drill.mjs backups/elfatina-….sql.enc          # proves it restores
+BACKUP_PASSPHRASE=… node scripts/restore-drill.mjs --decrypt backups/elfatina-….sql.enc restore.sql
 cd apps/worker
-npx wrangler d1 create henine-restore                 # a new, empty database
-npx wrangler d1 execute henine-restore --remote --file ../../restore.sql
+npx wrangler d1 create elfatina-restore                 # a new, empty database
+npx wrangler d1 execute elfatina-restore --remote --file ../../restore.sql
 ```
 Then point `wrangler.jsonc` → `d1_databases[0].database_id` to the new database, record the
 migrations as applied (`INSERT INTO d1_migrations (name, applied_at) VALUES ('0000_….sql', datetime('now'))`
@@ -90,9 +90,9 @@ The Worker refuses to start (503) when one of these four is missing.
 1. Uptime alert (GitHub email, or Telegram when `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` secrets
    are set) — `.github/workflows/uptime.yml` checks every 15 minutes.
 2. `curl -s https://…/api/health` → `{"ok":true,…}` means the Worker and D1 answer.
-3. Cloudflare dashboard → Workers & Pages → henine-boutique → Logs (every request is kept 3 days).
+3. Cloudflare dashboard → Workers & Pages → el-fatina → Logs (every request is kept 3 days).
 4. **D1 daily limit** (5 M rows read, 100 k written on the free plan): every query fails until
-   01:00 Algiers. D1 → henine-boutique-db → Metrics shows it. Warning on Telegram at 50 % and
+   01:00 Algiers. D1 → el-fatina-db → Metrics shows it. Warning on Telegram at 50 % and
    80 % (checked every 30 min): create an API token with only *Account → Account Analytics →
    Read*, then `npx wrangler secret put CF_ANALYTICS_TOKEN` and `npx wrangler secret put
    CF_ACCOUNT_ID` (the id shown by `npx wrangler whoami`). A wrong token shows up in Admin →

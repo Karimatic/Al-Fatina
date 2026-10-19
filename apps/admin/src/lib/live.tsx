@@ -38,7 +38,7 @@ export interface SoundPrefs {
   browser: boolean;
 }
 
-const PREFS_KEY = "henine.admin.orderAlerts";
+const PREFS_KEY = "elfatina.admin.orderAlerts";
 export const DEFAULT_PREFS: SoundPrefs = { sound: true, volume: 0.8, tone: "boutique", flash: true, browser: false };
 
 export function loadPrefs(): SoundPrefs {
@@ -58,7 +58,7 @@ export function savePrefs(p: SoundPrefs) {
   } catch {
     /* private mode */
   }
-  window.dispatchEvent(new Event("henine:prefs"));
+  window.dispatchEvent(new Event("elfatina:prefs"));
 }
 
 /* ── Sound (Web Audio: no file to download, nothing to allow in the CSP) ── */
@@ -263,7 +263,7 @@ export function playTone(tone: SoundKey, volume: number): boolean {
 async function claim(key: string): Promise<boolean> {
   const flag = () => {
     try {
-      const k = `henine.live.${key}`;
+      const k = `elfatina.live.${key}`;
       if (localStorage.getItem(k)) return false;
       localStorage.setItem(k, String(Date.now()));
       return true;
@@ -271,7 +271,7 @@ async function claim(key: string): Promise<boolean> {
       return true;
     }
   };
-  if (navigator.locks?.request) return navigator.locks.request(`henine-live-${key}`, () => flag());
+  if (navigator.locks?.request) return navigator.locks.request(`elfatina-live-${key}`, () => flag());
   return flag();
 }
 
@@ -281,7 +281,7 @@ function sweepFlags() {
     const old = Date.now() - 2 * 86400_000;
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);
-      if (k?.startsWith("henine.live.") && Number(localStorage.getItem(k)) < old) localStorage.removeItem(k);
+      if (k?.startsWith("elfatina.live.") && Number(localStorage.getItem(k)) < old) localStorage.removeItem(k);
     }
   } catch {
     /* ignore */
@@ -367,8 +367,8 @@ export function LiveProvider({ enabled, children }: { enabled: boolean; children
 
   useEffect(() => {
     const onPrefs = () => setPrefs(loadPrefs());
-    window.addEventListener("henine:prefs", onPrefs);
-    return () => window.removeEventListener("henine:prefs", onPrefs);
+    window.addEventListener("elfatina:prefs", onPrefs);
+    return () => window.removeEventListener("elfatina:prefs", onPrefs);
   }, []);
 
   // sound: needs one click on the page; the first click anywhere unlocks it

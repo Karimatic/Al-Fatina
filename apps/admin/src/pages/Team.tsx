@@ -1,4 +1,4 @@
-import { PERMISSIONS, ROLE_PRESETS, type Permission } from "@henine/shared";
+import { PERMISSIONS, ROLE_PRESETS, type Permission } from "@elfatina/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useState } from "react";
@@ -115,7 +115,7 @@ const presetPerms = (key: string) => {
 
 /** « Envoyez ce lien sur WhatsApp » with the message already written (she chooses the person). */
 const whatsappShare = (name: string, url: string) =>
-  `https://wa.me/?text=${encodeURIComponent(`Bonjour ${name} 🌸 Voici votre accès à l'administration Henine Boutique (valable 7 jours, une seule fois) : ${url}`)}`;
+  `https://wa.me/?text=${encodeURIComponent(`Bonjour ${name} ✨ Voici votre accès à l'administration El Fatina (valable 7 jours, une seule fois) : ${url}`)}`;
 
 export function TeamPage() {
   const me = useMe();

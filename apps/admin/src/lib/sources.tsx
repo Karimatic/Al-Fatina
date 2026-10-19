@@ -2,7 +2,7 @@
  * Where customers come from: the shop's names for the sources (Statistiques → Sources), used on
  * the orders screens and the sources page.
  */
-import { DEFAULT_SOURCE_SETTINGS, ORDER_SOURCES, sourceLabel, type SourceSettings } from "@henine/shared";
+import { DEFAULT_SOURCE_SETTINGS, ORDER_SOURCES, sourceLabel, type SourceSettings } from "@elfatina/shared";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { isAr } from "../i18n";

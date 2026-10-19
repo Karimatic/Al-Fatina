@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { ProductCardDTO } from "@henine/shared";
+import type { ProductCardDTO } from "@elfatina/shared";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";

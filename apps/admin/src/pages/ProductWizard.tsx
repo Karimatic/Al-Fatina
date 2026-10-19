@@ -341,7 +341,7 @@ export function ProductWizard() {
             <p className="mt-5 flex items-center justify-center gap-2 text-sm font-semibold"><Spinner className="size-4" /> {busy}</p>
           ) : (
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              <Button variant="primary" className="h-12" onClick={() => void finish("published")}>{tr("🌸 Mettre en ligne")}</Button>
+              <Button variant="primary" className="h-12" onClick={() => void finish("published")}>{tr("✨ Mettre en ligne")}</Button>
               <Button className="h-12" onClick={() => void finish("draft")}>{tr("Enregistrer en brouillon")}</Button>
             </div>
           )}

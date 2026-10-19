@@ -39,11 +39,11 @@ export const ENTRIES = [
   ...new Set([...PAGES, NOT_FOUND].flatMap((p) => [`ar-${p.view}`, `fr-${p.view}`])),
 ];
 
-const PREFIX = "\0henine-page:";
+const PREFIX = "\0elfatina-page:";
 function pageEntries(): PluginOption {
   return {
-    name: "henine-page-entries",
-    resolveId: (id) => (id.startsWith("henine-page:") ? `\0${id}` : null),
+    name: "elfatina-page-entries",
+    resolveId: (id) => (id.startsWith("elfatina-page:") ? `\0${id}` : null),
     load(id) {
       if (!id.startsWith(PREFIX)) return null;
       const [locale, view] = id.slice(PREFIX.length).split("-") as ["ar" | "fr", ViewKey];
@@ -94,7 +94,7 @@ export default defineConfig(({ isSsrBuild }) => {
         cssCodeSplit: true,
         modulePreload: { polyfill: false },
         rollupOptions: {
-          input: Object.fromEntries(ENTRIES.map((e) => [e, `henine-page:${e}`])),
+          input: Object.fromEntries(ENTRIES.map((e) => [e, `elfatina-page:${e}`])),
         },
       },
   };

@@ -1,4 +1,4 @@
-import type { Locale } from "@henine/shared";
+import type { Locale } from "@elfatina/shared";
 import { ar } from "./i18n/ar";
 import { fr, type Dictionary } from "./i18n/fr";
 

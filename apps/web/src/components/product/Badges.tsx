@@ -1,12 +1,13 @@
-import { isNewArrival, type ProductCardDTO } from "@henine/shared";
+import { isNewArrival, type ProductCardDTO } from "@elfatina/shared";
 import { useLocale } from "@/lib/locale";
 
+// quiet tags: charcoal for what sells, white for the rest
 const TONE: Record<string, string> = {
-  bestseller: "bg-plum-700 text-white",
-  trending: "bg-rose-700 text-white",
-  popular: "bg-ivory/90 text-plum-700",
-  new: "bg-ivory/90 text-plum-700",
-  pick: "bg-gold/90 text-white",
+  bestseller: "bg-ink text-white",
+  trending: "bg-ink text-white",
+  popular: "bg-white text-ink",
+  new: "bg-white text-ink",
+  pick: "bg-white text-ink",
 };
 
 /**
@@ -28,7 +29,7 @@ export function Badges({ p, className = "" }: { p: Pick<ProductCardDTO, "badge" 
   return (
     <span className={`flex flex-wrap gap-1 ${className}`}>
       {list.map((b) => (
-        <span key={b} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold shadow-sm ${TONE[b]}`}>
+        <span key={b} className={`px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.12em] ${TONE[b]}`}>
           {t.badges[b]}
         </span>
       ))}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CUSTOMER_CANCEL_REASONS, dateLocale, formatDA, normalizeDzPhone, toE164, TRACKING_STEPS, trackingStepIndex, type SiteConfigDTO, type TrackedOrderDTO } from "@henine/shared";
+import { CUSTOMER_CANCEL_REASONS, dateLocale, formatDA, normalizeDzPhone, toE164, TRACKING_STEPS, trackingStepIndex, type SiteConfigDTO, type TrackedOrderDTO } from "@elfatina/shared";
 import { ReviewForm } from "@/components/product/ReviewForm";
 import { ExchangeAction, ReceiptPrompt } from "@/components/views/AfterDelivery";
 import { ErrorBox, inputCls, PageTitle, ProductImage, Spinner } from "@/components/ui/kit";
@@ -27,11 +27,11 @@ export function ThankYouView() {
   }, [order, params?.code]);
   if (!params) return null;
   const link = `${location.origin}${href(`/suivi?c=${params.code}&t=${encodeURIComponent(params.token)}`)}`;
-  const wa = `https://wa.me/?text=${encodeURIComponent(`🌸 Henine Boutique · ${params.code}\n${link}`)}`;
+  const wa = `https://wa.me/?text=${encodeURIComponent(`✨ El Fatina · ${params.code}\n${link}`)}`;
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10 text-center">
-      <div className="mx-auto mb-5 grid size-16 place-items-center rounded-full bg-rose-100 text-3xl">🌸</div>
+      <div className="mx-auto mb-5 grid size-16 place-items-center rounded-full bg-rose-100 text-3xl">✨</div>
       <h1 className="heading-display text-3xl">{t.thanks.title}</h1>
       <p className="mt-3 text-ink-soft">{t.thanks.text}</p>
       <div className="mt-6 rounded-card border border-line bg-surface/70 p-5">

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import type { CollectionDTO, DropTeaserDTO, ProductCardDTO } from "@henine/shared";
+import type { CollectionDTO, DropTeaserDTO, ProductCardDTO } from "@elfatina/shared";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/ProductCard";
-import { Blossom } from "@/components/ui/icons";
+import { BrandMark } from "@/components/ui/icons";
 import { ErrorBox, PageTitle, ProductImage } from "@/components/ui/kit";
 import { ApiError, slugFromPath, useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
@@ -62,7 +62,7 @@ export function DropBanner({ drop }: { drop: DropTeaserDTO }) {
     <section className="mx-auto max-w-6xl px-4 pt-4">
       <a
         href={href(`/collection/${drop.slug}`)}
-        className="flex flex-col items-center gap-3 rounded-[1.5rem] bg-gradient-to-br from-plum-700 via-plum-600 to-rose-700 p-5 text-center text-white shadow-soft md:flex-row md:justify-between md:p-6 md:text-start"
+        className="flex flex-col items-center gap-3 bg-ink p-5 text-center text-white md:flex-row md:justify-between md:p-6 md:text-start"
       >
         <span>
           <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-rose-300">{done ? t.drop.live : t.drop.soon}</span>
@@ -127,7 +127,7 @@ export function CollectionView() {
       <header className="relative mb-8 overflow-hidden rounded-[1.75rem] bg-plum-700 text-white">
         {c.image && <ProductImage image={c.image} alt="" sizes="100vw" priority className="absolute inset-0 opacity-30" />}
         <div className="relative flex flex-col items-center gap-4 px-5 py-10 text-center md:py-14">
-          <Blossom size={34} />
+          <BrandMark size={34} />
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-300">{ended ? t.drop.ended : upcoming ? t.drop.soon : t.drop.live}</p>
           <h1 className="heading-display text-4xl leading-tight md:text-5xl">{name}</h1>
           {description && <p className="max-w-xl text-white/85">{description}</p>}

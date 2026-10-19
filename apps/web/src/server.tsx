@@ -4,7 +4,7 @@
  */
 import type { ComponentType } from "react";
 import { renderToString } from "react-dom/server";
-import { dirOf, type Locale } from "@henine/shared";
+import { dirOf, type Locale } from "@elfatina/shared";
 import { App, APP_CLASS, type LanguageProvider } from "./App";
 import { HomePage } from "@/components/home/HomePage";
 import { ProductView } from "@/components/product/ProductView";
@@ -17,7 +17,7 @@ import { ThankYouView, TrackView } from "@/components/views/OrderViews";
 import { OutfitView } from "@/components/views/OutfitView";
 import { SearchView } from "@/components/views/SearchView";
 import { CartView, CheckoutView, FavoritesView } from "@/components/views/ShopViews";
-import { MODE_BOOT, THEME_BOOT } from "@/lib/boot";
+import { THEME_BOOT } from "@/lib/boot";
 import { getDictionary } from "@/lib/dictionary";
 import { ArabicProvider } from "@/lib/locale-ar";
 import { FrenchProvider } from "@/lib/locale-fr";
@@ -47,7 +47,7 @@ const VIEWS: Record<ViewKey, ComponentType> = {
 const PROVIDERS: Record<Locale, LanguageProvider> = { ar: ArabicProvider, fr: FrenchProvider };
 
 export { NOT_FOUND, PAGES, APP_CLASS };
-export const BOOT_SCRIPT = MODE_BOOT + THEME_BOOT;
+export const BOOT_SCRIPT = THEME_BOOT;
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -57,7 +57,7 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
  * each page as itself). Shells get their canonical from the Worker, per slug.
  */
 /** Default picture of link previews (the built-in home photo, 640 × 640). */
-export const SHARE_IMAGE = { src: "/ig/pyjamas-rayures.jpg", width: 640, height: 640 };
+export const SHARE_IMAGE = { src: "/og.png", width: 640, height: 640 };
 
 /**
  * Home page only: who the shop is (Organization: name, logo, Instagram, Boumerdès) and the site
@@ -72,11 +72,11 @@ function shopJsonLd(locale: Locale, abs: (p: string) => string): string {
       "@context": "https://schema.org",
       "@type": "ClothingStore",
       "@id": `${abs("/")}#shop`,
-      name: "Henine Boutique",
+      name: "El Fatina",
       url: home,
       logo: abs("/icons/icon-512.png"),
       image: abs(SHARE_IMAGE.src),
-      sameAs: ["https://www.instagram.com/henine.boutique/"],
+      sameAs: ["https://www.instagram.com/el_fatina_/"],
       address: { "@type": "PostalAddress", addressLocality: locale === "fr" ? "Boumerdès" : "بومرداس", addressRegion: "Boumerdès", addressCountry: "DZ" },
       areaServed: { "@type": "Country", name: "Algeria" },
       currenciesAccepted: "DZD",
@@ -85,7 +85,7 @@ function shopJsonLd(locale: Locale, abs: (p: string) => string): string {
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      name: "Henine Boutique",
+      name: "El Fatina",
       url: home,
       inLanguage: locale === "fr" ? "fr-DZ" : "ar-DZ",
       publisher: { "@id": `${abs("/")}#shop` },
@@ -102,15 +102,14 @@ function shopJsonLd(locale: Locale, abs: (p: string) => string): string {
 
 function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
   const t = getDictionary(locale);
-  const title = page.title ? `${page.title[locale]} · Henine Boutique` : t.meta.title;
+  const title = page.title ? `${page.title[locale]} · El Fatina` : t.meta.title;
   const description = page.description?.[locale] ?? t.meta.description;
   const abs = (p: string) => esc(new URL(p, siteUrl).toString().replace(/\/$/, "") || siteUrl);
   const tags: string[] = [
-    `<meta name="theme-color" content="#fdeef3" media="(prefers-color-scheme: light)"/>`,
-    `<meta name="theme-color" content="#140c10" media="(prefers-color-scheme: dark)"/>`,
+    `<meta name="theme-color" content="#f7f3ee"/>`,
     `<title>${esc(title)}</title>`,
     `<meta name="description" content="${esc(description)}"/>`,
-    `<meta name="application-name" content="Henine Boutique"/>`,
+    `<meta name="application-name" content="El Fatina"/>`,
     `<link rel="manifest" href="/manifest.webmanifest"/>`,
   ];
   if (page.noindex) tags.push(`<meta name="robots" content="noindex"/>`);
@@ -128,19 +127,19 @@ function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
   tags.push(
     `<meta name="format-detection" content="telephone=no"/>`,
     `<meta name="mobile-web-app-capable" content="yes"/>`,
-    `<meta name="apple-mobile-web-app-title" content="Henine"/>`,
+    `<meta name="apple-mobile-web-app-title" content="El Fatina"/>`,
     `<meta name="apple-mobile-web-app-status-bar-style" content="default"/>`,
     `<meta property="og:title" content="${esc(title)}"/>`,
     `<meta property="og:description" content="${esc(description)}"/>`,
     ...(page.shell || page === NOT_FOUND ? [] : [`<meta property="og:url" content="${abs(own)}"/>`]),
-    `<meta property="og:site_name" content="Henine Boutique"/>`,
+    `<meta property="og:site_name" content="El Fatina"/>`,
     `<meta property="og:locale" content="${locale === "fr" ? "fr_DZ" : "ar_DZ"}"/>`,
     `<meta property="og:type" content="website"/>`,
     // link previews (WhatsApp, Instagram, Facebook): the shop's home photo (product pages get their own)
     `<meta property="og:image" content="${abs(SHARE_IMAGE.src)}"/>`,
     `<meta property="og:image:width" content="${SHARE_IMAGE.width}"/>`,
     `<meta property="og:image:height" content="${SHARE_IMAGE.height}"/>`,
-    `<meta property="og:image:alt" content="Henine Boutique"/>`,
+    `<meta property="og:image:alt" content="El Fatina"/>`,
     `<meta name="twitter:card" content="summary"/>`,
     `<meta name="twitter:title" content="${esc(title)}"/>`,
     `<meta name="twitter:description" content="${esc(description)}"/>`,

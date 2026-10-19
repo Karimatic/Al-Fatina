@@ -3,7 +3,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { cleanText } from "@henine/shared";
+import { cleanText } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { auditStmt } from "../../lib/audit";
 import { body, intParam } from "../../lib/http";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useFormGuard } from "@/lib/formGuard";
-import { normalizeDzPhone } from "@henine/shared";
+import { normalizeDzPhone } from "@elfatina/shared";
 import { inputCls, Spinner } from "@/components/ui/kit";
 import { ApiError, apiForm } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
@@ -45,7 +45,7 @@ export function ReviewForm({ productId, code: fixedCode, token: fixedToken, onDo
     e.preventDefault();
     setError(null);
     const p = token ? null : normalizeDzPhone(phone);
-    if (!/^HN-[0-9A-Z]{4,10}$/.test(normalizedCode)) return setError(R.errors.order_not_found!);
+    if (!/^EF-[0-9A-Z]{4,10}$/.test(normalizedCode)) return setError(R.errors.order_not_found!);
     if (!token && !p) return setError(t.checkout.errors.phone_invalid!);
     setState("sending");
     try {

@@ -71,7 +71,7 @@ const { renderPage, PAGES, NOT_FOUND, APP_CLASS, BOOT_SCRIPT } = await import(pa
 // 3. pages
 const site = siteUrl();
 /**
- * The shop has one address (henineboutique.com): a page opened on the old workers.dev address or
+ * The shop has one address (PUBLIC_ORIGIN, once El Fatina has a domain): a page opened on the old workers.dev address or
  * on www. goes there before anything is drawn, same path. (Static pages never reach the Worker,
  * so this is the page's first line; the Worker redirects the pages it serves itself.)
  */
@@ -82,7 +82,7 @@ const REDIRECT_BOOT =
     : "";
 const fonts = JSON.parse(readFileSync(join(web, "src/styles/font-preload.json"), "utf8"));
 const HERO_PRELOAD =
-  `<link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(max-width: 767px)" imagesrcset="/hero/silk-rose-480.webp 480w, /hero/silk-rose-960.webp 960w" imagesizes="50vw"/>`;
+  `<link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(max-width: 767px)" imagesrcset="/hero/silk-pearl-480.webp 480w, /hero/silk-pearl-960.webp 960w" imagesizes="100vw"/>`;
 const localePath = (locale, path) => (locale === "ar" ? path : path === "/" ? "/fr" : `/fr${path}`);
 
 function writePage(page, locale, file) {

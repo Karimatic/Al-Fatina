@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ROLE_PRESETS } from "@henine/shared";
+import { ROLE_PRESETS } from "@elfatina/shared";
 
 const baseSql = readFileSync(join(__dirname, "../seed/base.sql"), "utf8");
 const geoSql = readFileSync(join(__dirname, "../seed/geo.sql"), "utf8");

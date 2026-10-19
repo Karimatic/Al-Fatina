@@ -24,7 +24,7 @@ import {
   type FollowupStatus,
   type ManifestStatus,
   type OrderStatus,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { raiseAlert, resolveAlertStmt } from "../../lib/alerts";
 import { auditStmt } from "../../lib/audit";

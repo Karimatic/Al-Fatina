@@ -4,7 +4,7 @@
  * and the shop's own list: built-in sources renamed or hidden, its own sources with their
  * links, and the « How did you hear about us? » question at checkout.
  */
-import { CUSTOM_SOURCE_KEY, looksLikeLinkOrPhone, ORDER_SOURCE_LABEL, ORDER_SOURCES, sourceLabel, type CustomSource, type OrderSource, type SourceSettings } from "@henine/shared";
+import { CUSTOM_SOURCE_KEY, looksLikeLinkOrPhone, ORDER_SOURCE_LABEL, ORDER_SOURCES, sourceLabel, type CustomSource, type OrderSource, type SourceSettings } from "@elfatina/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -229,7 +229,7 @@ function SourcesEditor({ settings }: { settings: SourceSettings }) {
           className={`${inputCls} min-w-0 flex-1`}
           value={newName}
           maxLength={40}
-          placeholder={tr("Ex. : Influenceuse Lina, Flyer Dellys, Story Ramadan…")}
+          placeholder={tr("Ex. : Influenceuse Lina, Flyer Alger, Story Ramadan…")}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && add()}
           aria-label={tr("Nouvelle source")}

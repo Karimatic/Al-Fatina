@@ -1,4 +1,4 @@
-import { resolveStoreTexts, type SiteConfigDTO, type StoreTexts } from "@henine/shared";
+import { resolveStoreTexts, type SiteConfigDTO, type StoreTexts } from "@elfatina/shared";
 import { useApi } from "./api";
 import { useLocale } from "./locale";
 

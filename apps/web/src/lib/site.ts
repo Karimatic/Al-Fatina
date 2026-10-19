@@ -1,4 +1,4 @@
-import { DEFAULT_DESIGN, type SiteConfigDTO } from "@henine/shared";
+import { DEFAULT_DESIGN, type SiteConfigDTO } from "@elfatina/shared";
 import { useApi } from "./api";
 
 /** Store settings (/site): contact, design, flash sale… shared by every component. */

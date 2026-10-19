@@ -19,14 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      SHOP: ${{ vars.PUBLIC_ORIGIN || 'https://henineboutique.com' }}
+      SHOP: ${{ vars.PUBLIC_ORIGIN || 'https://el-fatina.karimmaticmz.workers.dev' }}
     steps:
       - name: Health and home page (2 tries)
         id: probe
         run: |
           check() {
-            curl -fsS -m 20 -A "henine-uptime" "$SHOP/api/health" > /dev/null &&
-            curl -fsS -m 20 -A "henine-uptime" "$SHOP/" | grep -q "<title>"
+            curl -fsS -m 20 -A "elfatina-uptime" "$SHOP/api/health" > /dev/null &&
+            curl -fsS -m 20 -A "elfatina-uptime" "$SHOP/" | grep -q "<title>"
           }
           if check; then echo "✓ up"; exit 0; fi
           echo "first check failed, again in 60 s"; sleep 60

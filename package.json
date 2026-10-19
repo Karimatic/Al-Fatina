@@ -1,5 +1,5 @@
 {
-  "name": "henine",
+  "name": "elfatina",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -10,11 +10,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "npm run dev --workspace @henine/worker",
-    "dev:web": "npm run dev --workspace @henine/web",
-    "dev:admin": "npm run dev --workspace @henine/admin",
+    "dev": "npm run dev --workspace @elfatina/worker",
+    "dev:web": "npm run dev --workspace @elfatina/web",
+    "dev:admin": "npm run dev --workspace @elfatina/admin",
     "prebuild": "node scripts/doctor.mjs",
-    "build": "npm run build --workspace @henine/web && npm run build --workspace @henine/admin && node scripts/assemble-dist.mjs",
+    "build": "npm run build --workspace @elfatina/web && npm run build --workspace @elfatina/admin && node scripts/assemble-dist.mjs",
     "deploy": "node scripts/deploy.mjs",
     "test:e2e": "playwright test",
     "verify:deploy": "node scripts/verify-deploy.mjs",
@@ -22,10 +22,10 @@
     "restore:drill": "node scripts/restore-drill.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
     "perf": "node scripts/perf-lab.cjs",
-    "db:generate": "npm run generate --workspace @henine/db",
-    "db:sql:local": "npm run sql:local --workspace @henine/worker --",
-    "db:migrate:local": "npm run migrate:local --workspace @henine/worker",
-    "db:seed:local": "npm run seed:local --workspace @henine/worker",
+    "db:generate": "npm run generate --workspace @elfatina/db",
+    "db:sql:local": "npm run sql:local --workspace @elfatina/worker --",
+    "db:migrate:local": "npm run migrate:local --workspace @elfatina/worker",
+    "db:seed:local": "npm run seed:local --workspace @elfatina/worker",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "pretest": "node scripts/doctor.mjs",

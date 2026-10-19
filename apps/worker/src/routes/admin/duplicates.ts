@@ -6,7 +6,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { cleanText, DUPLICATE_ACTIONS, hasPermission, isEditable, type DuplicateAction, type DuplicateStatus, type OrderStatus } from "@henine/shared";
+import { cleanText, DUPLICATE_ACTIONS, hasPermission, isEditable, type DuplicateAction, type DuplicateStatus, type OrderStatus } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { resolveAlertStmt } from "../../lib/alerts";
 import { auditStmt } from "../../lib/audit";

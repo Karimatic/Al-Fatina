@@ -1,4 +1,4 @@
-import type { Permission } from "@henine/shared";
+import type { Permission } from "@elfatina/shared";
 import {
   BellRing,
   Boxes,
@@ -13,12 +13,14 @@ import {
   Receipt,
   Shirt,
   ShoppingBag,
+  ShoppingCart,
   Star,
   TicketPercent,
   TriangleAlert,
   Users,
   UsersRound,
   type LucideIcon,
+  KeyRound,
 } from "lucide-react";
 import { tr } from "./i18n";
 
@@ -57,6 +59,7 @@ export const NAV: NavGroup[] = [
     items: [
       { path: "/commandes", label: tr("Commandes"), permission: "orders.view", icon: ShoppingBag, also: ["/expeditions", "/preparation"] },
       { path: "/clients", label: tr("Clients"), permission: "customers.view", icon: Users },
+      { path: "/paniers", label: tr("Paniers"), permission: "carts.view", icon: ShoppingCart },
       { path: "/promos", label: tr("Promos"), permission: "promos.edit", icon: TicketPercent, also: ["/collections"] },
       { path: "/fidelite", label: tr("Fidélité"), permission: "loyalty.edit", icon: Gift },
     ],
@@ -81,6 +84,7 @@ export const NAV: NavGroup[] = [
     label: tr("Système"),
     items: [
       { path: "/equipe", label: tr("Équipe"), permission: "team.manage", icon: UsersRound },
+      { path: "/comptes", label: tr("Comptes"), permission: "team.manage", icon: KeyRound },
       { path: "/contenu", label: tr("Contenu"), permission: "content.edit", icon: FileText },
       { path: "/erreurs", label: tr("Erreurs"), permission: "errors.view", icon: TriangleAlert },
     ],

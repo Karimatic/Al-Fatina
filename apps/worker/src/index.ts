@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { formatDA, imageUrl, type ImageRef } from "@henine/shared";
+import { formatDA, imageUrl, type ImageRef } from "@elfatina/shared";
 import type { AppEnv } from "./env";
 import { recordError } from "./lib/audit";
 import { getCollection, getProductDetail, listCategories } from "./lib/catalog";
@@ -172,7 +172,7 @@ interface PreviewMeta {
 function previewHead(c: Context<AppEnv>, path: string, ar: boolean, m: PreviewMeta): string {
   const canonical = new URL(path, c.env.PUBLIC_ORIGIN).toString();
   const tags: [string, string][] = [
-    ["og:site_name", "Henine Boutique"],
+    ["og:site_name", "El Fatina"],
     ["og:locale", ar ? "ar_DZ" : "fr_DZ"],
     ["og:type", m.type],
     ["og:url", canonical],
@@ -190,7 +190,7 @@ function previewHead(c: Context<AppEnv>, path: string, ar: boolean, m: PreviewMe
     );
   } else {
     // no picture of its own (category, info page, product without photo): the shop's home photo
-    tags.push(["og:image", new URL("/ig/pyjamas-rayures.jpg", c.env.PUBLIC_ORIGIN).toString()], ["og:image:width", "640"], ["og:image:height", "640"], ["og:image:alt", "Henine Boutique"]);
+    tags.push(["og:image", new URL("/ig/pyjamas-rayures.jpg", c.env.PUBLIC_ORIGIN).toString()], ["og:image:width", "640"], ["og:image:height", "640"], ["og:image:alt", "El Fatina"]);
   }
   if (m.price != null) tags.push(["product:price:amount", String(m.price)], ["product:price:currency", "DZD"]);
   return [
@@ -259,7 +259,7 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
         ]) +
         // the product itself, already read for this page: the store shows it without asking the
         // API again (audit R4-5). A data block, never run (no CSP hash needed); "<" escaped.
-        `<script type="application/json" id="henine-prefill">${JSON.stringify({ [`/products/${encodeURIComponent(slug)}`]: product }).replace(/</g, "\\" + "u003c")}</script>`;
+        `<script type="application/json" id="elfatina-prefill">${JSON.stringify({ [`/products/${encodeURIComponent(slug)}`]: product }).replace(/</g, "\\" + "u003c")}</script>`;
       const name = ar ? product.nameAr : product.nameFr;
       const text = (product.seoDescription ?? (ar ? product.descriptionAr : product.descriptionFr) ?? "").replace(/[*#\n]+/g, " ").trim();
       const price = formatDA(product.price);
@@ -278,10 +278,10 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
       const name = ar ? cat.nameAr : cat.nameFr;
       structured = breadcrumbJsonLd(c.env, ar, [{ name, path: url.pathname }]);
       meta = {
-        title: `${name} · Henine Boutique`,
+        title: `${name} · El Fatina`,
         description: ar
-          ? `${name} من Henine Boutique: التوصيل إلى 69 ولاية والدفع عند الاستلام.`
-          : `${name} chez Henine Boutique : livraison dans les 69 wilayas, paiement à la livraison.`,
+          ? `${name} من El Fatina: التوصيل إلى 69 ولاية والدفع عند الاستلام.`
+          : `${name} chez El Fatina : livraison dans les 69 wilayas, paiement à la livraison.`,
         type: "website",
         image: null,
         imageAlt: name,
@@ -295,7 +295,7 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
     if (page) {
       const name = ar ? page.title_ar : page.title_fr;
       meta = {
-        title: `${name} · Henine Boutique`,
+        title: `${name} · El Fatina`,
         description: (ar ? page.body_ar : page.body_fr).replace(/[*#[\]()\n]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 180) || name,
         type: "website",
         image: null,
@@ -307,8 +307,8 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
     if (col) {
       const name = ar ? col.nameAr : col.nameFr;
       meta = {
-        title: `${name} · Henine Boutique`,
-        description: ((ar ? col.descriptionAr : col.descriptionFr) ?? (ar ? "تشكيلة جديدة من Henine Boutique" : "Nouvelle collection Henine Boutique")).slice(0, 180),
+        title: `${name} · El Fatina`,
+        description: ((ar ? col.descriptionAr : col.descriptionFr) ?? (ar ? "تشكيلة جديدة من El Fatina" : "Nouvelle collection El Fatina")).slice(0, 180),
         type: "website",
         image: col.image,
         imageAlt: name,
@@ -317,7 +317,7 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
   }
   if (!meta) return new Response(res.body, { status: 404, headers: res.headers });
   const head = previewHead(c, url.pathname, ar, meta) + structured;
-  const title = section === "produit" ? `${meta.imageAlt} · Henine Boutique` : meta.title;
+  const title = section === "produit" ? `${meta.imageAlt} · El Fatina` : meta.title;
   return new HTMLRewriter()
     .on("title", { element: (el) => void el.setInnerContent(title) })
     .on('meta[name="description"]', { element: (el) => void el.setAttribute("content", meta.description) })

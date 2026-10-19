@@ -2,7 +2,7 @@
  * Daily manager report (Admin → Statistiques → Rapport du jour, and the evening Telegram
  * summary): what came in, what moved forward, what it earned, what's waiting.
  */
-import { orderProfit } from "@henine/shared";
+import { orderProfit } from "@elfatina/shared";
 import type { Env } from "../env";
 import { lateOrdersSql } from "./alerts";
 import { algiersDayStart, CANCELLED_SQL } from "./orders";

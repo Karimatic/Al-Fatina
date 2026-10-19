@@ -185,7 +185,7 @@ PAGES.forEach(([slug, tFr, tAr, bFr, bAr], i) =>
 const LINKS = [
   ["bio", null, "🛍️ Voir la boutique", "🛍️ تصفحي المتجر", "/", "shop"],
   ["bio", null, "📦 Suivre ma commande", "📦 تتبع طلبي", "/suivi", "package"],
-  ["bio", null, "📸 Instagram", "📸 إنستغرام", "https://www.instagram.com/henine.boutique/", "instagram"],
+  ["bio", null, "📸 Instagram", "📸 إنستغرام", "https://www.instagram.com/el_fatina_/", "instagram"],
   ["bio", null, "📍 Nous contacter", "📍 تواصلي معنا", "/contact", "pin"],
   ["short", "insta", "Instagram bio", "Instagram bio", "/?utm_source=instagram&utm_medium=bio", null],
 ];

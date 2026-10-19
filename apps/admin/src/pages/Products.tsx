@@ -1,4 +1,4 @@
-import { imageUrl, type ImageRef } from "@henine/shared";
+import { imageUrl, type ImageRef } from "@elfatina/shared";
 import { DiscountFields } from "../lib/discount";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";

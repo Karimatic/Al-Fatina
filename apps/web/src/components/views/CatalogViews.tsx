@@ -11,7 +11,7 @@ import {
   subCategories,
   type CategoryDTO,
   type ProductCardDTO,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/ProductCard";
 import { ErrorBox, PageTitle, ProductImage } from "@/components/ui/kit";
 import { slugFromPath, useApi } from "@/lib/api";
@@ -123,30 +123,34 @@ export function CategoryView() {
   }, [catalog.data, categories.data, slug, price, saleOnly, season]);
 
   useEffect(() => {
-    if (category) document.title = `${ar ? category.nameAr : category.nameFr} · Henine Boutique`;
+    if (category) document.title = `${ar ? category.nameAr : category.nameFr} · El Fatina`;
   }, [category, ar]);
 
   const money = (n: number) => formatDA(n, locale);
-  const chip = (on: boolean) => `h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition ${on ? "border-plum-600 bg-plum-600 text-white" : "border-line bg-surface hover:border-plum-600/40"}`;
+  const chip = (on: boolean) => `h-9 shrink-0 rounded-[2px] border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-ink bg-ink text-white" : "border-line hover:border-ink"}`;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-3 pb-10 pt-6 md:px-6 md:pt-10">
       {/* where she is: Catégories › Lingerie › Ensembles */}
-      <nav aria-label={t.categories.all} className="mb-2 text-sm text-ink-soft">
-        <a href={href("/categories")} className="hover:text-plum-700">{t.categories.all}</a>
+      <nav aria-label={t.categories.all} className="mb-3 text-center text-[11px] uppercase tracking-[0.14em] text-ink-soft">
+        <a href={href("/categories")} className="hover:text-ink">{t.categories.all}</a>
         {parent && (
           <>
             <span className="mx-1.5 rtl:rotate-180 inline-block" aria-hidden="true">›</span>
-            <a href={href(`/c/${parent.slug}`)} className="hover:text-plum-700">{ar ? parent.nameAr : parent.nameFr}</a>
+            <a href={href(`/c/${parent.slug}`)} className="hover:text-ink">{ar ? parent.nameAr : parent.nameFr}</a>
           </>
         )}
       </nav>
-      <PageTitle>{category ? (ar ? category.nameAr : category.nameFr) : <span className="skeleton inline-block h-9 w-40" />}</PageTitle>
+      <div className="text-center">
+        <PageTitle>{category ? (ar ? category.nameAr : category.nameFr) : <span className="skeleton inline-block h-9 w-40" />}</PageTitle>
+        {/* how many pieces, once the list is known */}
+        <p className="-mt-3 mb-6 h-5 text-sm text-ink-soft">{catalog.data && categories.data ? `${products.length} ${t.silk.pieces}` : ""}</p>
+      </div>
 
-      {/* filters: on sale, price */}
-      <div className="swipe-row -mx-4 mb-5 flex gap-2 overflow-x-auto px-4 pb-1" role="group" aria-label={F.price}>
-        <button type="button" aria-pressed={saleOnly} onClick={() => setSaleOnly((v) => !v)} className={chip(saleOnly)}>
-          🏷️ {F.onSale}
+      {/* filters: on sale, price; the bar stays under the header while scrolling */}
+      <div className="swipe-row sticky top-[6.75rem] z-30 -mx-3 mb-6 flex gap-2 overflow-x-auto border-y border-line bg-ivory px-3 py-2.5 md:top-[7.5rem] lg:top-[4.75rem] md:-mx-6 md:justify-center md:px-6" role="group" aria-label={F.price}>
+        <button type="button" aria-pressed={saleOnly} onClick={() => setSaleOnly((v) => !v)} className={`${chip(saleOnly)} ${saleOnly ? "" : "text-sale"}`}>
+          {F.onSale}
         </button>
         <span className="mx-1 w-px shrink-0 bg-line" aria-hidden="true" />
         {(
@@ -208,18 +212,18 @@ export function PromotionsView() {
   });
   const shown = main === "all" ? sale : sale.filter((p) => p.categorySlug && categorySlugs(all, main).has(p.categorySlug));
   const best = sale[0] ? percentOff(sale[0]) : 0;
-  const chip = (on: boolean) => `h-10 shrink-0 rounded-full border px-4 text-sm font-medium transition ${on ? "border-plum-600 bg-plum-600 text-white" : "border-line bg-surface"}`;
+  const chip = (on: boolean) => `h-9 shrink-0 rounded-[2px] border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-ink bg-ink text-white" : "border-line hover:border-ink"}`;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center gap-4 overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-plum-700 via-plum-600 to-rose-500 p-6 text-white md:p-10">
+      <header className="mb-8 flex items-center gap-4 overflow-hidden bg-cream p-6 md:p-12">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Henine Boutique</p>
-          <h1 className="heading-display mt-1 text-4xl md:text-5xl">{P.title}</h1>
-          <p className="mt-2 max-w-xl text-white/90">{P.text}</p>
+          <p className="eyebrow-silk text-ink-soft">El Fatina</p>
+          <h1 className="title-silk mt-2 text-3xl md:text-5xl">{P.title}</h1>
+          <p className="mt-3 max-w-xl text-ink-soft">{P.text}</p>
         </div>
         {best > 0 && (
-          <span className="grid size-20 shrink-0 place-items-center rounded-full bg-white text-xl font-black text-plum-700 shadow-lg md:size-28 md:text-3xl" dir="ltr">
+          <span className="grid size-20 shrink-0 place-items-center rounded-full bg-sale text-xl font-medium text-white md:size-28 md:text-3xl" dir="ltr">
             −{best}%
           </span>
         )}

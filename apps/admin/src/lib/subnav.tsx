@@ -1,4 +1,4 @@
-import type { Permission } from "@henine/shared";
+import type { Permission } from "@elfatina/shared";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { tr } from "../i18n";
 import { useCan } from "../Shell";

@@ -171,14 +171,14 @@ describe("manifests and failed deliveries", () => {
 });
 
 describe("the shop's own sources", () => {
-  const settings = { builtIn: { instagram: { name: "Page Insta", emoji: "🌸" }, tiktok: { hidden: true } }, custom: [{ key: "lina", name: "Influenceuse Lina", emoji: "💄" }], ask: true };
+  const settings = { builtIn: { instagram: { name: "Page Insta", emoji: "✨" }, tiktok: { hidden: true } }, custom: [{ key: "lina", name: "Influenceuse Lina", emoji: "💄" }], ask: true };
   it("a link made for one of them counts for it, whatever the case", () => {
     expect(classifySource({ utmSource: "LINA" }, settings.custom)).toBe("lina");
     expect(classifySource({ utmSource: "lina" })).toBe("campaign");
     expect(classifySource({ utmSource: "ig" }, settings.custom)).toBe("instagram");
   });
   it("names: the shop's renaming, its own sources, the defaults in each language", () => {
-    expect(sourceLabel("instagram", settings, "ar")).toMatchObject({ name: "Page Insta", emoji: "🌸" });
+    expect(sourceLabel("instagram", settings, "ar")).toMatchObject({ name: "Page Insta", emoji: "✨" });
     expect(sourceLabel("lina", settings, "fr")).toMatchObject({ name: "Influenceuse Lina", custom: true });
     expect(sourceLabel("facebook", DEFAULT_SOURCE_SETTINGS, "ar").name).toBe("فيسبوك");
   });

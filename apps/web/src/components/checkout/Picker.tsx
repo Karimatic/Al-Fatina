@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { normalizeSearch } from "@henine/shared";
+import { normalizeSearch } from "@elfatina/shared";
 import { inputCls, Spinner } from "@/components/ui/kit";
 import { useLocale } from "@/lib/locale";
 import { useDialogFocus } from "@/lib/dialogFocus";

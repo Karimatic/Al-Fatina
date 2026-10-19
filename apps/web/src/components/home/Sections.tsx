@@ -34,12 +34,11 @@ export function Reveal({ children, delay = 0, className = "" }: { children: Reac
 /** Section heading: title on the start side, "see all" on the end side. */
 export function SectionHead({ title, href, link }: { title: string; href?: string; link?: string }) {
   return (
-    <div className="mb-4 flex items-end justify-between gap-3">
-      <h2 className="heading-display text-[1.65rem] leading-tight md:text-4xl">{title}</h2>
+    <div className="mb-7 text-center md:mb-9">
+      <h2 className="title-silk text-[1.35rem] md:text-[1.9rem]">{title}</h2>
       {href && link && (
-        <a href={href} className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-plum-600">
+        <a href={href} className="mt-2 inline-block text-[11.5px] uppercase tracking-[0.16em] text-ink-soft underline underline-offset-[6px] hover:text-ink">
           {link}
-          <span aria-hidden="true" className="transition group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5">→</span>
         </a>
       )}
     </div>
@@ -52,7 +51,7 @@ export function SectionHead({ title, href, link }: { title: string; href?: strin
 export function InstagramCard({ children }: { children?: React.ReactNode }) {
   const { t } = useLocale();
   const contact = useSite().data?.contact;
-  const href = contact?.instagram || "https://www.instagram.com/henine.boutique/";
+  const href = contact?.instagram || "https://www.instagram.com/el_fatina_/";
   // follower count as written in Admin → Contact (no chip when it's empty)
   const stats: [string, string][] = [...(contact?.followers ? [[contact.followers, t.instagram.followers] as [string, string]] : []), ...t.instagram.stats];
   return (
@@ -80,7 +79,7 @@ export function InstagramCard({ children }: { children?: React.ReactNode }) {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="ig-btn inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-gradient-to-r from-rose-700 via-plum-600 to-rose-700 px-6 font-semibold text-white shadow-soft transition hover:scale-[1.03]"
+              className="ig-btn inline-flex h-12 shrink-0 items-center gap-2 rounded-[2px] bg-ink px-7 text-[13px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-black"
             >
               <InstagramIcon size={18} />
               <span dir="ltr">{t.instagram.cta}</span>

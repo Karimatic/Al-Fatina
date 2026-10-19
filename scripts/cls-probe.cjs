@@ -10,8 +10,8 @@ const BASE = process.env.PERF_BASE || "http://127.0.0.1:8799";
     const ctx = await browser.newContext({ viewport: { width: 360, height: 780 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
     await ctx.addInitScript(() => {
       try {
-        localStorage.setItem("henine.pwaPrompt", "1");
-        sessionStorage.setItem("henine.assistantHint", "1");
+        localStorage.setItem("elfatina.pwaPrompt", "1");
+        sessionStorage.setItem("elfatina.assistantHint", "1");
       } catch {}
       window.__shifts = [];
       new PerformanceObserver((l) => {

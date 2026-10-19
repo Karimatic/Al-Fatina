@@ -51,7 +51,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation"
-      className={`fixed inset-x-0 bottom-0 z-40 border-t border-line/80 bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_24px_rgb(23_10_16/0.06)] transition-transform duration-300 md:hidden ${hidden ? "translate-y-full" : ""}`}
+      className={`fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] transition-transform duration-300 md:hidden ${hidden ? "translate-y-full" : ""}`}
     >
       <ul className="grid grid-cols-5">
         {items.map(({ to, label, Icon, match }) => {
@@ -61,17 +61,19 @@ export function BottomNav() {
               <a
                 href={href(to)}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium transition ${active ? "text-ink" : "text-ink-soft"}`}
+                className={`relative flex h-16 flex-col items-center justify-center gap-1 text-[10px] uppercase tracking-[0.08em] transition ${active ? "font-medium text-ink" : "text-ink-soft"}`}
               >
-                <span className={`grid h-7 w-12 place-items-center rounded-full transition ${active ? "bg-ink text-on-ink" : ""}`}>
+                {/* the page you are on: a thin line along the top of its tab */}
+                {active && <span aria-hidden="true" className="absolute inset-x-4 top-0 h-px bg-ink" />}
+                <span className="grid h-7 place-items-center">
                   <Icon size={20} />
                 </span>
                 <span className="max-w-full truncate px-0.5">{label}</span>
                 {label === t.nav.trackShort && order && (
-                  <span className="absolute top-1.5 size-2.5 rounded-full bg-rose-500 ring-2 ring-white ms-7" aria-label={t.status[order.status]} />
+                  <span className="absolute top-1.5 size-2.5 rounded-full bg-sale ring-2 ring-white ms-7" aria-label={t.status[order.status]} />
                 )}
                 {to === "/panier" && count > 0 && (
-                  <span className="absolute top-1 grid min-w-5 place-items-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-5 text-white ring-2 ring-white ms-8">
+                  <span className="absolute top-1 grid min-w-5 place-items-center rounded-full bg-ink px-1 text-[10px] font-bold leading-5 text-white ring-2 ring-white ms-8">
                     {count}
                   </span>
                 )}

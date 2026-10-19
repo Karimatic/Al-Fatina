@@ -13,7 +13,7 @@ import {
   timingSafeEqual,
   type OrderStatus,
   type Permission,
-} from "@henine/shared";
+} from "@elfatina/shared";
 import type { Env } from "../env";
 import { recordError } from "./audit";
 import { variantLabels } from "./catalog";
@@ -159,8 +159,8 @@ function whatsappUrl(o: OrderForMessage): string {
   const phone = `213${o.phone.slice(1)}`;
   const text =
     o.locale === "fr"
-      ? `Bonjour ${o.name} 🌸 Ici Henine Boutique. Nous confirmons votre commande ${o.public_code} (${formatDA(o.total)}), livraison ${o.delivery_type === "bureau" ? "au bureau" : "à domicile"} à ${o.wilaya_fr ?? ""}. Merci !`
-      : `مرحبا ${o.name} 🌸 معك Henine Boutique. نؤكد طلبك ${o.public_code} (${formatDA(o.total)})، التوصيل ${o.delivery_type === "bureau" ? "إلى المكتب" : "إلى المنزل"}. شكرا!`;
+      ? `Bonjour ${o.name} ✨ Ici El Fatina. Nous confirmons votre commande ${o.public_code} (${formatDA(o.total)}), livraison ${o.delivery_type === "bureau" ? "au bureau" : "à domicile"} à ${o.wilaya_fr ?? ""}. Merci !`
+      : `مرحبا ${o.name} ✨ معك El Fatina. نؤكد طلبك ${o.public_code} (${formatDA(o.total)})، التوصيل ${o.delivery_type === "bureau" ? "إلى المكتب" : "إلى المنزل"}. شكرا!`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 }
 
@@ -471,7 +471,7 @@ export const BOT_COMMANDS = [
   { command: "semaine", description: "Bilan des 7 derniers jours" },
   { command: "stock", description: "Articles en stock bas ou épuisés" },
   { command: "chercher", description: "Chercher une cliente (téléphone ou nom)" },
-  { command: "cmd", description: "Afficher une commande : /cmd HN-XXXXXX" },
+  { command: "cmd", description: "Afficher une commande : /cmd EF-XXXXXX" },
   { command: "id", description: "Mon ID Telegram (à relier dans Équipe)" },
   { command: "aide", description: "Tout ce que le bot sait faire" },
 ];
@@ -525,14 +525,14 @@ async function handleCommand(env: Env, token: string, msg: TgMessage, chatId: st
     case "/start":
     case "/id":
       return reply(
-        `🌸 Henine Boutique\nID de ce chat : <code>${msg.chat.id}</code>\nVotre ID Telegram : <code>${msg.from?.id ?? "?"}</code>\n` +
+        `✨ El Fatina\nID de ce chat : <code>${msg.chat.id}</code>\nVotre ID Telegram : <code>${msg.from?.id ?? "?"}</code>\n` +
           "Ajoutez votre ID dans Admin → Équipe pour signer vos actions avec votre nom.",
       );
     case "/aide":
     case "/help":
       return reply(
         [
-          "🌸 <b>Bot Henine Boutique</b>",
+          "✨ <b>Bot El Fatina</b>",
           "",
           "<b>Sur chaque commande</b>",
           "✅ Confirmer · 📵 Injoignable · ❌ Annuler, puis 📦 Préparer → 🚚 Expédiée → 🎉 Livrée",
@@ -565,7 +565,7 @@ async function handleCommand(env: Env, token: string, msg: TgMessage, chatId: st
               `${o.status === "injoignable" ? `📵×${o.confirm_attempts}` : "🆕"} <code>${o.public_code}</code> · ${esc(o.name)} · ${esc(o.wilaya)} · ${esc(formatDA(o.total))} · ${algiersTime(o.created_at)}`,
           ),
           "",
-          "Ouvrir une commande : /cmd HN-XXXXXX",
+          "Ouvrir une commande : /cmd EF-XXXXXX",
         ].join("\n"),
       );
     }
@@ -611,7 +611,7 @@ async function handleCommand(env: Env, token: string, msg: TgMessage, chatId: st
     case "/cmd": {
       const code = arg.toUpperCase();
       const o = code ? await env.DB.prepare("SELECT id FROM orders WHERE public_code = ?").bind(code).first<{ id: number }>() : null;
-      if (!o) return reply("Commande introuvable. Exemple : <code>/cmd HN-7K3P9Q</code>");
+      if (!o) return reply("Commande introuvable. Exemple : <code>/cmd EF-7K3P9Q</code>");
       const m = await buildOrderMessage(env, o.id);
       return reply(m!.text, { reply_markup: m!.reply_markup });
     }

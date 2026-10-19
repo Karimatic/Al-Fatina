@@ -1,4 +1,4 @@
-import { base64url, sha256Hex } from "@henine/shared";
+import { base64url, sha256Hex } from "@elfatina/shared";
 
 export { sha256Hex };
 

@@ -1,4 +1,4 @@
-import { hasPermission } from "@henine/shared";
+import { hasPermission } from "@elfatina/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { ChevronRight, ExternalLink, KeyRound, LogOut, Menu, Moon, PanelLeft, Settings, Store, Sun, X } from "lucide-react";
@@ -94,7 +94,7 @@ const initials = (name: string) =>
     .map((w) => w[0]!.toUpperCase())
     .join("");
 
-const SIDEBAR_KEY = "henine.admin.sidebar";
+const SIDEBAR_KEY = "elfatina.admin.sidebar";
 
 /* ───────────── Sidebar ───────────── */
 
@@ -390,8 +390,8 @@ export function Shell() {
           <UpdateBar />
         </main>
         <footer className="mx-auto hidden w-full max-w-[90rem] items-center justify-between px-6 pb-6 text-xs text-ink-soft md:flex">
-          <span>© {new Date().getFullYear()} {tr("Henine Boutique · Administration")}</span>
-          <span>{tr("Boumerdès · 69 wilayas")}</span>
+          <span>© {new Date().getFullYear()} {tr("El Fatina · Administration")}</span>
+          <span>{tr("En ligne · 69 wilayas")}</span>
         </footer>
       </div>
 

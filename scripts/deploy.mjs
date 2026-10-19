@@ -39,7 +39,7 @@ const subject = run("git", ["log", "-1", "--format=%s"], root, { capture: true }
 
 run("npm", ["run", "build"]);
 run("node", ["scripts/check-migrations.mjs"]);
-run("npx", ["wrangler", "d1", "migrations", "apply", "henine-boutique-db", "--remote"], worker);
+run("npx", ["wrangler", "d1", "migrations", "apply", "el-fatina-db", "--remote"], worker);
 run("npx", ["wrangler", "deploy", "--tag", sha, "--message", JSON.stringify(subject)], worker);
 run("node", ["scripts/verify-deploy.mjs", ...process.argv.slice(2).filter((a) => a.startsWith("http"))]);
 console.log(`✓ deployed ${sha} (${subject})`);

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { imageSrcSet, imageUrl, type ImageRef } from "@henine/shared";
+import { imageSrcSet, imageUrl, type ImageRef } from "@elfatina/shared";
 import { useLocale } from "@/lib/locale";
 import { useDialogFocus } from "@/lib/dialogFocus";
 

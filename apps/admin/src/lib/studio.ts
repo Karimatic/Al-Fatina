@@ -4,7 +4,7 @@
  * alike in the shop, on the theme's background. On by default, remembered on this device.
  * When the service is unavailable (monthly quota, error) the original photo is used.
  */
-const KEY = "henine.admin.studioPhotos";
+const KEY = "elfatina.admin.studioPhotos";
 
 export function studioEnabled(): boolean {
   try {

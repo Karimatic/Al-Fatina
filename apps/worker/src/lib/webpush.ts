@@ -6,7 +6,7 @@
  * encrypted with SETTINGS_KEY (nothing to configure). Push endpoints are restricted to the
  * browsers' own push services, so the Worker never posts to an arbitrary address.
  */
-import { base64url, imageUrl, type ImageRef } from "@henine/shared";
+import { base64url, imageUrl, type ImageRef } from "@elfatina/shared";
 import type { Env } from "../env";
 import { recordError } from "./audit";
 import { imageRef, variantLabels, type ImageRow } from "./catalog";
@@ -82,7 +82,7 @@ async function vapidHeader(env: Env, endpoint: string): Promise<string> {
   const unsigned = `${b64json({ typ: "JWT", alg: "ES256" })}.${b64json({
     aud: new URL(endpoint).origin,
     exp: Math.floor(Date.now() / 1000) + 12 * 3600,
-    sub: env.PUBLIC_ORIGIN.startsWith("https://") ? env.PUBLIC_ORIGIN : "mailto:contact@henine.boutique",
+    sub: env.PUBLIC_ORIGIN.startsWith("https://") ? env.PUBLIC_ORIGIN : "mailto:contact@el_fatina_",
   })}`;
   const sig = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, privateKey, enc.encode(unsigned)));
   return `vapid t=${unsigned}.${base64url(sig)}, k=${publicKey}`;
@@ -190,7 +190,7 @@ export async function sendRestockPushes(env: Env, variantIds?: number[], max = 4
     const label = labels.get(r.variant_id)?.[ar ? "ar" : "fr"];
     const img = firstImage.get(r.product_id);
     const outcome = await sendPush(env, r, {
-      title: ar ? "عاد إلى المخزون 🌸" : "De retour en stock 🌸",
+      title: ar ? "عاد إلى المخزون ✨" : "De retour en stock ✨",
       body: ar ? `«${name}»${label ? ` (${label})` : ""} متوفر من جديد، أسرعي قبل نفاد الكمية 💕` : `« ${name} »${label ? ` (${label})` : ""} est de nouveau disponible. Faites vite 💕`,
       url: new URL(`${ar ? "" : "/fr"}/produit/${r.slug}?utm_source=push&utm_medium=restock`, env.PUBLIC_ORIGIN).toString(),
       icon: img ? new URL(imageUrl(img, 480), env.PUBLIC_ORIGIN).toString() : undefined,

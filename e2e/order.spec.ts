@@ -15,14 +15,14 @@ for (const locale of ["ar", "fr"] as const) {
 
     // the thank-you page shows the order code
     await expect(page).toHaveURL(new RegExp(`${t.prefix}/merci`), { timeout: 20_000 });
-    await expect(page.getByText(/HN-[0-9A-Z]{4,10}/).first()).toBeVisible();
+    await expect(page.getByText(/EF-[0-9A-Z]{4,10}/).first()).toBeVisible();
 
     // the private token is out of the address bar (ad pixels read it, audit R5-1), the code stays…
     await expect.poll(() => new URL(page.url()).searchParams.has("t")).toBe(false);
-    expect(new URL(page.url()).searchParams.get("c")).toMatch(/^HN-/);
+    expect(new URL(page.url()).searchParams.get("c")).toMatch(/^EF-/);
     // …and the page still knows her order after a reload (kept on this phone)
     await page.reload();
-    await expect(page.getByText(/HN-[0-9A-Z]{4,10}/).first()).toBeVisible();
+    await expect(page.getByText(/EF-[0-9A-Z]{4,10}/).first()).toBeVisible();
     await expect(page.getByText(/\d[\d\s.]*\s?(DA|دج)/).first()).toBeVisible();
   });
 }
@@ -43,7 +43,7 @@ test("the answer to « confirm » is lost: one order, thank-you page", async ({ 
   });
   await page.getByRole("button", { name: t.submit }).click();
   await expect(page).toHaveURL(/\/fr\/merci/, { timeout: 30_000 });
-  await expect(page.getByText(/HN-[0-9A-Z]{4,10}/).first()).toBeVisible();
+  await expect(page.getByText(/EF-[0-9A-Z]{4,10}/).first()).toBeVisible();
 
   // exactly one order for this number
   const found = await request.post("/api/track", { data: { phone }, headers: { Origin: baseURL! } });

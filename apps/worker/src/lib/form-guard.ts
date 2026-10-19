@@ -9,7 +9,7 @@
  * the per-connection and per-phone limits still apply behind it.
  */
 import type { Context } from "hono";
-import { base64url, timingSafeEqual } from "@henine/shared";
+import { base64url, timingSafeEqual } from "@elfatina/shared";
 import type { AppEnv, Env } from "../env";
 import { HttpError, rateLimit } from "./http";
 

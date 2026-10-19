@@ -1,4 +1,4 @@
-import { formatDA, imageSrcSet, imageUrl, type ImageRef, artKey } from "@henine/shared";
+import { formatDA, imageSrcSet, imageUrl, type ImageRef, artKey } from "@elfatina/shared";
 import { useId } from "react";
 import { useLocale } from "@/lib/locale";
 
@@ -7,15 +7,16 @@ export function Price({ value, compareAt, className = "" }: { value: number; com
   const off = compareAt && compareAt > value ? Math.round(((compareAt - value) / compareAt) * 100) : null;
   return (
     <span className={`inline-flex flex-wrap items-baseline gap-x-2 ${className}`}>
-      <span className="font-semibold text-ink" dir="ltr">
+      {/* on sale: the new price in burgundy, the old one struck through, the saving beside */}
+      <span className={`font-medium ${off ? "text-sale" : "text-ink"}`} dir="ltr">
         {formatDA(value, locale)}
       </span>
       {off ? (
         <>
-          <s className="text-sm text-ink-soft" dir="ltr">
+          <s className="text-[0.88em] text-ink-soft" dir="ltr">
             {formatDA(compareAt!, locale)}
           </s>
-          <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700" dir="ltr">
+          <span className="text-[0.8em] font-medium text-sale" dir="ltr">
             -{off}%
           </span>
         </>
@@ -135,8 +136,8 @@ export function ErrorBox({ onRetry }: { onRetry?: () => void }) {
 }
 
 export function PageTitle({ children }: { children: React.ReactNode }) {
-  return <h1 className="heading-display mb-6 text-3xl md:text-4xl">{children}</h1>;
+  return <h1 className="title-silk mb-6 text-[1.6rem] md:text-4xl">{children}</h1>;
 }
 
 export const inputCls =
-  "h-12 w-full rounded-xl border border-line bg-surface px-4 text-ink shadow-[inset_0_1px_2px_rgb(42_26_36/0.04)] outline-none transition placeholder:text-ink-soft/60 focus:border-plum-600 focus:ring-2 focus:ring-plum-600/15";
+  "h-12 w-full rounded-[2px] border border-[#cfc6bb] bg-surface px-4 text-ink outline-none transition placeholder:text-ink-soft/70 focus:border-ink focus:ring-1 focus:ring-ink";

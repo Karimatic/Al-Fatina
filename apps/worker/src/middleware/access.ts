@@ -5,7 +5,7 @@
  */
 import type { MiddlewareHandler } from "hono";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { hasPermission, type Permission } from "@henine/shared";
+import { hasPermission, type Permission } from "@elfatina/shared";
 import type { AppEnv } from "../env";
 import { readSession } from "../lib/auth";
 

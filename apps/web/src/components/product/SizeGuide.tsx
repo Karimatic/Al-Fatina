@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import type { SizeGuideDTO } from "@henine/shared";
+import type { SizeGuideDTO } from "@elfatina/shared";
 import { useLocale } from "@/lib/locale";
 import { useDialogFocus } from "@/lib/dialogFocus";
 

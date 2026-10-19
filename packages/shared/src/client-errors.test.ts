@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isForeignClientError } from "./client-errors";
 
-const SHOP = "https://henine-boutique.karimmaticmz.workers.dev";
+const SHOP = "https://el-fatina.karimmaticmz.workers.dev";
 
 describe("browser errors that are not the shop's", () => {
   it("drops crypto-wallet and extension errors", () => {

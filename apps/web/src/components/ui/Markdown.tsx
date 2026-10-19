@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { parseMarkdown, type Inline } from "@henine/shared";
+import { parseMarkdown, type Inline } from "@elfatina/shared";
 
 /** Renders admin-written markdown as React elements (no HTML injection possible). */
 function Inlines({ nodes }: { nodes: Inline[] }) {

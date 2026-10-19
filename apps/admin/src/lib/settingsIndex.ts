@@ -1,5 +1,5 @@
 /** The settings tabs and every setting in them: used by Paramètres and by the search bar at the top. */
-import type { Permission } from "@henine/shared";
+import type { Permission } from "@elfatina/shared";
 import { BellRing, KeyRound, Plug, Phone, ShoppingBag, Store, Wallet, type LucideIcon } from "lucide-react";
 import { tr } from "../i18n";
 

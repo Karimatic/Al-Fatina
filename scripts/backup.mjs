@@ -45,7 +45,7 @@ const query = (sql) => {
 
 mkdirSync(out, { recursive: true });
 const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
-const plain = join(out, `henine-${stamp}.sql`);
+const plain = join(out, `elfatina-${stamp}.sql`);
 try {
   // 1. the whole database as SQL
   wrangler(["d1", "export", "DB", "--remote", "--output", arg(plain)]);
@@ -61,7 +61,7 @@ try {
   const data = Buffer.concat([cipher.update(readFileSync(plain)), cipher.final()]);
   const file = `${plain}.enc`;
   writeFileSync(file, Buffer.concat([Buffer.from("HNB1"), salt, iv, cipher.getAuthTag(), data]));
-  writeFileSync(join(out, `henine-${stamp}.counts.json`), JSON.stringify({ at: new Date().toISOString(), counts }, null, 2));
+  writeFileSync(join(out, `elfatina-${stamp}.counts.json`), JSON.stringify({ at: new Date().toISOString(), counts }, null, 2));
   const rows = Object.values(counts).reduce((a, b) => a + b, 0);
   console.log(`✓ ${file} (${Math.round(data.length / 1024)} KB, ${tables.length} tables, ${rows} rows)`);
 } finally {

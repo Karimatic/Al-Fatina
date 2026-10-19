@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { SiteConfigDTO } from "@henine/shared";
+import type { SiteConfigDTO } from "@elfatina/shared";
 import { useApi } from "@/lib/api";
 import { useStoreTexts } from "@/lib/storeTexts";
 import { usePauseOffscreen } from "@/lib/pauseOffscreen";
@@ -14,7 +14,7 @@ import { usePauseOffscreen } from "@/lib/pauseOffscreen";
  * the movement remembered from the visitor's last page (else the first message, still), never
  * a default that then switches (a scrolling bar turning into "one at a time" on every page).
  */
-const REMEMBER = "henine.announce";
+const REMEMBER = "elfatina.announce";
 
 export function AnnouncementBar() {
   const { data } = useApi<SiteConfigDTO>("/site");
@@ -66,7 +66,7 @@ export function AnnouncementBar() {
             {lane.map((m, i) => (
               <li key={`${copy}-${i}`} className="flex shrink-0 items-center whitespace-nowrap">
                 <span className="px-5">{m}</span>
-                <span className="announce-sparkle text-[10px] text-rose-300" style={{ animationDelay: `${(i % 4) * 0.5}s` }}>
+                <span className="announce-sparkle text-[9px] text-gold" style={{ animationDelay: `${(i % 4) * 0.5}s` }}>
                   ✦
                 </span>
               </li>

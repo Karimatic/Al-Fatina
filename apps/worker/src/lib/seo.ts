@@ -1,4 +1,4 @@
-import { imageUrl, type ProductDetailDTO } from "@henine/shared";
+import { imageUrl, type ProductDetailDTO } from "@elfatina/shared";
 import type { Env } from "../env";
 import { imageRef, visibleSql, type ImageRow } from "./catalog";
 
@@ -103,8 +103,8 @@ export async function metaFeedCsv(env: Env, lang: "ar" | "fr"): Promise<string> 
       const color = label("couleur");
       lines.push(
         [
-          v ? v.sku || `HN-${v.id}` : `HN-P${p.id}`,
-          `HN-P${p.id}`,
+          v ? v.sku || `EF-${v.id}` : `EF-P${p.id}`,
+          `EF-P${p.id}`,
           [name, color, size].filter(Boolean).join(" - ").slice(0, 150),
           desc.slice(0, 5000),
           available > 0 ? "in stock" : "out of stock",
@@ -114,7 +114,7 @@ export async function metaFeedCsv(env: Env, lang: "ar" | "fr"): Promise<string> 
           link,
           abs(env, imageUrl(ordered[0]!, 1200)),
           ordered.slice(1, 11).map((img) => abs(env, imageUrl(img, 1200))).join(","),
-          "Henine Boutique",
+          "El Fatina",
           size,
           color,
           (ar ? p.cat_ar : p.cat_fr) ?? "",
@@ -179,8 +179,8 @@ export function productJsonLd(env: Env, p: ProductDetailDTO, ar: boolean, path: 
     url,
     image: p.images.slice(0, 6).map((img) => abs(env, imageUrl(img, 1200))),
     description: plain(ar ? p.descriptionAr : p.descriptionFr) || name,
-    sku: `HN-P${p.id}`,
-    brand: { "@type": "Brand", name: "Henine Boutique" },
+    sku: `EF-P${p.id}`,
+    brand: { "@type": "Brand", name: "El Fatina" },
     ...(p.category ? { category: ar ? p.category.nameAr : p.category.nameFr } : {}),
     offers: {
       ...(low === high

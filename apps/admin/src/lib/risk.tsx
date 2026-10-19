@@ -1,4 +1,4 @@
-import { RISK_LEVEL_LABEL, RISK_REASON_LABEL, SEGMENT_LABEL, type CustomerSegment, type RiskAssessment, type RiskLevel } from "@henine/shared";
+import { RISK_LEVEL_LABEL, RISK_REASON_LABEL, SEGMENT_LABEL, type CustomerSegment, type RiskAssessment, type RiskLevel } from "@elfatina/shared";
 import { Badge } from "../ui";
 import { tr } from "../i18n";
 

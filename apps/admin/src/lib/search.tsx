@@ -5,7 +5,7 @@
  * Filter tabs with counts, details on every line, quick actions, recently opened items and
  * recent searches (this device). Only what the member may open shows up.
  */
-import { formatDzPhone, hasPermission, type OrderStatus, type Permission } from "@henine/shared";
+import { formatDzPhone, hasPermission, type OrderStatus, type Permission } from "@elfatina/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -105,6 +105,7 @@ const PAGE_WORDS: Record<string, string> = {
   "/caisse": "caisse vente boutique magasin الصندوق البيع في المحل",
   "/commandes": "commandes orders طلبات طلبيات الطلبيات كوموند",
   "/clients": "clientes clients زبائن الزبونات الزبائن",
+  "/paniers": "paniers abandonnés السلات المتروكة",
   "/promos": "promos codes coupons réduction remise كوبون تخفيض",
   "/fidelite": "fidélité points الوفاء النقاط",
   "/preparation": "préparation colis emballage تحضير الطرود",
@@ -166,7 +167,7 @@ interface SearchHistory {
   queries: string[];
   opened: Remembered[];
 }
-const HISTORY_KEY = "henine.admin.search.v1";
+const HISTORY_KEY = "elfatina.admin.search.v1";
 function loadHistory(): SearchHistory {
   try {
     const h = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "{}") as Partial<SearchHistory>;
@@ -750,7 +751,7 @@ function SearchDialog({ groups, permissions, onClose }: { groups: NavGroup[]; pe
           })}
           {!q.trim() && (
             <li role="presentation" className="px-3 pb-1 pt-3 text-xs leading-relaxed text-ink-soft">
-              {tr("Astuce : tapez un numéro de commande (HN-…), un téléphone, un nom, une référence de produit, un code promo ou un mot comme « son » ou « livraison ».")}
+              {tr("Astuce : tapez un numéro de commande (EF-…), un téléphone, un nom, une référence de produit, un code promo ou un mot comme « son » ou « livraison ».")}
             </li>
           )}
           {q.trim() && !hits.length && (

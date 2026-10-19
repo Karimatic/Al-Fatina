@@ -1,10 +1,10 @@
-import { formatDzPhone } from "@henine/shared";
+import { formatDzPhone } from "@elfatina/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { useEffect } from "react";
 import { api } from "../api";
-import { Blossom } from "../brand";
+import { BrandMark } from "../brand";
 import { da, daMinus, date } from "../lib/format";
 import { ErrorState, ListSkeleton } from "../ui";
 import { tr } from "../i18n";
@@ -44,7 +44,7 @@ export function InvoicePage() {
   });
   const o = q.data?.slips[0];
   useEffect(() => {
-    if (o) document.title = `Facture ${o.public_code} · Henine Boutique`;
+    if (o) document.title = `Facture ${o.public_code} · El Fatina`;
   }, [o]);
 
   return (
@@ -70,11 +70,11 @@ export function InvoicePage() {
         <article className="mx-auto my-6 max-w-[210mm] bg-surface p-[14mm] text-[13px] leading-relaxed text-ink shadow-sm print:my-0 print:shadow-none" dir="ltr">
           <header className="flex items-start justify-between gap-6 border-b-2 border-plum-600 pb-5">
             <div className="flex items-center gap-3">
-              <Blossom className="size-11" />
+              <BrandMark className="size-11" />
               <div>
-                <p className="text-2xl font-bold uppercase tracking-[0.18em] text-plum-700">Henine Boutique</p>
+                <p className="text-2xl font-bold uppercase tracking-[0.18em] text-plum-700">El Fatina</p>
                 <p className="text-xs text-ink-soft">
-                  {q.data.store.address ?? "Boumerdès"}{q.data.store.phone ? ` · ${formatDzPhone(q.data.store.phone)}` : ""}
+                  {q.data.store.address ?? ""}{q.data.store.phone ? ` · ${formatDzPhone(q.data.store.phone)}` : ""}
                 </p>
               </div>
             </div>
@@ -144,7 +144,7 @@ export function InvoicePage() {
 
           <footer className="mt-10 border-t border-line pt-4 text-center text-xs text-ink-soft">
             <p>Paiement à la livraison · الدفع عند الاستلام</p>
-            <p>Merci pour votre confiance 🌸 شكرًا على ثقتك</p>
+            <p>Merci pour votre confiance ✨ شكرًا على ثقتك</p>
           </footer>
         </article>
       )}

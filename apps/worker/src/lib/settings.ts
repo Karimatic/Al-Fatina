@@ -2,7 +2,7 @@
  * Typed access to the `settings` key/value table. Values are JSON; missing keys fall back
  * to defaults, so the store works even on an empty database.
  */
-import { DEFAULT_BOUTIQUE, DEFAULT_DESIGN, type BoutiqueDTO, type DesignDTO, type StoreTextOverrides, DEFAULT_SLA, type SeasonSetting, type SlaSettings, type OrderCostLine, DEFAULT_SOURCE_SETTINGS, type SourceSettings, type DuplicateSettings, type AnnouncementAnimation } from "@henine/shared";
+import { DEFAULT_BOUTIQUE, DEFAULT_DESIGN, type BoutiqueDTO, type DesignDTO, type StoreTextOverrides, DEFAULT_SLA, type SeasonSetting, type SlaSettings, type OrderCostLine, DEFAULT_SOURCE_SETTINGS, type SourceSettings, type DuplicateSettings, type AnnouncementAnimation } from "@elfatina/shared";
 import type { Env } from "../env";
 
 export interface Settings {
@@ -59,29 +59,29 @@ export interface Settings {
   texts: { ar: StoreTextOverrides; fr: StoreTextOverrides };
   /** logo, colours, fonts, banners, home sections (Admin → Page d'accueil → Apparence) */
   design: DesignDTO;
-  /** the shop in Boumerdès: address, map, opening hours (the /boutique page) */
+  /** the physical shop (off by default: El Fatina sells online): address, map, opening hours (the /boutique page) */
   boutique: BoutiqueDTO;
 }
 
 export const DEFAULTS: Settings = {
   store: {
-    name: "Henine Boutique", tagline_fr: "L’élégance & la qualité au meilleur prix", tagline_ar: "الأناقة والجودة بأفضل سعر",
-    city_fr: "Boumerdès", city_ar: "بومرداس", hours_fr: "Ouvert 7j/7", hours_ar: "مفتوح 7/7", wilaya: 35,
+    name: "El Fatina", tagline_fr: "L’élégance & la qualité au meilleur prix", tagline_ar: "الأناقة والجودة بأفضل سعر",
+    city_fr: "", city_ar: "", hours_fr: "Commandes 7j/7", hours_ar: "الطلبات 7/7", wilaya: 35,
   },
   contact: {
-    phone: null, whatsapp: null, instagram: "https://www.instagram.com/henine.boutique/", tiktok: null,
-    facebook: null, maps: null, address_fr: "Boumerdès", address_ar: "بومرداس", followers: "+89K",
+    phone: null, whatsapp: null, instagram: "https://www.instagram.com/el_fatina_/", tiktok: null,
+    facebook: null, maps: null, address_fr: "", address_ar: "", followers: "",
   },
   announcement: {
     active: true,
-    messages_fr: ["🚚 Livraison dans les 69 wilayas", "💵 Paiement à la livraison", "🌸 Boutique à Boumerdès · 7j/7"],
-    messages_ar: ["🚚 التوصيل إلى 69 ولاية", "💵 الدفع عند الاستلام", "🌸 محلنا في بومرداس · 7/7"],
+    messages_fr: ["Livraison dans les 69 wilayas", "Paiement à la livraison", "Commandez en ligne · 7j/7"],
+    messages_ar: ["التوصيل إلى 69 ولاية", "الدفع عند الاستلام", "اطلبي أونلاين · 7/7"],
   },
   hero: {
     eyebrow_fr: "Nouvelle collection", eyebrow_ar: "تشكيلة جديدة",
     title_fr: "L’élégance & la qualité au meilleur prix", title_ar: "الأناقة والجودة بأفضل سعر",
-    subtitle_fr: "Pyjamas, lingerie, nuisettes et djebbas choisis avec soin, livrés partout en Algérie.",
-    subtitle_ar: "بيجامات، ملابس داخلية، قمصان نوم وجبب مختارة بعناية، تصلك إلى كل أنحاء الجزائر.",
+    subtitle_fr: "Robes, ensembles et tenues pour femmes choisis avec soin, livrés partout en Algérie.",
+    subtitle_ar: "فساتين، أطقم وأزياء نسائية مختارة بعناية، تصلك إلى كل أنحاء الجزائر.",
   },
   checkout: {
     cod: true, express_on_product: true, max_orders_per_phone_per_hour: 3,

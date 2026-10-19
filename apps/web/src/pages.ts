@@ -43,10 +43,10 @@ export const PAGES: PageDef[] = [
   {
     path: "/boutique",
     view: "BoutiqueView",
-    title: { ar: "محلنا في دلس", fr: "Notre boutique à Dellys" },
+    title: { ar: "محلنا", fr: "Notre boutique" },
     description: {
-      ar: "العنوان، أوقات العمل، الخريطة والاتجاهات إلى محل Henine Boutique في دلس، لقهاوي، بجانب المحكمة.",
-      fr: "Adresse, horaires, plan et itinéraire de la boutique Henine à Dellys (Laqhaoui, à côté du tribunal).",
+      ar: "العنوان، أوقات العمل والخريطة لمحل El Fatina.",
+      fr: "Adresse, horaires et plan de la boutique El Fatina.",
     },
   },
   { path: "/c/_", view: "CategoryView", title: { ar: "قسم", fr: "Catégorie" }, shell: true },
@@ -66,8 +66,8 @@ export const PAGES: PageDef[] = [
     view: "PromotionsView",
     title: { ar: "التخفيضات", fr: "Promotions" },
     description: {
-      ar: "قطع بأسعار مخفضة ما دامت متوفرة: فساتين، بيجامات، لانجري… الدفع عند الاستلام والتوصيل إلى 69 ولاية.",
-      fr: "Des pièces à prix cassés tant qu'il en reste : robes, pyjamas, lingerie… Paiement à la livraison, 69 wilayas.",
+      ar: "قطع بأسعار مخفضة ما دامت متوفرة: فساتين، أطقم، بيجامات… الدفع عند الاستلام والتوصيل إلى 69 ولاية.",
+      fr: "Des pièces à prix cassés tant qu'il en reste : robes, ensembles, pyjamas… Paiement à la livraison, 69 wilayas.",
     },
   },
   { path: "/recherche", view: "SearchView", title: { ar: "بحث", fr: "Recherche" } },

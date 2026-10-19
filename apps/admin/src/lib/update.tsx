@@ -52,9 +52,9 @@ export function RouteError({ error }: { error: unknown }) {
   const message = error instanceof Error ? error.message : String(error);
   useEffect(() => {
     try {
-      const last = Number(sessionStorage.getItem("henine.admin.autoReload") ?? 0);
+      const last = Number(sessionStorage.getItem("elfatina.admin.autoReload") ?? 0);
       if (Date.now() - last > 30_000) {
-        sessionStorage.setItem("henine.admin.autoReload", String(Date.now()));
+        sessionStorage.setItem("elfatina.admin.autoReload", String(Date.now()));
         location.reload();
       }
     } catch {
@@ -64,7 +64,7 @@ export function RouteError({ error }: { error: unknown }) {
   return (
     <div className="grid min-h-dvh place-items-center p-6">
       <div className="max-w-md rounded-2xl border border-line bg-surface p-6 text-center">
-        <p className="text-3xl" aria-hidden="true">🌸</p>
+        <p className="text-3xl" aria-hidden="true">✨</p>
         <p className="mt-2 text-lg font-semibold">{tr("Cette page n'a pas pu s'afficher")}</p>
         <p className="mt-1 text-sm text-ink-soft">{tr("Rechargez la page. Si le problème revient, envoyez une capture de ce message.")}</p>
         <button type="button" onClick={() => location.reload()} className="mt-4 h-11 rounded-full bg-plum-600 px-6 font-semibold text-white">

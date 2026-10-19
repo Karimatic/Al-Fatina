@@ -15,7 +15,7 @@ const TIMEOUT_MS = { read: 8_000, send: 15_000 };
 
 /** Some data on this page came from the phone's saved copy, not the shop (audit R2-4). */
 export let savedCopyShown = false;
-export const SAVED_COPY_EVENT = "henine:saved-copy";
+export const SAVED_COPY_EVENT = "elfatina:saved-copy";
 function markSavedCopy() {
   if (savedCopyShown) return;
   savedCopyShown = true;
@@ -85,7 +85,7 @@ const prefilled = new Set<string>();
 // answers the server already put in the page (a product page carries its product, audit R4-5):
 // the page shows them at once instead of asking the API a second time
 try {
-  const block = typeof document === "undefined" ? null : document.getElementById("henine-prefill");
+  const block = typeof document === "undefined" ? null : document.getElementById("elfatina-prefill");
   if (block?.textContent)
     for (const [path, data] of Object.entries(JSON.parse(block.textContent) as Record<string, unknown>)) {
       cache.set(path, { at: Date.now(), data });

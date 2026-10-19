@@ -12,7 +12,7 @@ async function shop() {
   seedShop(db);
   const env = { DB: db, SETTINGS_KEY: KEY, PUBLIC_ORIGIN: "https://shop.example" } as unknown as Env;
   const token = await encryptSecret(KEY, "123456:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghij");
-  db.sqlite.exec(`INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('telegram', '${JSON.stringify({ token_enc: token, chat_id: String(GROUP), chat_title: "Équipe", bot_username: "henine_bot", webhook_secret_enc: null, webhook_url: null, last_update_id: 0 })}', 0)`);
+  db.sqlite.exec(`INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('telegram', '${JSON.stringify({ token_enc: token, chat_id: String(GROUP), chat_title: "Équipe", bot_username: "elfatina_bot", webhook_secret_enc: null, webhook_url: null, last_update_id: 0 })}', 0)`);
   return { db, env };
 }
 
@@ -33,7 +33,7 @@ describe("Telegram bot commands", () => {
   it("a stranger writing to the bot gets no customer data nor figures", async () => {
     const { env } = await shop();
     const sent = captureTelegram();
-    for (const c of ["/chercher 0554", "/cmd HN-T1", "/jour", "/semaine", "/attente", "/stock"]) await handleUpdate(env, command(c, 999, 999) as never);
+    for (const c of ["/chercher 0554", "/cmd EF-T1", "/jour", "/semaine", "/attente", "/stock"]) await handleUpdate(env, command(c, 999, 999) as never);
     expect(sent).toHaveLength(6);
     for (const m of sent) expect(m).toContain("⛔");
     // /id stays open: it is how a member finds their Telegram id

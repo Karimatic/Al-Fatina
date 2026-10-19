@@ -1,4 +1,4 @@
-import { formatDA } from "@henine/shared";
+import { formatDA } from "@elfatina/shared";
 import { expirePoints } from "./lib/loyalty";
 import type { Env } from "./env";
 import { recordError } from "./lib/audit";
@@ -12,35 +12,38 @@ import { sendCampaignBatch, sendRestockPushes } from "./lib/webpush";
 import { STALE_HOLD_HOURS, staleHoldSql } from "./routes/admin/orders";
 
 /**
- * Cron dispatcher (3 triggers on the free plan, see wrangler.jsonc).
- * Each job must stay small: ≤ 10 ms CPU and ≤ 50 subrequests per invocation.
+ * Cron dispatcher: ONE trigger every 5 minutes (wrangler.jsonc). Cloudflare's free plan allows 5
+ * triggers per account and Henine Boutique, on the same account, already uses 3. The tick's time
+ * picks the work: 21:00 Algiers (20:00 UTC) the evening jobs alone, every half hour the callbacks
+ * and the quota check (with the Telegram outbox), the other ticks the 5-minute jobs.
+ * Each tick must stay small: ≤ 10 ms CPU and ≤ 50 subrequests.
  */
 export async function scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
   const run = (name: string, job: Promise<unknown>) =>
     ctx.waitUntil(job.catch((err: Error) => recordError(env, "cron", `${name}: ${err.message}`)));
-  switch (controller.cron) {
-    case "*/5 * * * *":
-      run("outbox", processOutbox(env, 10));
-      // back-in-stock pushes not sent at restock time (more than one batch, or a network error)
-      run("restock_push", sendRestockPushes(env, undefined, 25)); // 10 + 25 + 10 ≤ 50 sub-requests
-      // store news to subscribers, next batch
-      run("campaign_push", sendCampaignBatch(env, 10));
-      // late orders (SLA), parcels ready, critical stock → Admin alerts (one D1 batch)
-      run("alerts", scanAlerts(env));
-      // contact messages that arrived after the last Telegram notice, in one message
-      run("contact_digest", contactDigest(env));
-      break;
-    case "*/30 * * * *":
-      run("callbacks", callbackReminder(env));
-      // the database's daily free quota: Telegram at 50 % and 80 % (needs CF_ANALYTICS_TOKEN)
-      run("quota", quotaCheck(env));
-      break;
-    case "0 20 * * *":
-      run("daily_report", dailyReport(env));
-      run("purge", purgeExpired(env));
-      run("points_expiry", expirePoints(env));
-      break;
+  const at = new Date(controller.scheduledTime);
+  const minute = at.getUTCMinutes();
+  if (at.getUTCHours() === 20 && minute < 5) {
+    run("daily_report", dailyReport(env));
+    run("purge", purgeExpired(env));
+    run("points_expiry", expirePoints(env));
+    return;
   }
+  run("outbox", processOutbox(env, 10));
+  if (minute % 30 < 5) {
+    run("callbacks", callbackReminder(env));
+    // the database's daily free quota: Telegram at 50 % and 80 % (needs CF_ANALYTICS_TOKEN)
+    run("quota", quotaCheck(env));
+    return;
+  }
+  // back-in-stock pushes not sent at restock time (more than one batch, or a network error)
+  run("restock_push", sendRestockPushes(env, undefined, 25)); // 10 + 25 + 10 ≤ 50 sub-requests
+  // store news to subscribers, next batch
+  run("campaign_push", sendCampaignBatch(env, 10));
+  // late orders (SLA), parcels ready, critical stock → Admin alerts (one D1 batch)
+  run("alerts", scanAlerts(env));
+  // contact messages that arrived after the last Telegram notice, in one message
+  run("contact_digest", contactDigest(env));
 }
 
 async function callbackReminder(env: Env) {
@@ -88,5 +91,7 @@ async function purgeExpired(env: Env) {
     env.DB.prepare("DELETE FROM outbox WHERE done_at IS NOT NULL AND done_at < ?").bind(now - 30 * 86400_000),
     // privacy: drop IP hashes / user agents after 90 days
     env.DB.prepare("UPDATE orders SET ip_hash = NULL, ua_short = NULL WHERE created_at < ? AND ip_hash IS NOT NULL").bind(now - 90 * 86400_000),
+    // abandoned checkouts (phone, name) are kept 30 days, then deleted
+    env.DB.prepare("DELETE FROM carts WHERE updated_at < ?").bind(now - 30 * 86400_000),
   ]);
 }

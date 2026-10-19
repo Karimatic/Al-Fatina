@@ -26,8 +26,8 @@ export const STORE_TEXTS: Record<Locale, StoreTexts> = {
   fr: {
     eyebrow: "Nouvelle collection",
     title: "L’élégance & la qualité au meilleur prix",
-    subtitle: "Pyjamas, lingerie, nuisettes et djebbas choisis avec soin, livrés partout en Algérie.",
-    announcement: ["🚚 Livraison dans les 69 wilayas", "💵 Paiement à la livraison", "🔄 Échange possible", "🌸 Boutique à Boumerdès · 7j/7"],
+    subtitle: "Robes, ensembles et tenues pour femmes choisis avec soin, livrés partout en Algérie.",
+    announcement: ["Livraison dans les 69 wilayas", "Paiement à la livraison", "Échange possible", "Commandez en ligne · 7j/7"],
     faq: [
       { q: "Où livrez-vous ?", a: "Dans les 69 wilayas avec ZR Express, à domicile ou au bureau le plus proche." },
       { q: "Comment payer ?", a: "En espèces à la réception du colis, sans carte bancaire." },
@@ -41,8 +41,8 @@ export const STORE_TEXTS: Record<Locale, StoreTexts> = {
   ar: {
     eyebrow: "تشكيلة جديدة",
     title: "الأناقة والجودة بأفضل سعر",
-    subtitle: "بيجامات، ملابس داخلية، قمصان نوم وجبب مختارة بعناية، تصلك إلى كل أنحاء الجزائر.",
-    announcement: ["🚚 التوصيل إلى 69 ولاية", "💵 الدفع عند الاستلام", "🔄 إمكانية التبديل", "🌸 محلنا في بومرداس · 7/7"],
+    subtitle: "فساتين، أطقم وأزياء نسائية مختارة بعناية، تصلك إلى كل أنحاء الجزائر.",
+    announcement: ["التوصيل إلى 69 ولاية", "الدفع عند الاستلام", "إمكانية التبديل", "اطلبي أونلاين · 7/7"],
     faq: [
       { q: "أين توصلون؟", a: "نوصل إلى كل الولايات الـ69 مع ZR Express، إلى المنزل أو إلى أقرب مكتب." },
       { q: "كيف أدفع؟", a: "تدفعين نقدًا عند استلام الطلب، لا حاجة لبطاقة بنكية." },

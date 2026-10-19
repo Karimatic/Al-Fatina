@@ -1,10 +1,10 @@
-import { formatDzPhone } from "@henine/shared";
+import { formatDzPhone } from "@elfatina/shared";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { Printer } from "lucide-react";
 import { useEffect } from "react";
 import { api } from "../api";
-import { Blossom } from "../brand";
+import { BrandMark } from "../brand";
 import { da, daMinus, date } from "../lib/format";
 import { ErrorState, ListSkeleton } from "../ui";
 import { tr } from "../i18n";
@@ -88,7 +88,7 @@ function SlipCard({ s, store }: { s: Slip; store: SlipsData["store"] }) {
     <section className="slip mb-6 border border-dashed border-ink/40 bg-surface p-5 text-[12.5px] leading-snug text-ink print:mb-0">
       <header className="flex items-start justify-between gap-4 border-b border-ink/20 pb-3">
         <div className="flex items-center gap-2">
-          <Blossom size={26} />
+          <BrandMark size={26} />
           <div>
             <p className="font-display text-lg italic font-bold text-plum-700">{store.name}</p>
             <p className="text-[11px] text-ink-soft">
@@ -168,7 +168,7 @@ function SlipCard({ s, store }: { s: Slip; store: SlipsData["store"] }) {
         </dl>
       </div>
       <p className="mt-3 border-t border-ink/20 pt-2 text-center text-[11px] text-ink-soft">
-        {tr("Merci pour votre confiance 🌸")} <span dir="rtl">شكرا لثقتك</span> {tr("· Échange possible sous 48 h")}
+        {tr("Merci pour votre confiance ✨")} <span dir="rtl">شكرا لثقتك</span> {tr("· Échange possible sous 48 h")}
       </p>
     </section>
   );

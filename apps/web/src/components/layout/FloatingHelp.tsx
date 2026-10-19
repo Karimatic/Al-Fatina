@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { formatDA, type AssistantReplyDTO } from "@henine/shared";
+import { formatDA, type AssistantReplyDTO } from "@elfatina/shared";
 import { ProductImage, Spinner } from "@/components/ui/kit";
 import { apiPost } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
@@ -30,8 +30,8 @@ export function FloatingHelp() {
   useEffect(() => {
     let seen = "1";
     try {
-      seen = sessionStorage.getItem("henine.assistantHint") ?? "";
-      sessionStorage.setItem("henine.assistantHint", "1");
+      seen = sessionStorage.getItem("elfatina.assistantHint") ?? "";
+      sessionStorage.setItem("elfatina.assistantHint", "1");
     } catch {
       /* private mode: no bubble */
     }
@@ -52,8 +52,8 @@ export function FloatingHelp() {
   }, []);
   useEffect(() => {
     const show = () => setOpen(true);
-    window.addEventListener("henine:assistant", show);
-    return () => window.removeEventListener("henine:assistant", show);
+    window.addEventListener("elfatina:assistant", show);
+    return () => window.removeEventListener("elfatina:assistant", show);
   }, []);
   // stable: the panel's setup (focus, scroll lock) must not run again while she types
   const close = useCallback(() => setOpen(false), []);
@@ -89,7 +89,7 @@ export function FloatingHelp() {
             setOpen(true);
           }}
           aria-label={t.plus.assistant.open}
-          className={`assistant-fab lift relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-gradient-to-br from-rose-500 via-plum-600 to-plum-700 ps-1.5 text-sm ${compact ? "pe-1.5 md:pe-4" : "pe-4"} font-semibold text-white shadow-[0_12px_30px_-8px_rgb(142_16_72/0.7)] ring-2 ring-white/80`}
+          className={`assistant-fab lift relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-ink ps-1.5 text-sm ${compact ? "pe-1.5 md:pe-4" : "pe-4"} font-medium text-white shadow-[0_6px_20px_-6px_rgb(0_0_0/0.45)]`}
         >
           <span className="grid size-9 place-items-center rounded-full bg-white/20" aria-hidden="true">
             <span className="assistant-spark">
@@ -186,7 +186,7 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
   return (
     <div className="sheet-backdrop fixed inset-0 z-50 flex items-end justify-center bg-noir/50 md:items-center" ref={dialogRef} role="dialog" aria-modal="true" aria-label={A.title} onClick={onClose}>
       <div className="sheet-in flex max-h-[88dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-[1.75rem] bg-ivory shadow-2xl md:rounded-[1.75rem]" onClick={(e) => e.stopPropagation()}>
-        <header className="flex items-center justify-between gap-3 bg-gradient-to-br from-plum-600 to-plum-700 px-5 py-4 text-white">
+        <header className="flex items-center justify-between gap-3 bg-ink px-5 py-4 text-white">
           <div>
             <p className="heading-display text-xl">{A.title}</p>
             <p className="text-xs text-white/75">{ar ? "من منتجاتنا المتوفرة فقط" : "Uniquement nos pièces en stock"}</p>
@@ -313,5 +313,5 @@ function AssistantPanel({ onClose, locale }: { onClose: () => void; locale: "fr"
 
 /** Opens the assistant from anywhere (search page "ask the assistant"). */
 export function openAssistant() {
-  window.dispatchEvent(new Event("henine:assistant"));
+  window.dispatchEvent(new Event("elfatina:assistant"));
 }

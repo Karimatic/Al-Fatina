@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { dateLocale, formatDA, type WilayaDTO } from "@henine/shared";
+import { dateLocale, formatDA, type WilayaDTO } from "@elfatina/shared";
 import { WhatsAppIcon } from "@/components/layout/FloatingHelp";
 import { useApi } from "@/lib/api";
 import { useLocale } from "@/lib/locale";
 import { useSite, whatsappLink } from "@/lib/site";
 import { checkoutMemory } from "@/lib/stores";
 
-const KEY = "henine.wilaya.v1";
+const KEY = "elfatina.wilaya.v1";
 
 /** Today + n delivery days, skipping Fridays (no deliveries). */
 function addDeliveryDays(n: number): Date {

@@ -4,7 +4,7 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { hasPermission } from "@henine/shared";
+import { hasPermission } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { isDev } from "../../env";
 import { body, HttpError, intParam } from "../../lib/http";

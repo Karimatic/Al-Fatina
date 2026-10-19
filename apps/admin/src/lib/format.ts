@@ -1,4 +1,4 @@
-import { formatDA, formatDzPhone, STATUS_LABELS, toE164, type OrderStatus } from "@henine/shared";
+import { formatDA, formatDzPhone, STATUS_LABELS, toE164, type OrderStatus } from "@elfatina/shared";
 import { isAr, tr } from "../i18n";
 
 const LOCALE = isAr ? "ar-DZ" : "fr-DZ";

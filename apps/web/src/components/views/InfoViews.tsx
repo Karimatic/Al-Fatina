@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useFormGuard } from "@/lib/formGuard";
-import { normalizeDzPhone, toE164, type LinkDTO, type PageDTO, type SiteConfigDTO } from "@henine/shared";
-import { Blossom, InstagramIcon } from "@/components/ui/icons";
+import { normalizeDzPhone, toE164, type LinkDTO, type PageDTO, type SiteConfigDTO } from "@elfatina/shared";
+import { BrandMark, InstagramIcon } from "@/components/ui/icons";
 import { Markdown } from "@/components/ui/Markdown";
 import { ErrorBox, inputCls, PageTitle, Spinner } from "@/components/ui/kit";
 import { apiPost, slugFromPath, useApi } from "@/lib/api";
@@ -93,7 +93,7 @@ export function LinksView() {
   const { data, error, reload } = useApi<LinkDTO[]>("/links");
   return (
     <div className="mx-auto max-w-md px-4 py-10 text-center">
-      <Blossom size={64} className="mx-auto animate-bloom" />
+      <BrandMark size={64} className="mx-auto " />
       <h1 className="heading-display mt-3 text-3xl text-plum-700" dir="ltr">{t.links.title}</h1>
       <p className="mt-1 text-sm text-ink-soft">{t.brand.tagline}</p>
       <ul className="mt-8 space-y-3">
@@ -124,7 +124,7 @@ export function PageView() {
   useEffect(() => setSlug(slugFromPath(location.pathname)), []);
   const { data, error, reload } = useApi<PageDTO>(slug && slug !== "_" ? `/pages/${encodeURIComponent(slug)}` : null);
   useEffect(() => {
-    if (data) document.title = `${ar ? data.titleAr : data.titleFr} · Henine Boutique`;
+    if (data) document.title = `${ar ? data.titleAr : data.titleFr} · El Fatina`;
   }, [data, ar]);
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">

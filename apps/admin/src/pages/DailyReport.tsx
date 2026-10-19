@@ -102,7 +102,7 @@ export function DailyReportCard() {
               className={`rounded-xl p-3 text-sm ${r.late ? "bg-red-50 text-red-900" : "bg-ivory-deep"}`}
             >
               <p className="text-xs opacity-80">{tr("⏰ En retard maintenant")}</p>
-              <p className="mt-0.5 font-semibold">{r.late ? tr("{0} commande(s) à traiter →", { 0: r.late }) : tr("Aucune 🌸")}</p>
+              <p className="mt-0.5 font-semibold">{r.late ? tr("{0} commande(s) à traiter →", { 0: r.late }) : tr("Aucune ✨")}</p>
             </Link>
           </div>
         </div>

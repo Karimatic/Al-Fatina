@@ -4,7 +4,7 @@
  * comes back when the member may see that section.
  */
 import { Hono } from "hono";
-import { hasPermission, type OrderStatus, type Permission } from "@henine/shared";
+import { hasPermission, type OrderStatus, type Permission } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
 import { mediaUrl } from "../../lib/catalog";
 

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { DEFAULT_DESIGN, productBgVars, themeVars, themeVarsDark } from "@henine/shared";
+import { DEFAULT_DESIGN, productBgVars, themeVars } from "@elfatina/shared";
 import { designFontVars, ownFontFace } from "@/lib/fontPresets";
 import { DESIGN_KEY as KEY } from "@/lib/boot";
 import { useDesign } from "@/lib/site";
@@ -8,7 +8,7 @@ const rules = (vars: Record<string, string>) => Object.entries(vars).map(([k, v]
 
 /**
  * Colours and fonts chosen in Admin → Page d'accueil → Apparence, as a small stylesheet
- * (light values, and their dark-mode versions). Remembered on the phone so the next page
+ * (the store is light only). Remembered on the phone so the next page
  * paints with them straight away (see THEME_BOOT).
  */
 export function ThemeStyle() {
@@ -23,32 +23,22 @@ export function ThemeStyle() {
     const isDefault = accent.toLowerCase() === DEFAULT_DESIGN.colors.accent && soft.toLowerCase() === DEFAULT_DESIGN.colors.soft;
     const fonts = designFontVars({ font, customFont });
     let css = ownFontFace({ font, customFont, fontFile }) + (Object.keys(fonts).length ? `:root:root{${rules(fonts)}}` : "");
-    if (!isDefault) {
-      const dark = rules(themeVarsDark({ accent, soft }));
-      css +=
-        `:root:root{${rules(themeVars({ accent, soft }))}}` +
-        `@media screen{:root:root[data-theme="dark"]{${dark}}@media (prefers-color-scheme: dark){:root:root:not([data-theme="light"]){${dark}}}}`;
-    }
+    if (!isDefault) css += `:root:root{${rules(themeVars({ accent, soft }))}}`;
     // background behind product pictures (Apparence → Fond des produits)
     const tile = productBgVars(productBg, false);
-    if (Object.keys(tile).length) {
-      const dark = rules(productBgVars(productBg, true));
-      css +=
-        `:root:root{${rules(tile)}}` +
-        `@media screen{:root:root[data-theme="dark"]{${dark}}@media (prefers-color-scheme: dark){:root:root:not([data-theme="light"]){${dark}}}}`;
-    }
-    let style = document.getElementById("henine-theme");
+    if (Object.keys(tile).length) css += `:root:root{${rules(tile)}}`;
+    let style = document.getElementById("elfatina-theme");
     if (css) {
       if (!style) {
-        style = Object.assign(document.createElement("style"), { id: "henine-theme" });
+        style = Object.assign(document.createElement("style"), { id: "elfatina-theme" });
         document.head.appendChild(style);
       }
       if (style.textContent !== css) style.textContent = css;
     } else style?.remove();
     try {
       localStorage.setItem(KEY, JSON.stringify({ css }));
-      localStorage.removeItem("henine.design.v1");
-      localStorage.removeItem("henine.design.v2"); // older format with a Google Fonts link
+      localStorage.removeItem("elfatina.design.v1");
+      localStorage.removeItem("elfatina.design.v2"); // older format with a Google Fonts link
     } catch {
       /* private mode */
     }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { formatDA, normalizeSearch, type CategoryDTO, type ProductCardDTO } from "@henine/shared";
+import { formatDA, normalizeSearch, type CategoryDTO, type ProductCardDTO } from "@elfatina/shared";
 import { openAssistant } from "@/components/layout/FloatingHelp";
 import { ProductGrid, ProductGridSkeleton } from "@/components/product/ProductCard";
 import { SearchIcon } from "@/components/ui/icons";
