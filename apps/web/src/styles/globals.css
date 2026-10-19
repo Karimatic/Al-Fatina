@@ -2,36 +2,36 @@
 @import "./fonts.css";
 
 /*
- * Al Fatina design tokens, "silk luxe" in feminine tones: a white page with blush sections, dusty
- * rose buttons and accents, rose-gold details, warm mauve-brown text, soft 2 px corners and spaced
- * capitals; a berry red for sales only.
- * WCAG contrast: ink 13.4:1, ink-soft 5.7:1 (5.1:1 on blush), white on the rose buttons 5.0:1,
- * accent text 7.2:1, sale 7.7:1 (AA ✓). rose-300/500 and gold are decoration only, never text.
+ * Al Fatina design tokens, "silk luxe" in pink and purple: a white page with pale pink-lavender
+ * sections, buttons and strips in a rose-pink → violet gradient, deep plum-purple text, soft 2 px
+ * corners and spaced capitals; a berry red for sales only.
+ * WCAG contrast: ink 14.6:1, ink-soft 6.3:1 (5.7:1 on the tint), white on the gradient 5.0–7.5:1,
+ * accent text 8.0:1, sale 6.9:1 (AA ✓). rose-300/500 and gold are decoration only, never text.
  */
 @theme {
   --default-border-width: 1px;
   --color-ivory: #ffffff;
-  --color-ivory-deep: #fcf0f1;
-  --color-ink: #3d2a30;
-  --color-ink-soft: #7d5f66;
-  --color-line: #f0dde0;
-  --color-rose-800: #7a3046;
-  --color-plum-600: #b04f68;
-  --color-plum-700: #8f3b52;
-  --color-rose-100: #fcf0f1;
-  --color-rose-300: #ecc5cc;
-  --color-rose-500: #d98fa0;
-  --color-rose-700: #b04f68;
-  --color-gold: #c99a8f;
+  --color-ivory-deep: #faf0f8;
+  --color-ink: #35213f;
+  --color-ink-soft: #6e5878;
+  --color-line: #eedbea;
+  --color-rose-800: #5e2d8c;
+  --color-plum-600: #9e3a92;
+  --color-plum-700: #7a2f8c;
+  --color-rose-100: #faf0f8;
+  --color-rose-300: #e9c6e4;
+  --color-rose-500: #c98bc6;
+  --color-rose-700: #9e3a92;
+  --color-gold: #d4a3c9;
   --color-success: #2f6b4a;
-  --color-danger: #a3123f;
+  --color-danger: #b0124a;
   --color-surface: #ffffff;
-  --color-noir: #3d2a30;
+  --color-noir: #35213f;
   --color-on-ink: #ffffff;
-  --color-accent-text: #8f3b52;
+  --color-accent-text: #7a2f8c;
   /* sales and discounts: the one colour that is never the theme's */
-  --color-sale: #a3123f;
-  --color-cream: #fcf0f1;
+  --color-sale: #b0124a;
+  --color-cream: #faf0f8;
 
   --font-display: var(--font-p-jost), "Century Gothic", Arial, sans-serif;
   --font-sans: var(--font-p-jost), system-ui, sans-serif;
@@ -71,6 +71,17 @@
   margin-inline-end: -0.32em;
   color: var(--color-ink);
 }
+
+/* Pink → purple: the filled accents carry the gradient over their plain colour (kept as the
+   fallback and for borders); the deeper one is for the club line. */
+:root {
+  --grad-brand: linear-gradient(100deg, #c2397a 0%, #9e3a92 50%, #6e3aa6 100%);
+  --grad-deep: linear-gradient(100deg, #a32e68 0%, #5e2d8c 100%);
+}
+.bg-plum-600 { background-image: var(--grad-brand); }
+.bg-plum-700 { background-image: var(--grad-deep); }
+:is(a, button).bg-plum-600:hover { filter: brightness(0.94); }
+[dir="rtl"] .bg-plum-600 { background-image: linear-gradient(260deg, #c2397a 0%, #9e3a92 50%, #6e3aa6 100%); }
 
 /* Pills and chips get the soft 2 px corner like the buttons; round things with a fixed size stay
    round (colour dots, icon buttons, avatars). */
@@ -228,8 +239,8 @@ html[lang="ar"] :is(.uppercase, .heading-display, .title-silk, .eyebrow-silk) {
     letter-spacing: 0.16em;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
-  .btn-silk { background: var(--color-plum-600); color: #fff; }
-  .btn-silk:hover { background: var(--color-plum-700); }
+  .btn-silk { background: var(--color-plum-600) var(--grad-brand); color: #fff; }
+  .btn-silk:hover { filter: brightness(0.94); }
   .btn-silk-line { border: 1px solid currentColor; }
   .btn-silk-line:hover { background: var(--color-plum-600); color: #fff; border-color: var(--color-plum-600); }
   html[lang="ar"] :is(.btn-silk, .btn-silk-line) { letter-spacing: 0; font-size: 0.9375rem; font-weight: 700; }

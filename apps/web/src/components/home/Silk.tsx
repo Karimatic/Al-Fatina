@@ -38,13 +38,13 @@ export function SilkHero({ sale }: { sale: boolean }) {
         />
       )}
       {design.heroVideo && <LoopVideo src={design.heroVideo} className="absolute inset-0 -z-10 size-full object-cover" />}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-[#3d2a30]/70 via-[#b04f68]/20 to-transparent md:bg-gradient-to-r md:from-[#3d2a30]/60 md:via-[#b04f68]/15 rtl:md:bg-gradient-to-l" />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-[#35213f]/70 via-[#9e3a92]/25 to-transparent md:bg-gradient-to-r md:from-[#35213f]/60 md:via-[#9e3a92]/20 rtl:md:bg-gradient-to-l" />
       <div className="mx-auto flex min-h-[34rem] max-w-7xl flex-col justify-end px-6 pb-10 text-white md:min-h-[40rem] md:justify-center md:px-12 md:pb-0">
         <p className="eyebrow-silk text-white/90">{eyebrow}</p>
         <h1 className="title-silk mt-3 max-w-xl text-balance text-[2rem] leading-[1.15] md:text-[3.4rem]">{title}</h1>
         <p className="mt-4 max-w-md text-[15px] leading-relaxed text-white/90 md:text-base">{subtitle}</p>
         <div className="mt-7 flex flex-wrap gap-3">
-          <a href={href("/nouveautes")} className="btn-silk bg-white text-ink hover:bg-white/90">
+          <a href={href("/nouveautes")} className="btn-silk">
             {t.silk.discover}
           </a>
           {sale && (
@@ -109,7 +109,7 @@ export function CategoryBanners({ categories, products }: { categories: Category
                 ) : sample ? (
                   <ProductImage image={sample.image} alt="" sizes="50vw" className="size-full transition duration-700 group-hover:scale-[1.03]" />
                 ) : null}
-                <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#3d2a30]/60 via-[#b04f68]/5 to-transparent" />
+                <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#35213f]/60 via-[#9e3a92]/10 to-transparent" />
                 <span className="absolute inset-x-0 bottom-0 flex flex-col items-center p-4 text-center text-white md:p-8">
                   <span className="title-silk text-[1rem] md:text-2xl">{name}</span>
                   <span className="mt-2 text-[10.5px] uppercase tracking-[0.18em] underline underline-offset-[6px] md:text-xs">{t.silk.discover}</span>

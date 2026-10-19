@@ -1347,7 +1347,7 @@ export const AR: Record<string, string> = {
   "Tendances (carrousel)": "الرائج (شريط متحرك)",
   "La sélection (onglets)": "مختاراتنا (تبويبات)",
   "À explorer": "اكتشفي أيضا",
-  "Rose poudré (Al Fatina)": "وردي ناعم (الفاتنة)",
+  "Rose & violet (Al Fatina)": "وردي وبنفسجي (الفاتنة)",
   Soie: "حريري",
   Prune: "برقوقي",
   "Al Fatina (Jost)": "الفاتنة (Jost)",

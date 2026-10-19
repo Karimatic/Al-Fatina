@@ -22,27 +22,27 @@
   /* thicker outlines for cards, inputs, chips and separators (border, border-t…, divide-y), both themes */
   --default-border-width: 2px;
   --color-ivory: #ffffff; /* same grounds and hairlines as the store */
-  --color-ivory-deep: #fcf0f1;
-  --color-sidebar: #fdf7f8;
+  --color-ivory-deep: #faf0f8;
+  --color-sidebar: #fcf6fb;
   /* same "bold luxury" palette as the store: near-black plum ink, deep raspberry accent */
-  --color-ink: #3d2a30;
-  --color-ink-soft: #7d5f66;
-  --color-line: #efdade; /* visible hairlines on white, like the dark theme */
-  --color-plum-600: #b04f68;
-  --color-plum-700: #8f3b52;
-  --color-rose-100: #fcf0f1;
-  --color-rose-300: #ecc5cc;
-  --color-rose-500: #d98fa0;
-  --color-rose-700: #8f3b52;
-  --color-gold: #c99a8f;
+  --color-ink: #35213f;
+  --color-ink-soft: #6e5878;
+  --color-line: #eedbea; /* visible hairlines on white, like the dark theme */
+  --color-plum-600: #9e3a92;
+  --color-plum-700: #7a2f8c;
+  --color-rose-100: #faf0f8;
+  --color-rose-300: #e9c6e4;
+  --color-rose-500: #c98bc6;
+  --color-rose-700: #7a2f8c;
+  --color-gold: #d4a3c9;
   --color-lavender: #b39ddb;
   --color-peach: #ffab91;
   --color-surface: #ffffff; /* cards, sheets, inputs (dark in dark mode) */
-  --color-noir: #3d2a30; /* footer, photo overlays: dark in both modes */
+  --color-noir: #35213f; /* footer, photo overlays: dark in both modes */
   --color-on-ink: #ffffff; /* text on an ink chip (chips turn light in dark mode) */
-  --color-accent-text: #8f3b52; /* accent text on the page ground */
-  --color-chart: #b04f68; /* chart lines and bars */
-  --color-chart-strong: #8f3b52;
+  --color-accent-text: #7a2f8c; /* accent text on the page ground */
+  --color-chart: #9e3a92; /* chart lines and bars */
+  --color-chart-strong: #6e3aa6;
   /* order outcomes (validated categorical steps: light here, dark in the dark block) */
   --color-o-delivered: #1baf7a;
   --color-o-progress: #2a78d6;
@@ -230,26 +230,26 @@ html[lang="ar"] body {
  * Screen only: printing (slips, invoices) always uses the light colours. */
 @media screen {
 :root[data-theme="dark"] {
-  --color-ivory: #160f11;
-  --color-ivory-deep: #22171a;
-  --color-surface: #1c1316;
-  --color-ink: #f6ecee;
-  --color-ink-soft: #cdb5bb;
-  --color-line: #3a2a2f;
-  --color-rose-100: #3a1f27;
-  --color-noir: #0d0809;
-  --color-on-ink: #160f11;
-  --color-accent-text: #f0b3c1;
-  --color-chart: #e58fa5;
-  --color-chart-strong: #f4bccb;
+  --color-ivory: #140e18;
+  --color-ivory-deep: #201628;
+  --color-surface: #1a1220;
+  --color-ink: #f4ecf6;
+  --color-ink-soft: #cbb6d2;
+  --color-line: #382a40;
+  --color-rose-100: #331f3d;
+  --color-noir: #0c080e;
+  --color-on-ink: #140e18;
+  --color-accent-text: #e5b3e8;
+  --color-chart: #d58fd6;
+  --color-chart-strong: #e8bdeb;
   --color-o-delivered: #199e70;
   --color-o-progress: #3987e5;
   --color-o-pending: #c98500;
   --color-o-cancelled: #9085e9;
   --color-o-returned: #e66767;
-  --color-sidebar: #191013;
-  --color-plum-600: #b04f68;
-  --color-plum-700: #8f3b52;
+  --color-sidebar: #170f1c;
+  --color-plum-600: #9e3a92;
+  --color-plum-700: #7a2f8c;
   --color-emerald-50: #0f2a20;
   --color-emerald-100: #123526;
   --color-emerald-700: #7fdcb0;
@@ -302,24 +302,24 @@ html[lang="ar"] body {
 :root[data-theme="dark"] .text-success { color: #72dfa9; }
 @media (prefers-color-scheme: dark) {
 :root:not([data-theme="light"]) {
-  --color-ivory: #160f11;
-  --color-ivory-deep: #22171a;
-  --color-surface: #1c1316;
-  --color-ink: #f6ecee;
-  --color-ink-soft: #cdb5bb;
-  --color-line: #3a2a2f;
-  --color-rose-100: #3a1f27;
-  --color-noir: #0d0809;
-  --color-on-ink: #160f11;
-  --color-accent-text: #f0b3c1;
-  --color-chart: #e58fa5;
-  --color-chart-strong: #f4bccb;
+  --color-ivory: #140e18;
+  --color-ivory-deep: #201628;
+  --color-surface: #1a1220;
+  --color-ink: #f4ecf6;
+  --color-ink-soft: #cbb6d2;
+  --color-line: #382a40;
+  --color-rose-100: #331f3d;
+  --color-noir: #0c080e;
+  --color-on-ink: #140e18;
+  --color-accent-text: #e5b3e8;
+  --color-chart: #d58fd6;
+  --color-chart-strong: #e8bdeb;
   --color-o-delivered: #199e70;
   --color-o-progress: #3987e5;
   --color-o-pending: #c98500;
   --color-o-cancelled: #9085e9;
   --color-o-returned: #e66767;
-  --color-sidebar: #191013;
+  --color-sidebar: #170f1c;
   --color-emerald-50: #0f2a20;
   --color-emerald-100: #123526;
   --color-emerald-700: #7fdcb0;
@@ -407,3 +407,7 @@ html[lang="ar"] body {
 *::-webkit-scrollbar {
   display: none;
 }
+
+/* Al Fatina: the filled accents carry the pink → purple gradient over their plain colour */
+.bg-plum-600 { background-image: linear-gradient(100deg, #c2397a 0%, #9e3a92 50%, #6e3aa6 100%); }
+.bg-plum-700 { background-image: linear-gradient(100deg, #a32e68 0%, #5e2d8c 100%); }
