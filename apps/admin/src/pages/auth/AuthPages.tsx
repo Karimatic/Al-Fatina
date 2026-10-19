@@ -93,7 +93,12 @@ export function LoginPage() {
     setBusy(true);
     try {
       const key = await derivePasswordKey(email, password);
-      const res = await auth<{ challenge: string; emailHint: string; devCode?: string; method?: "totp" | "email" }>("/login", { email: email.trim(), key, remember });
+      const res = await auth<{ challenge: string; emailHint: string; devCode?: string; method?: "totp" | "email" | "password" }>("/login", { email: email.trim(), key, remember });
+      // email + password was enough (no authenticator, no email service): straight in
+      if (res.method === "password") {
+        location.href = nextUrl();
+        return;
+      }
       setChallenge({ id: res.challenge, hint: res.emailHint, dev: res.devCode, totp: res.method === "totp" });
       setStep("code");
     } catch (err) {

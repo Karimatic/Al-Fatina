@@ -93,3 +93,26 @@ describe("admin sign-in without an email service: authenticator app", () => {
     }
   });
 });
+
+describe("admin sign-in: email + password only (no authenticator app, no email service)", () => {
+  it("the right password opens a session at once; a wrong one does not", async () => {
+    const db = testDb();
+    const e = env(db);
+    const { hashPassword } = await import("../lib/auth");
+    const { hash, salt } = await hashPassword(e, KEY);
+    db.sqlite.exec(
+      `INSERT INTO team_members (id, email, name, role_id, is_active, password_hash, password_salt)
+       VALUES (1, 'owner@shop.test', 'Owner', (SELECT id FROM roles WHERE key = 'owner'), 1, '${hash}', '${salt}')`,
+    );
+    const res = await app.request(
+      "/login",
+      { method: "POST", headers: { "Content-Type": "application/json", Origin: "https://shop.test" }, body: JSON.stringify({ email: "owner@shop.test", key: KEY }) },
+      e,
+      ctx,
+    );
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { method: string }).method).toBe("password");
+    expect(res.headers.get("set-cookie") ?? "").toMatch(/HttpOnly/i);
+    expect((await call(e, "/login", { email: "owner@shop.test", key: "b".repeat(64) })).status).toBe(401);
+  });
+});

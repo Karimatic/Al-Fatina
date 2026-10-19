@@ -65,6 +65,14 @@ authRoutes.post("/login", async (c) => {
     if (m) await registerFailure(c.env, m);
     throw new HttpError(401, "invalid_credentials");
   }
+  // El Fatina: email + password is enough for an account without an authenticator app when the
+  // shop has no email service (no code could be sent). Rate limit and lockout still apply; an
+  // account that sets up an authenticator keeps the second step.
+  if (!m.totp_secret_enc && !mailReady(c.env)) {
+    await createSession(c, m.id, input.remember);
+    await c.env.DB.batch([auditStmt(c.env, `member:${m.id}`, "login", "session", { method: "password" })]);
+    return c.json({ ok: true, method: "password" });
+  }
   const ch = await createChallenge(c.env, m.id, "login", { remember: input.remember });
   const emailHint = m.email.replace(/^(.).*(@.*)$/, "$1•••$2");
   // set up with an authenticator app: its code, no email needed
