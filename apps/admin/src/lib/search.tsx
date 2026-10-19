@@ -751,7 +751,7 @@ function SearchDialog({ groups, permissions, onClose }: { groups: NavGroup[]; pe
           })}
           {!q.trim() && (
             <li role="presentation" className="px-3 pb-1 pt-3 text-xs leading-relaxed text-ink-soft">
-              {tr("Astuce : tapez un numéro de commande (EF-…), un téléphone, un nom, une référence de produit, un code promo ou un mot comme « son » ou « livraison ».")}
+              {tr("Astuce : tapez un numéro de commande (AF-…), un téléphone, un nom, une référence de produit, un code promo ou un mot comme « son » ou « livraison ».")}
             </li>
           )}
           {q.trim() && !hits.length && (

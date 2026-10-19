@@ -13,13 +13,13 @@ function randomChars(length: number, alphabet: string): string {
   return out;
 }
 
-/** Public order code, e.g. "EF-7K3P9Q". ~1 billion combinations, non-sequential. */
+/** Public order code, e.g. "AF-7K3P9Q". ~1 billion combinations, non-sequential. */
 export function newOrderCode(): string {
-  return `EF-${randomChars(6, CROCKFORD)}`;
+  return `AF-${randomChars(6, CROCKFORD)}`;
 }
 
 export function isOrderCode(value: string): boolean {
-  return /^EF-[0-9A-HJKMNP-TV-Z]{6}$/.test(value.trim().toUpperCase());
+  return /^AF-[0-9A-HJKMNP-TV-Z]{6}$/.test(value.trim().toUpperCase());
 }
 
 /** 128-bit URL-safe secret (tracking links, review links). Only its hash is stored. */

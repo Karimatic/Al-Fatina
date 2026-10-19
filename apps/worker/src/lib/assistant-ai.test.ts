@@ -101,7 +101,7 @@ describe("assistant AI voice", () => {
     const env = { DB: db } as unknown as Env;
     const offTopic = await answer(env, assistantInput.parse({ q: "هل انت ai حقيقي", locale: "ar" }));
     expect(offTopic.products).toEqual([]);
-    expect(offTopic.reply).toContain("El Fatina");
+    expect(offTopic.reply).toContain("Al Fatina");
     const search = await answer(env, assistantInput.parse({ q: "بيجامة", locale: "ar" }));
     expect(search.products.map((p) => p.slug)).toEqual(["pyjama"]);
   });

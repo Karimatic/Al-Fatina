@@ -11,7 +11,7 @@ const SEEN = "elfatina.visits.v1";
 const DISMISSED = "elfatina.install.dismissed";
 
 /**
- * "Installer El Fatina": the store as an app on the home screen (PWA). Offered from
+ * "Installer Al Fatina": the store as an app on the home screen (PWA). Offered from
  * the second visit, never again for 30 days once dismissed. Android/desktop use the browser's
  * own install prompt; iPhone gets the two-tap instructions (Safari has no prompt).
  */

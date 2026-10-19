@@ -40,7 +40,7 @@ async function sendCode(c: Parameters<typeof devEcho>[0], to: string, name: stri
     purpose === "login" ? `Votre code de connexion : ${value}` : purpose === "reset" ? `Réinitialisation du mot de passe : ${value}` : `Activez votre compte : ${value}`;
   const intro =
     purpose === "login"
-      ? "Voici votre code pour vous connecter à l'administration El Fatina."
+      ? "Voici votre code pour vous connecter à l'administration Al Fatina."
       : purpose === "reset"
         ? "Voici votre code pour choisir un nouveau mot de passe."
         : "Voici votre code pour activer votre compte d'équipe.";
@@ -65,7 +65,7 @@ authRoutes.post("/login", async (c) => {
     if (m) await registerFailure(c.env, m);
     throw new HttpError(401, "invalid_credentials");
   }
-  // El Fatina: email + password is enough for an account without an authenticator app when the
+  // Al Fatina: email + password is enough for an account without an authenticator app when the
   // shop has no email service (no code could be sent). Rate limit and lockout still apply; an
   // account that sets up an authenticator keeps the second step.
   if (!m.totp_secret_enc && !mailReady(c.env)) {

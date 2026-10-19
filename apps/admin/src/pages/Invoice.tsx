@@ -44,7 +44,7 @@ export function InvoicePage() {
   });
   const o = q.data?.slips[0];
   useEffect(() => {
-    if (o) document.title = `Facture ${o.public_code} · El Fatina`;
+    if (o) document.title = `Facture ${o.public_code} · Al Fatina`;
   }, [o]);
 
   return (
@@ -72,7 +72,7 @@ export function InvoicePage() {
             <div className="flex items-center gap-3">
               <BrandMark className="size-11" />
               <div>
-                <p className="text-2xl font-bold uppercase tracking-[0.18em] text-plum-700">El Fatina</p>
+                <p className="text-2xl font-bold uppercase tracking-[0.18em] text-plum-700">Al Fatina</p>
                 <p className="text-xs text-ink-soft">
                   {q.data.store.address ?? ""}{q.data.store.phone ? ` · ${formatDzPhone(q.data.store.phone)}` : ""}
                 </p>

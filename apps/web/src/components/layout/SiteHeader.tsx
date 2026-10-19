@@ -9,8 +9,8 @@ import { LanguageSwitch } from "./LanguageSwitch";
 import { SiteMenu } from "./SiteMenu";
 
 /**
- * Silk-shop header: a thin dark El Fatina Club line, then the bar.
- * Computers: EL FATINA on the left, the sections in spaced capitals, search · language · favourites
+ * Silk-shop header: a thin dark Al Fatina Club line, then the bar.
+ * Computers: AL FATINA on the left, the sections in spaced capitals, search · language · favourites
  * · bag on the right. Phones: ☰ and search at the start, the name in the middle, the bag at the end.
  * Only the bar stays at the top while scrolling.
  */
@@ -40,13 +40,13 @@ export function SiteHeader() {
             </a>
           </div>
 
-          <a href={href("/")} className="flex shrink-0 items-center py-2 lg:me-6 lg:ms-2" aria-label="El Fatina">
+          <a href={href("/")} className="flex shrink-0 items-center py-2 lg:me-6 lg:ms-2" aria-label="Al Fatina">
             {logo ? (
               // the shop's own logo (Admin → Page d'accueil → Apparence)
-              <img src={logo} alt="El Fatina" className="h-8 w-auto max-w-[10rem] object-contain md:h-10" />
+              <img src={logo} alt="Al Fatina" className="h-8 w-auto max-w-[10rem] object-contain md:h-10" />
             ) : (
               <span className="brand-mark whitespace-nowrap text-[1.05rem] min-[400px]:text-[1.2rem] md:text-[1.5rem]" dir="ltr">
-                El Fatina
+                Al Fatina
               </span>
             )}
           </a>

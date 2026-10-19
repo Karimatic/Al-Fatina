@@ -22,7 +22,7 @@ if (!pass) {
 
 function decrypt(file) {
   const b = readFileSync(file);
-  if (b.subarray(0, 4).toString() !== "HNB1") throw new Error("not a El Fatina backup file");
+  if (b.subarray(0, 4).toString() !== "HNB1") throw new Error("not a Al Fatina backup file");
   const salt = b.subarray(4, 20);
   const iv = b.subarray(20, 32);
   const tag = b.subarray(32, 48);

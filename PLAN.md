@@ -1,11 +1,11 @@
-# El Fatina — master plan
+# Al Fatina — master plan
 
-> **El Fatina / الفاتنة**, online women's clothing shop in Algeria (Instagram
+> **Al Fatina / الفاتنة**, online women's clothing shop in Algeria (Instagram
 > [@el_fatina_](https://www.instagram.com/el_fatina_/)). Delivery to the 69 wilayas, cash on delivery,
 > Arabic first (right to left) + French.
 >
 > Built on a fresh clone of the owner's Henine-Boutique engine, which is already proven in production:
-> security, speed, admin, Telegram, tests. El Fatina gets its own brand, its own design and its own
+> security, speed, admin, Telegram, tests. Al Fatina gets its own brand, its own design and its own
 > Cloudflare resources.
 >
 > Design reference: the **LilySilk** storefront style (lilysilk.com), matched in spirit, nothing copied.
@@ -16,7 +16,7 @@
 
 | Goal | How it is met |
 |---|---|
-| Best possible store for El Fatina | Calm, luxurious silk-shop look; fast pages; ordering in 3 taps; tracking without an account |
+| Best possible store for Al Fatina | Calm, luxurious silk-shop look; fast pages; ordering in 3 taps; tracking without an account |
 | Complete admin panel, phone first | 21 tabs (§6), one-hand use on a phone, live new-order alerts |
 | Secure on every side | §5: CSP with hashes, signed sessions + authenticator app, rate limits, audit log, no secrets in code |
 | Cloudflare free tier only | §4: a Worker serving pre-rendered pages, D1, R2, one cron, Durable Object; budget table |
@@ -39,7 +39,7 @@
   background behind them. Lots of white space.
 - **Header (every page):**
   - a thin cream service strip: "Livraison 69 wilayas · Paiement à la livraison · WhatsApp";
-  - a dark loyalty strip: "El Fatina Club: des points à chaque commande";
+  - a dark loyalty strip: "Al Fatina Club: des points à chaque commande";
   - the main bar:
     - **computer:** logo on the left, capital category links, then search, favourites and bag;
     - **phone:** ☰ on the left, logo in the middle, search and bag on the right.
@@ -57,8 +57,8 @@
 - **Product page:** gallery (swipe on phones), name in capitals, price, size and colour, a big
   charcoal "Commander" button, delivery estimate per wilaya, size guide, then the description and
   delivery & returns.
-- **Footer:** cream, four link columns + El Fatina Club. Then a thin legal bar.
-- **Logo:** "EL FATINA" in widely spaced Jost capitals. App icon: the "EF" monogram, charcoal on cream.
+- **Footer:** cream, four link columns + Al Fatina Club. Then a thin legal bar.
+- **Logo:** "AL FATINA" in widely spaced Jost capitals. App icon: the "EF" monogram, charcoal on cream.
 
 ## 3. Pages (Arabic at `/`, French at `/fr`)
 
@@ -162,14 +162,14 @@ search over everything, live badge on new orders.
 - **Clients:** every customer with orders, spending, returns, points, notes, a blacklist, and a delete
   on request (privacy law 18-07).
 - **Paniers:**
-  - **(restored for El Fatina)** checkouts started but not finished: name, phone, pieces, total and
+  - **(restored for Al Fatina)** checkouts started but not finished: name, phone, pieces, total and
     time;
   - call or WhatsApp in one tap, a restore link that refills her cart;
   - purged automatically.
 - **Promos:**
   - promo codes (percentage, amount, free delivery, minimum, dates, uses per customer);
   - flash sales with countdown; collections and drops.
-- **Fidélité:** El Fatina Club settings (points per DA, value of a point, expiry, welcome bonus),
+- **Fidélité:** Al Fatina Club settings (points per DA, value of a point, expiry, welcome bonus),
   member list, manual adjustments with a reason.
 
 ### Marketing
@@ -233,9 +233,9 @@ search over everything, live badge on new orders.
 
 | # | Phase | State |
 |---|---|---|
-| 0 | Fresh clone, rebrand to El Fatina, separation from Henine (resources, limits, cron) | done |
+| 0 | Fresh clone, rebrand to Al Fatina, separation from Henine (resources, limits, cron) | done |
 | 1 | LilySilk-style design: tokens, header, home, cards, product page, footer, icons | done |
-| 2 | Admin: Paniers restored (migration 0012), Comptes tab, El Fatina colours | done |
+| 2 | Admin: Paniers restored (migration 0012), Comptes tab, Al Fatina colours | done |
 | 3 | Checks: types, lint, 253 unit tests, 86 browser tests (phone + computer, FR + AR, accessibility) | done |
 | 4 | Deploy to staging (workers.dev), live checks | to do |
 | 5 | Owner content: products and photos, prices, delivery grid, Telegram bot, contact | owner |

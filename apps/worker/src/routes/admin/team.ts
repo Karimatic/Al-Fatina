@@ -98,9 +98,9 @@ async function sendInvite(c: Parameters<typeof body>[0], memberId: number, email
   const url = `${origin}/admin/invitation?token=${token}`;
   const mail = await sendMail(c.env, {
     to: email,
-    subject: "Invitation à l'équipe El Fatina",
-    text: `Bonjour ${name},\n\nVous êtes invitée à rejoindre l'administration de El Fatina.\nChoisissez votre mot de passe ici (lien valable 7 jours) :\n${url}`,
-    html: mailLayout("Invitation à l'équipe El Fatina", [`Bonjour ${name},`, "Vous êtes invitée à rejoindre l'administration de El Fatina.", "Ce lien est valable 7 jours."], undefined, { label: "Choisir mon mot de passe", url }),
+    subject: "Invitation à l'équipe Al Fatina",
+    text: `Bonjour ${name},\n\nVous êtes invitée à rejoindre l'administration de Al Fatina.\nChoisissez votre mot de passe ici (lien valable 7 jours) :\n${url}`,
+    html: mailLayout("Invitation à l'équipe Al Fatina", [`Bonjour ${name},`, "Vous êtes invitée à rejoindre l'administration de Al Fatina.", "Ce lien est valable 7 jours."], undefined, { label: "Choisir mon mot de passe", url }),
   });
   return { inviteUrl: url, emailed: mail.delivered && mailProvider(c.env) !== "console", provider: mail.provider };
 }

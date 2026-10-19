@@ -67,7 +67,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
   const site = useApi<SiteConfigDTO>("/site");
   const name = ar ? p.nameAr : p.nameFr;
   useEffect(() => {
-    document.title = `${name} · El Fatina`;
+    document.title = `${name} · Al Fatina`;
     rememberViewed(p.slug); // "Vus récemment" on the home page
     markStep("product");
     trackAd("ViewContent", [{ id: p.id, price: p.price, name: p.nameFr }]);

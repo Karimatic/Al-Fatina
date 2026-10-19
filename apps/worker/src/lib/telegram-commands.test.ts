@@ -33,7 +33,7 @@ describe("Telegram bot commands", () => {
   it("a stranger writing to the bot gets no customer data nor figures", async () => {
     const { env } = await shop();
     const sent = captureTelegram();
-    for (const c of ["/chercher 0554", "/cmd EF-T1", "/jour", "/semaine", "/attente", "/stock"]) await handleUpdate(env, command(c, 999, 999) as never);
+    for (const c of ["/chercher 0554", "/cmd AF-T1", "/jour", "/semaine", "/attente", "/stock"]) await handleUpdate(env, command(c, 999, 999) as never);
     expect(sent).toHaveLength(6);
     for (const m of sent) expect(m).toContain("⛔");
     // /id stays open: it is how a member finds their Telegram id

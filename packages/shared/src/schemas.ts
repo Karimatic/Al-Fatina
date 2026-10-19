@@ -153,7 +153,7 @@ export const cartSaveInput = z.object({
   locale: z.enum(["fr", "ar"]).default("ar"),
 });
 
-const orderCode = z.string().trim().toUpperCase().regex(/^EF-[0-9A-Z]{4,10}$/);
+const orderCode = z.string().trim().toUpperCase().regex(/^AF-[0-9A-Z]{4,10}$/);
 
 /**
  * Verified review: proves a delivered order either with the private tracking token

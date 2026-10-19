@@ -105,7 +105,7 @@ describe("unconfirmed orders from one connection", () => {
     const now = Date.now();
     for (let i = 0; i < n; i++)
       db.sqlite.exec(`INSERT INTO orders (public_code, track_token_hash, idempotency_key, status, channel, customer_id, name, phone, wilaya_code, delivery_type, subtotal, shipping_price, total, ip_hash, created_at, updated_at)
-        VALUES ('EF-P${i}', 'x', 'k-${i}', 'nouvelle', 'web', 1, 'X', '05500000${String(i).padStart(2, "0")}', 16, 'bureau', 3000, 400, 3400, 'iphash', ${now}, ${now})`);
+        VALUES ('AF-P${i}', 'x', 'k-${i}', 'nouvelle', 'web', 1, 'X', '05500000${String(i).padStart(2, "0")}', 16, 'bureau', 3000, 400, 3400, 'iphash', ${now}, ${now})`);
   };
   it("12 today: her order goes through, flagged for the team", async () => {
     const db = shop();

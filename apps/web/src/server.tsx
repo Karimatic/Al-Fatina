@@ -72,7 +72,7 @@ function shopJsonLd(locale: Locale, abs: (p: string) => string): string {
       "@context": "https://schema.org",
       "@type": "ClothingStore",
       "@id": `${abs("/")}#shop`,
-      name: "El Fatina",
+      name: "Al Fatina",
       url: home,
       logo: abs("/icons/icon-512.png"),
       image: abs(SHARE_IMAGE.src),
@@ -85,7 +85,7 @@ function shopJsonLd(locale: Locale, abs: (p: string) => string): string {
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      name: "El Fatina",
+      name: "Al Fatina",
       url: home,
       inLanguage: locale === "fr" ? "fr-DZ" : "ar-DZ",
       publisher: { "@id": `${abs("/")}#shop` },
@@ -102,14 +102,14 @@ function shopJsonLd(locale: Locale, abs: (p: string) => string): string {
 
 function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
   const t = getDictionary(locale);
-  const title = page.title ? `${page.title[locale]} · El Fatina` : t.meta.title;
+  const title = page.title ? `${page.title[locale]} · Al Fatina` : t.meta.title;
   const description = page.description?.[locale] ?? t.meta.description;
   const abs = (p: string) => esc(new URL(p, siteUrl).toString().replace(/\/$/, "") || siteUrl);
   const tags: string[] = [
     `<meta name="theme-color" content="#f7f3ee"/>`,
     `<title>${esc(title)}</title>`,
     `<meta name="description" content="${esc(description)}"/>`,
-    `<meta name="application-name" content="El Fatina"/>`,
+    `<meta name="application-name" content="Al Fatina"/>`,
     `<link rel="manifest" href="/manifest.webmanifest"/>`,
   ];
   if (page.noindex) tags.push(`<meta name="robots" content="noindex"/>`);
@@ -127,19 +127,19 @@ function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
   tags.push(
     `<meta name="format-detection" content="telephone=no"/>`,
     `<meta name="mobile-web-app-capable" content="yes"/>`,
-    `<meta name="apple-mobile-web-app-title" content="El Fatina"/>`,
+    `<meta name="apple-mobile-web-app-title" content="Al Fatina"/>`,
     `<meta name="apple-mobile-web-app-status-bar-style" content="default"/>`,
     `<meta property="og:title" content="${esc(title)}"/>`,
     `<meta property="og:description" content="${esc(description)}"/>`,
     ...(page.shell || page === NOT_FOUND ? [] : [`<meta property="og:url" content="${abs(own)}"/>`]),
-    `<meta property="og:site_name" content="El Fatina"/>`,
+    `<meta property="og:site_name" content="Al Fatina"/>`,
     `<meta property="og:locale" content="${locale === "fr" ? "fr_DZ" : "ar_DZ"}"/>`,
     `<meta property="og:type" content="website"/>`,
     // link previews (WhatsApp, Instagram, Facebook): the shop's home photo (product pages get their own)
     `<meta property="og:image" content="${abs(SHARE_IMAGE.src)}"/>`,
     `<meta property="og:image:width" content="${SHARE_IMAGE.width}"/>`,
     `<meta property="og:image:height" content="${SHARE_IMAGE.height}"/>`,
-    `<meta property="og:image:alt" content="El Fatina"/>`,
+    `<meta property="og:image:alt" content="Al Fatina"/>`,
     `<meta name="twitter:card" content="summary"/>`,
     `<meta name="twitter:title" content="${esc(title)}"/>`,
     `<meta name="twitter:description" content="${esc(description)}"/>`,

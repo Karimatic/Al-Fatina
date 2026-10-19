@@ -27,7 +27,7 @@ export function ThankYouView() {
   }, [order, params?.code]);
   if (!params) return null;
   const link = `${location.origin}${href(`/suivi?c=${params.code}&t=${encodeURIComponent(params.token)}`)}`;
-  const wa = `https://wa.me/?text=${encodeURIComponent(`✨ El Fatina · ${params.code}\n${link}`)}`;
+  const wa = `https://wa.me/?text=${encodeURIComponent(`✨ Al Fatina · ${params.code}\n${link}`)}`;
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10 text-center">

@@ -1,4 +1,4 @@
-/* El Fatina service worker: notifications (back in stock, store news), and saved copies
+/* Al Fatina service worker: notifications (back in stock, store news), and saved copies
  * for flaky mobile networks (audit REL-3).
  *  - Public pages (home, shop, categories, products, info pages): network first, 4 s at most;
  *    no answer → the copy saved last time she opened that page (marked with a Server-Timing
@@ -108,7 +108,7 @@ self.addEventListener("push", (event) => {
     data = { body: event.data ? event.data.text() : "" };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || "El Fatina ✨", {
+    self.registration.showNotification(data.title || "Al Fatina ✨", {
       body: data.body || "",
       icon: data.icon || "/icon.svg",
       image: data.icon || undefined,

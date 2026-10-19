@@ -172,7 +172,7 @@ interface PreviewMeta {
 function previewHead(c: Context<AppEnv>, path: string, ar: boolean, m: PreviewMeta): string {
   const canonical = new URL(path, c.env.PUBLIC_ORIGIN).toString();
   const tags: [string, string][] = [
-    ["og:site_name", "El Fatina"],
+    ["og:site_name", "Al Fatina"],
     ["og:locale", ar ? "ar_DZ" : "fr_DZ"],
     ["og:type", m.type],
     ["og:url", canonical],
@@ -190,7 +190,7 @@ function previewHead(c: Context<AppEnv>, path: string, ar: boolean, m: PreviewMe
     );
   } else {
     // no picture of its own (category, info page, product without photo): the shop's home photo
-    tags.push(["og:image", new URL("/ig/pyjamas-rayures.jpg", c.env.PUBLIC_ORIGIN).toString()], ["og:image:width", "640"], ["og:image:height", "640"], ["og:image:alt", "El Fatina"]);
+    tags.push(["og:image", new URL("/ig/pyjamas-rayures.jpg", c.env.PUBLIC_ORIGIN).toString()], ["og:image:width", "640"], ["og:image:height", "640"], ["og:image:alt", "Al Fatina"]);
   }
   if (m.price != null) tags.push(["product:price:amount", String(m.price)], ["product:price:currency", "DZD"]);
   return [
@@ -278,10 +278,10 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
       const name = ar ? cat.nameAr : cat.nameFr;
       structured = breadcrumbJsonLd(c.env, ar, [{ name, path: url.pathname }]);
       meta = {
-        title: `${name} · El Fatina`,
+        title: `${name} · Al Fatina`,
         description: ar
-          ? `${name} من El Fatina: التوصيل إلى 69 ولاية والدفع عند الاستلام.`
-          : `${name} chez El Fatina : livraison dans les 69 wilayas, paiement à la livraison.`,
+          ? `${name} من Al Fatina: التوصيل إلى 69 ولاية والدفع عند الاستلام.`
+          : `${name} chez Al Fatina : livraison dans les 69 wilayas, paiement à la livraison.`,
         type: "website",
         image: null,
         imageAlt: name,
@@ -295,7 +295,7 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
     if (page) {
       const name = ar ? page.title_ar : page.title_fr;
       meta = {
-        title: `${name} · El Fatina`,
+        title: `${name} · Al Fatina`,
         description: (ar ? page.body_ar : page.body_fr).replace(/[*#[\]()\n]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 180) || name,
         type: "website",
         image: null,
@@ -307,8 +307,8 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
     if (col) {
       const name = ar ? col.nameAr : col.nameFr;
       meta = {
-        title: `${name} · El Fatina`,
-        description: ((ar ? col.descriptionAr : col.descriptionFr) ?? (ar ? "تشكيلة جديدة من El Fatina" : "Nouvelle collection El Fatina")).slice(0, 180),
+        title: `${name} · Al Fatina`,
+        description: ((ar ? col.descriptionAr : col.descriptionFr) ?? (ar ? "تشكيلة جديدة من Al Fatina" : "Nouvelle collection Al Fatina")).slice(0, 180),
         type: "website",
         image: col.image,
         imageAlt: name,
@@ -317,7 +317,7 @@ async function previewPage(c: Context<AppEnv>, res: Response, prefix: string, se
   }
   if (!meta) return new Response(res.body, { status: 404, headers: res.headers });
   const head = previewHead(c, url.pathname, ar, meta) + structured;
-  const title = section === "produit" ? `${meta.imageAlt} · El Fatina` : meta.title;
+  const title = section === "produit" ? `${meta.imageAlt} · Al Fatina` : meta.title;
   return new HTMLRewriter()
     .on("title", { element: (el) => void el.setInnerContent(title) })
     .on('meta[name="description"]', { element: (el) => void el.setAttribute("content", meta.description) })

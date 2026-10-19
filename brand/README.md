@@ -2,7 +2,7 @@
 
 Drop the boutique's source files here (Instagram blocks automated download):
 
-- `logo.svg` (or a high-resolution PNG): the El Fatina logo
+- `logo.svg` (or a high-resolution PNG): the Al Fatina logo
 - `photos/`: 20–30 good product photos (original quality, not screenshots)
 - colour references, if the boutique has official colours
 

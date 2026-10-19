@@ -5,7 +5,7 @@ import type { Dictionary } from "./fr";
 /** Arabic texts (the store at /). Only Arabic pages download this file. */
 export const ar: Dictionary = {
   meta: {
-    title: "الفاتنة El Fatina · أزياء نسائية أونلاين",
+    title: "الفاتنة Al Fatina · أزياء نسائية أونلاين",
     description:
       "الأناقة والجودة بأفضل سعر. ملابس نسائية مختارة بعناية. التوصيل إلى 69 ولاية والدفع عند الاستلام. اطلبي أونلاين 7/7.",
   },
@@ -50,7 +50,7 @@ export const ar: Dictionary = {
     promos: "تخفيضات",
     recent: "شاهدتِها مؤخرا",
     stories: { nouveautes: "جديدنا", promo: "تخفيضات %", livraison: "التوصيل", concours: "مسابقات" },
-    lookbook: { eyebrow: "@el_fatina_", title: "أناقة El Fatina على إنستغرام", cta: "المزيد على إنستغرام" },
+    lookbook: { eyebrow: "@el_fatina_", title: "أناقة Al Fatina على إنستغرام", cta: "المزيد على إنستغرام" },
     contest: { eyebrow: "مسابقات", title: "هدايا تربحينها كل شهر", text: "شاركي على إنستغرام: تابعينا، أعجبي، وأشيري لصديقتك." },
     reviews: { eyebrow: "آراء موثقة", title: "زبوناتنا يتكلمن عنا", based: (n: number) => `${arCount(n, { one: "رأي واحد", two: "رأيان", few: "آراء", many: "رأيًا", other: "رأي" })} من زبونات استلمن طلباتهن`, verified: "شراء موثق" },
   },
@@ -262,7 +262,7 @@ export const ar: Dictionary = {
     hoursValue: "الطلبات 7/7",
     addressValue: "متجر أونلاين · الجزائر",
   },
-  links: { title: "El Fatina", subtitle: "كل روابطنا" },
+  links: { title: "Al Fatina", subtitle: "كل روابطنا" },
   status: {
     nouvelle: "تم تسجيل الطلب", injoignable: "في انتظار التأكيد", confirmee: "مؤكدة", en_preparation: "قيد التحضير",
     expediee: "تم الشحن", en_livraison: "قيد التوصيل", livree: "تم التوصيل", retour: "قيد الإرجاع",
@@ -274,7 +274,7 @@ export const ar: Dictionary = {
     copy: "نسخ الرابط",
     copied: "تم نسخ الرابط ✓",
     instagram: "لإنستغرام: انسخي الرابط ثم ألصقيه في الستوري (ملصق «رابط») أو في رسالة.",
-    text: (name: string, price: string) => `${name} · ${price} عند El Fatina ✨`,
+    text: (name: string, price: string) => `${name} · ${price} عند Al Fatina ✨`,
   },
   badges: { bestseller: "الأكثر مبيعًا", trending: "رائج", popular: "مطلوب", new: "جديد", pick: "اختيارنا" } as Record<string, string>,
   picker: {
@@ -340,7 +340,7 @@ export const ar: Dictionary = {
     cancelled: "تم إلغاء هذا الطلب.",
     returned: "تم إرجاع هذا الطرد إلى المحل.",
     items: "المنتجات",
-    itemsPrivate: "حفاظًا على خصوصيتك، تظهر المنتجات مع رقم الطلب (EF-…) أو الرابط الذي وصلك بعد الطلب.",
+    itemsPrivate: "حفاظًا على خصوصيتك، تظهر المنتجات مع رقم الطلب (AF-…) أو الرابط الذي وصلك بعد الطلب.",
     subtotal: "المجموع الفرعي",
     shipping: "التوصيل",
     discount: "التخفيض",
@@ -376,7 +376,7 @@ export const ar: Dictionary = {
   reviewsPlus: {
     onlyBuyers: "آراء موثقة 100%: فقط الزبونات اللواتي استلمن هذا المنتج يمكنهن ترك رأي.",
     cta: "استلمت هذا المنتج",
-    code: "رقم الطلب (EF-…)",
+    code: "رقم الطلب (AF-…)",
     phone: "الهاتف المستعمل في الطلب",
     rate: "تقييمك",
     text: "رأيك (اختياري)",
@@ -430,8 +430,8 @@ export const ar: Dictionary = {
     whatsapp: {
       help: "تحتاجين مساعدة؟",
       ask: "عندك سؤال؟ اسألي عبر واتساب",
-      askProduct: (name: string, url: string) => `السلام عليكم El Fatina ✨ عندي سؤال على «${name}»: ${url}`,
-      hello: "السلام عليكم El Fatina ✨ أحتاج مساعدة.",
+      askProduct: (name: string, url: string) => `السلام عليكم Al Fatina ✨ عندي سؤال على «${name}»: ${url}`,
+      hello: "السلام عليكم Al Fatina ✨ أحتاج مساعدة.",
     },
     flash: {
       title: "تخفيض محدود",
@@ -443,7 +443,7 @@ export const ar: Dictionary = {
     },
     favorites: {
       share: "مشاركة قائمتي",
-      shareText: "قائمة أمنياتي في El Fatina 💕",
+      shareText: "قائمة أمنياتي في Al Fatina 💕",
       shared: "قائمة شاركوها معك 💕",
       addAll: "أضيفي الكل إلى مفضلتي",
       added: "أضيفت إلى مفضلتك ✓",
@@ -461,10 +461,10 @@ export const ar: Dictionary = {
     },
     reviews: { photos: "📷 أضيفي صورًا (3 كحد أقصى)", photosHint: "تظهر بعد موافقة الفريق.", remove: "حذف الصورة", photoAlt: "صورة الزبونة" },
     assistant: {
-      open: "مساعدة El Fatina",
+      open: "مساعدة Al Fatina",
       short: "مساعدتك",
       hint: "تحتاجين مساعدة في الاختيار؟ قولي لي ماذا تبحثين عنه ✨",
-      title: "✨ مساعدة El Fatina",
+      title: "✨ مساعدة Al Fatina",
       intro: "اسأليني عن قطعة (اللون، المناسبة، المقاس، الميزانية)، سعر التوصيل إلى ولايتك، أين وصل طلبك، عنوان المحل، التخفيضات…",
       placeholder: "مثلًا: فستان أسود لعرس بأقل من 8000 دج",
       send: "ابحثي",
@@ -485,7 +485,7 @@ export const ar: Dictionary = {
       instagram: "أو تابعينا على إنستغرام",
     },
     install: {
-      title: "ثبّتي El Fatina",
+      title: "ثبّتي Al Fatina",
       text: "ادخلي بلمسة واحدة من شاشتك الرئيسية، كأنه تطبيق.",
       cta: "تثبيت",
       later: "لاحقًا",

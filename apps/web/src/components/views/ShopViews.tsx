@@ -193,7 +193,7 @@ export function FavoritesView() {
   async function share() {
     const url = `${location.origin}${location.pathname}?l=${favorites.join(",")}`;
     try {
-      if (navigator.share) await navigator.share({ title: "El Fatina", text: F.shareText, url });
+      if (navigator.share) await navigator.share({ title: "Al Fatina", text: F.shareText, url });
       else {
         await navigator.clipboard.writeText(url);
         setMsg(F.copied);

@@ -45,8 +45,8 @@ export const PAGES: PageDef[] = [
     view: "BoutiqueView",
     title: { ar: "محلنا", fr: "Notre boutique" },
     description: {
-      ar: "العنوان، أوقات العمل والخريطة لمحل El Fatina.",
-      fr: "Adresse, horaires et plan de la boutique El Fatina.",
+      ar: "العنوان، أوقات العمل والخريطة لمحل Al Fatina.",
+      fr: "Adresse, horaires et plan de la boutique Al Fatina.",
     },
   },
   { path: "/c/_", view: "CategoryView", title: { ar: "قسم", fr: "Catégorie" }, shell: true },

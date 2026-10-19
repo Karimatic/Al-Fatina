@@ -32,7 +32,7 @@ describe("network error reports", () => {
   it("a failed page load is recorded, without its query", async () => {
     const { send, errors } = setup();
     const res = await send([
-      { type: "network-error", url: "https://elfatinaboutique.com/fr/merci?c=EF-ABC123", body: { type: "tcp.timed_out", phase: "connection", status_code: 0 } },
+      { type: "network-error", url: "https://elfatinaboutique.com/fr/merci?c=AF-ABC123", body: { type: "tcp.timed_out", phase: "connection", status_code: 0 } },
       { type: "network-error", url: "https://elfatinaboutique.com/", body: { type: "ok", phase: "application", status_code: 200 } },
     ]);
     expect(res.status).toBe(204);

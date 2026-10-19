@@ -531,7 +531,7 @@ function OrderSheet({ id, onClose }: { id: number | null; onClose: () => void })
   }
 
   const waText = o
-    ? `Bonjour ${o.name} ✨ Ici El Fatina. Nous confirmons votre commande ${o.public_code} (${da(o.total)}), livraison ${o.delivery_type === "bureau" ? "au bureau" : "à domicile"} à ${o.wilaya_fr}. Merci !`
+    ? `Bonjour ${o.name} ✨ Ici Al Fatina. Nous confirmons votre commande ${o.public_code} (${da(o.total)}), livraison ${o.delivery_type === "bureau" ? "au bureau" : "à domicile"} à ${o.wilaya_fr}. Merci !`
     : "";
 
   return (

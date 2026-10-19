@@ -45,7 +45,7 @@ export function ReviewForm({ productId, code: fixedCode, token: fixedToken, onDo
     e.preventDefault();
     setError(null);
     const p = token ? null : normalizeDzPhone(phone);
-    if (!/^EF-[0-9A-Z]{4,10}$/.test(normalizedCode)) return setError(R.errors.order_not_found!);
+    if (!/^AF-[0-9A-Z]{4,10}$/.test(normalizedCode)) return setError(R.errors.order_not_found!);
     if (!token && !p) return setError(t.checkout.errors.phone_invalid!);
     setState("sending");
     try {

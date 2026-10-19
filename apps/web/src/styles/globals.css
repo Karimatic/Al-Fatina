@@ -2,7 +2,7 @@
 @import "./fonts.css";
 
 /*
- * El Fatina design tokens, "silk luxe": a white page with cream sections, charcoal text and buttons,
+ * Al Fatina design tokens, "silk luxe": a white page with cream sections, charcoal text and buttons,
  * warm hairlines, widely spaced capitals, soft 2 px corners, a muted gold for small details and a
  * deep burgundy for sales only.
  * WCAG contrast on white: ink 15.9:1, ink-soft 6.1:1 (5.6:1 on cream), sale 7.5:1 (AA ✓).
@@ -59,7 +59,7 @@
   }
 }
 
-/* ── The wordmark: EL FATINA in light Jost capitals, widely spaced ── */
+/* ── The wordmark: AL FATINA in light Jost capitals, widely spaced ── */
 .brand-mark {
   display: inline-block;
   font-family: var(--font-display);

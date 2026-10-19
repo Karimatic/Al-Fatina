@@ -36,7 +36,7 @@ describe("admin sign-in without an email service: authenticator app", () => {
     expect(accept.status).toBe(200);
     expect(accept.body.method).toBe("totp");
     const secret = accept.body.totp!.secret;
-    expect(accept.body.totp!.uri).toMatch(/^otpauth:\/\/totp\/El%20Fatina%3Ailyas%40shop\.test\?secret=/);
+    expect(accept.body.totp!.uri).toMatch(/^otpauth:\/\/totp\/Al%20Fatina%3Ailyas%40shop\.test\?secret=/);
 
     // a wrong code is refused, the app's code activates the account
     expect((await call(e, "/invite/verify", { token, challenge: accept.body.challenge, code: "000000" })).status).toBe(400);

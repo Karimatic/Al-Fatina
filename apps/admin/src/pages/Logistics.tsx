@@ -151,7 +151,7 @@ function FollowupQueue() {
                     📞 {f.phone}
                   </a>
                   <a
-                    href={waLink(f.phone, tr("Bonjour {0}, le livreur n'a pas pu vous livrer votre commande {1} de El Fatina. Quand êtes-vous disponible ?", { 0: f.name, 1: f.public_code }))}
+                    href={waLink(f.phone, tr("Bonjour {0}, le livreur n'a pas pu vous livrer votre commande {1} de Al Fatina. Quand êtes-vous disponible ?", { 0: f.name, 1: f.public_code }))}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex h-10 items-center rounded-lg border border-line px-3 text-sm font-semibold"
@@ -603,7 +603,7 @@ export function ManifestPrintPage() {
     <div className="mx-auto max-w-4xl bg-white p-6 text-black print:p-0" dir="ltr">
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold">El Fatina · Bordereau {m.code}</h1>
+          <h1 className="text-xl font-bold">Al Fatina · Bordereau {m.code}</h1>
           <p className="text-sm">
             {m.carrier} · {m.totals.packages} colis · à encaisser {da(m.totals.cod)} · {dateTime(m.handed_at ?? m.created_at)}
           </p>

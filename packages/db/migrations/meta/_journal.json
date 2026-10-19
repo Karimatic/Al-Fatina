@@ -92,6 +92,13 @@
       "when": 1792424110505,
       "tag": "0012_restore_carts",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1792436381663,
+      "tag": "0013_rename_al_fatina",
+      "breakpoints": true
     }
   ]
 }

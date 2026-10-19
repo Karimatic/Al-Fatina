@@ -1,8 +1,8 @@
-/** El Fatina's mark: "EF" in Jost, in the text colour (the app icon's letters). */
+/** Al Fatina's mark: "AF" in Jost, in the text colour (the app icon's letters). */
 export function BrandMark({ size = 28, className, light = false }: { size?: number; className?: string; light?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" className={className}>
-      <path fill={light ? "#ffffff" : "currentColor"} d="M30.08 16.18L12 16.18L12 47.82L30.08 47.82L30.08 44.20L15.84 44.20L15.84 32.45L29.18 32.45L29.18 28.84L15.84 28.84L15.84 19.80L30.08 19.80L30.08 16.18ZM52 16.18L35.73 16.18L35.73 47.82L39.57 47.82L39.57 32.45L51.55 32.45L51.55 28.84L39.57 28.84L39.57 19.80L52 19.80L52 16.18Z" />
+      <path fill={light ? "#ffffff" : "currentColor"} d="M18.43 37.50L28.28 37.50L31.39 44.84L34.71 44.84L23.35 19.16L12 44.84L15.32 44.84L18.43 37.50ZM19.62 34.71L23.35 25.90L27.09 34.71L19.62 34.71ZM52 20.38L39.42 20.38L39.42 44.84L42.39 44.84L42.39 32.96L51.65 32.96L51.65 30.17L42.39 30.17L42.39 23.18L52 23.18L52 20.38Z" />
     </svg>
   );
 }
@@ -30,7 +30,7 @@ export function Wordmark({
 }) {
   const s = SIZES[size];
   return (
-    <span className={`relative inline-flex items-center ${s.gap} ${className}`} aria-label="El Fatina">
+    <span className={`relative inline-flex items-center ${s.gap} ${className}`} aria-label="Al Fatina">
       {badge ? (
         <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-rose-500 via-plum-600 to-plum-700 shadow-[0_2px_8px_-2px_rgb(157_23_77/0.5)]">
           <BrandMark size={22} light className="wordmark-blossom" />
@@ -41,7 +41,7 @@ export function Wordmark({
       {!iconOnly && (
         <span className="relative flex min-w-0 flex-col" aria-hidden="true">
           <span className={`wordmark whitespace-nowrap ${s.text}`} dir="ltr">
-            El Fatina
+            Al Fatina
           </span>
           {subtitle && <span className={`${s.sub} font-semibold uppercase tracking-[0.22em] text-ink-soft`}>{subtitle}</span>}
           {/* twinkles just past the end of the word, never over the letters */}

@@ -730,7 +730,7 @@ export function NotifierPage() {
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {(w.phones ?? "").split(", ").filter(Boolean).map((p) => (
-                    <a key={p} href={waLink(p, `Bonjour ✨ Bonne nouvelle : « ${w.name_fr} (${w.options}) » est de retour chez El Fatina ! ${location.origin}`)} target="_blank" rel="noreferrer" className="rounded-full bg-[#25D366] px-3 py-1 text-xs font-semibold text-white">
+                    <a key={p} href={waLink(p, `Bonjour ✨ Bonne nouvelle : « ${w.name_fr} (${w.options}) » est de retour chez Al Fatina ! ${location.origin}`)} target="_blank" rel="noreferrer" className="rounded-full bg-[#25D366] px-3 py-1 text-xs font-semibold text-white">
                       <bdi dir="ltr">{formatDzPhone(p)}</bdi>
                     </a>
                   ))}
@@ -882,7 +882,7 @@ export function ContactPage() {
                   </div>
                   <p className="mt-1 whitespace-pre-line text-sm">{m.message}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {m.phone && <a href={waLink(m.phone, `Bonjour ${m.name} ✨ Ici El Fatina, suite à votre message : `)} target="_blank" rel="noreferrer" className="inline-flex h-9 items-center rounded-lg bg-[#25D366] px-3.5 text-sm font-semibold text-white">{tr("Répondre sur WhatsApp")}</a>}
+                    {m.phone && <a href={waLink(m.phone, `Bonjour ${m.name} ✨ Ici Al Fatina, suite à votre message : `)} target="_blank" rel="noreferrer" className="inline-flex h-9 items-center rounded-lg bg-[#25D366] px-3.5 text-sm font-semibold text-white">{tr("Répondre sur WhatsApp")}</a>}
                     {m.status !== "done" && <Button size="sm" variant="primary" onClick={() => setMsg.mutate({ id: m.id, s: "done" })}>{tr("✓ Traité")}</Button>}
                     {m.status !== "spam" && <Button size="sm" variant="ghost" onClick={() => setMsg.mutate({ id: m.id, s: "spam" })}>{tr("Spam")}</Button>}
                   </div>

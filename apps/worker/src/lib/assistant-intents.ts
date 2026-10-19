@@ -90,7 +90,7 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
   }
   if (wordsCount <= 3 && hasAny(text, W.greet)) {
     return base(
-      T(ar, "وعليكم السلام ✨ أنا مساعدة El Fatina. أبحث لك عن قطعة (لون، مناسبة، مقاس، ميزانية)، أخبرك بسعر التوصيل إلى ولايتك، أين وصل طلبك، أو أين محلنا.", "Bonjour ✨ Je suis l'assistante El Fatina. Je trouve une pièce pour vous (couleur, occasion, taille, budget), je donne le prix de livraison vers votre wilaya, où en est votre commande, ou l'adresse de la boutique."),
+      T(ar, "وعليكم السلام ✨ أنا مساعدة Al Fatina. أبحث لك عن قطعة (لون، مناسبة، مقاس، ميزانية)، أخبرك بسعر التوصيل إلى ولايتك، أين وصل طلبك، أو أين محلنا.", "Bonjour ✨ Je suis l'assistante Al Fatina. Je trouve une pièce pour vous (couleur, occasion, taille, budget), je donne le prix de livraison vers votre wilaya, où en est votre commande, ou l'adresse de la boutique."),
       { intent: "greet" },
     );
   }
@@ -291,6 +291,6 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
       ? undefined
       : found.understood.length
         ? T(ar, "لم أجد قطعة متوفرة بهذه المواصفات. جربي لونًا أو مقاسًا آخر، أو اسأليني عن الجديد أو التخفيضات.", "Je n'ai rien trouvé en stock avec ces critères. Essayez une autre couleur ou taille, ou demandez-moi les nouveautés ou les promos.")
-        : T(ar, "أنا مساعدة El Fatina ✨ أساعدك فقط في ما يخص المحل: البحث عن قطعة (لون، مقاس، ميزانية)، سعر التوصيل إلى ولايتك، طلبك، التبديل، أو عنوان المحل وأوقاته.", "Je suis l'assistante El Fatina ✨ Je réponds seulement à ce qui concerne la boutique : trouver une pièce (couleur, taille, budget), le prix de livraison vers votre wilaya, votre commande, les échanges, l'adresse et les horaires."),
+        : T(ar, "أنا مساعدة Al Fatina ✨ أساعدك فقط في ما يخص المحل: البحث عن قطعة (لون، مقاس، ميزانية)، سعر التوصيل إلى ولايتك، طلبك، التبديل، أو عنوان المحل وأوقاته.", "Je suis l'assistante Al Fatina ✨ Je réponds seulement à ce qui concerne la boutique : trouver une pièce (couleur, taille, budget), le prix de livraison vers votre wilaya, votre commande, les échanges, l'adresse et les horaires."),
   };
 }

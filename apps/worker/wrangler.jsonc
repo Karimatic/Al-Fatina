@@ -41,7 +41,7 @@
     {
       "binding": "DB",
       "database_name": "el-fatina-db",
-      // El Fatina's own database (created 2026-10-13, location weur). Never another shop's id.
+      // Al Fatina's own database (created 2026-10-13, location weur). Never another shop's id.
       "database_id": "808962b0-3ca1-499b-81e8-70b83507adb3",
       // Local development keeps its own database (npm run dev), never the production one: this
       // id only names the local copy (.wrangler/state). Query it from the repo root with
@@ -75,7 +75,7 @@
     }
   ],
   // namespace ids are shared by every Worker of the Cloudflare account: Henine uses 1001-1006,
-  // El Fatina 2001-2006 (the same ids would make both shops count against one limit)
+  // Al Fatina 2001-2006 (the same ids would make both shops count against one limit)
   "ratelimits": [
     {
       "name": "RL_WRITE",
@@ -151,7 +151,7 @@
     "MEDIA_ORIGIN": "",
     // "console": no email service, admins sign in with an authenticator app
     "MAIL_PROVIDER": "console",
-    "MAIL_FROM": "El Fatina <no-reply@example.com>",
+    "MAIL_FROM": "Al Fatina <no-reply@example.com>",
     // "off" = assistant without AI
     "ASSISTANT_MODEL": "@cf/google/gemma-4-26b-a4b-it"
   },

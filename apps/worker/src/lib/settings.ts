@@ -59,13 +59,13 @@ export interface Settings {
   texts: { ar: StoreTextOverrides; fr: StoreTextOverrides };
   /** logo, colours, fonts, banners, home sections (Admin → Page d'accueil → Apparence) */
   design: DesignDTO;
-  /** the physical shop (off by default: El Fatina sells online): address, map, opening hours (the /boutique page) */
+  /** the physical shop (off by default: Al Fatina sells online): address, map, opening hours (the /boutique page) */
   boutique: BoutiqueDTO;
 }
 
 export const DEFAULTS: Settings = {
   store: {
-    name: "El Fatina", tagline_fr: "L’élégance & la qualité au meilleur prix", tagline_ar: "الأناقة والجودة بأفضل سعر",
+    name: "Al Fatina", tagline_fr: "L’élégance & la qualité au meilleur prix", tagline_ar: "الأناقة والجودة بأفضل سعر",
     city_fr: "", city_ar: "", hours_fr: "Commandes 7j/7", hours_ar: "الطلبات 7/7", wilaya: 35,
   },
   contact: {

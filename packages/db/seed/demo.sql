@@ -398,7 +398,7 @@ Nous sommes une boutique **100 % en ligne** : commandez sur le site **7j/7**, ou
 نحن متجر **أونلاين 100%**: اطلبي من الموقع **7 أيام في الأسبوع**، أو راسلينا من صفحة [تواصلي معنا](/contact).', 1);
 INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (2, 'cgv', 'Conditions générales de vente', 'الشروط العامة للبيع', '## 1. Objet
 
-Ces conditions s''appliquent à toutes les commandes passées sur le site El Fatina. Passer commande signifie les accepter.
+Ces conditions s''appliquent à toutes les commandes passées sur le site Al Fatina. Passer commande signifie les accepter.
 
 ## 2. Produits
 
@@ -437,7 +437,7 @@ Vos informations servent uniquement à traiter votre commande : voir la [Politiq
 
 Pour toute question : la page [Contact](/fr/contact) ou notre Instagram. Ces conditions sont soumises au droit algérien.', '## 1. الموضوع
 
-تنطبق هذه الشروط على كل الطلبات عبر موقع El Fatina. إتمام الطلب يعني الموافقة عليها.
+تنطبق هذه الشروط على كل الطلبات عبر موقع Al Fatina. إتمام الطلب يعني الموافقة عليها.
 
 ## 2. المنتجات
 
@@ -475,7 +475,7 @@ Pour toute question : la page [Contact](/fr/contact) ou notre Instagram. Ces con
 ## 9. التواصل
 
 لأي سؤال: صفحة [تواصلي معنا](/contact) أو حسابنا على إنستغرام. تخضع هذه الشروط للقانون الجزائري.', 1);
-INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (3, 'confidentialite', 'Politique de confidentialité', 'سياسة الخصوصية', 'El Fatina protège vos données conformément à la **loi 18-07** relative à la protection des personnes physiques dans le traitement des données à caractère personnel.
+INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (3, 'confidentialite', 'Politique de confidentialité', 'سياسة الخصوصية', 'Al Fatina protège vos données conformément à la **loi 18-07** relative à la protection des personnes physiques dans le traitement des données à caractère personnel.
 
 ## Ce que nous collectons
 
@@ -504,7 +504,7 @@ Votre panier, vos favoris et vos préférences (langue, mode sombre) sont enregi
 
 ## Vos droits
 
-Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nous écrivant depuis la page [Contact](/fr/contact).', 'تحمي El Fatina معطياتك وفقًا **للقانون 18-07** المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
+Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nous écrivant depuis la page [Contact](/fr/contact).', 'تحمي Al Fatina معطياتك وفقًا **للقانون 18-07** المتعلق بحماية الأشخاص الطبيعيين في مجال معالجة المعطيات ذات الطابع الشخصي.
 
 ## ما الذي نجمعه
 
@@ -534,9 +534,9 @@ Vous pouvez demander à **consulter, corriger ou supprimer** vos données en nou
 ## حقوقك
 
 يمكنك طلب **الاطلاع على معطياتك أو تصحيحها أو حذفها** بمراسلتنا من صفحة [تواصلي معنا](/contact).', 1);
-INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (4, 'a-propos', 'À propos', 'من نحن', '## El Fatina
+INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is_active) VALUES (4, 'a-propos', 'À propos', 'من نحن', '## Al Fatina
 
-**L''élégance et la qualité au meilleur prix.** El Fatina, c''est une boutique de mode féminine en ligne, livrée partout en Algérie : des pièces choisies pour leur tombé, leur confort et leurs finitions.
+**L''élégance et la qualité au meilleur prix.** Al Fatina, c''est une boutique de mode féminine en ligne, livrée partout en Algérie : des pièces choisies pour leur tombé, leur confort et leurs finitions.
 
 ## Notre promesse
 
@@ -549,9 +549,9 @@ INSERT OR REPLACE INTO pages (id, slug, title_fr, title_ar, body_fr, body_ar, is
 
 Commandez en ligne **7j/7**, payez à la livraison, et échangez si la taille ne convient pas : [livraison et retours](/fr/p/livraison-retours).
 
-Suivez nos nouveautés et nos essayages en vidéo sur Instagram.', '## El Fatina
+Suivez nos nouveautés et nos essayages en vidéo sur Instagram.', '## Al Fatina
 
-**الأناقة والجودة بأفضل سعر.** الفاتنة El Fatina متجر أزياء نسائية أونلاين يوصل إلى كل أنحاء الجزائر: قطع نختارها لانسدالها وراحتها وجودة تفاصيلها.
+**الأناقة والجودة بأفضل سعر.** الفاتنة Al Fatina متجر أزياء نسائية أونلاين يوصل إلى كل أنحاء الجزائر: قطع نختارها لانسدالها وراحتها وجودة تفاصيلها.
 
 ## وعدنا
 

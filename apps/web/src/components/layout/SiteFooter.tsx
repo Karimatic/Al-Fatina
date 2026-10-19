@@ -20,7 +20,7 @@ function useSocials() {
 
 /**
  * Silk-shop footer on cream: link columns under spaced capital titles (the house, help, the shop),
- * the El Fatina Club and the social buttons; then a thin line with the year, the ads choice and
+ * the Al Fatina Club and the social buttons; then a thin line with the year, the ads choice and
  * the language.
  */
 export function SiteFooter() {
@@ -89,14 +89,14 @@ export function SiteFooter() {
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-5 pb-20 md:pb-5 lg:px-8">
           {design.logo ? (
-            <img src={design.logo} alt="El Fatina" className="h-8 w-auto max-w-[9rem] object-contain" />
+            <img src={design.logo} alt="Al Fatina" className="h-8 w-auto max-w-[9rem] object-contain" />
           ) : (
             <p className="brand-mark text-sm" dir="ltr">
-              El Fatina
+              Al Fatina
             </p>
           )}
           <p className="text-xs text-ink-soft">
-            © {new Date().getFullYear()} El Fatina · {t.footer.rights}
+            © {new Date().getFullYear()} Al Fatina · {t.footer.rights}
             {pixelsConfigured(site.data?.pixels) && (
               <>
                 {" · "}

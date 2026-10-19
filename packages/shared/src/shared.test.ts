@@ -84,7 +84,7 @@ describe("codes", () => {
     const codes = new Set(Array.from({ length: 500 }, newOrderCode));
     expect(codes.size).toBe(500);
     for (const c of codes) expect(isOrderCode(c)).toBe(true);
-    expect(isOrderCode("EF-ILOU00")).toBe(false);
+    expect(isOrderCode("AF-ILOU00")).toBe(false);
   });
 
   it("compares secrets in constant time", () => {

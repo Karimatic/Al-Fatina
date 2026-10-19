@@ -3,7 +3,7 @@ import { STORE_TEXTS } from "@elfatina/shared";
 /** French texts (the store under /fr). Only French pages download this file. */
 export const fr = {
   meta: {
-    title: "El Fatina · Mode féminine en ligne",
+    title: "Al Fatina · Mode féminine en ligne",
     description:
       "L’élégance & la qualité au meilleur prix. Vêtements pour femmes choisis avec soin. Livraison 69 wilayas, paiement à la livraison. Commandez en ligne 7j/7.",
   },
@@ -14,7 +14,7 @@ export const fr = {
   /** the silk-shop layout: header strips, home blocks, catalogue */
   silk: {
     service: "Livraison 69 wilayas · Paiement à la livraison · Échange facile",
-    club: "El Fatina Club · des points à chaque commande, à utiliser sur la suivante",
+    club: "Al Fatina Club · des points à chaque commande, à utiliser sur la suivante",
     newIn: "Nouveautés",
     sale: "Promotions",
     track: "Suivi de commande",
@@ -49,7 +49,7 @@ export const fr = {
     promos: "Promotions",
     recent: "Vus récemment",
     stories: { nouveautes: "Nouveautés", promo: "Promo %", livraison: "Livraison", concours: "Concours" },
-    lookbook: { eyebrow: "@el_fatina_", title: "Le style El Fatina, sur Instagram", cta: "Voir plus sur Instagram" },
+    lookbook: { eyebrow: "@el_fatina_", title: "Le style Al Fatina, sur Instagram", cta: "Voir plus sur Instagram" },
     contest: { eyebrow: "Concours", title: "Des cadeaux à gagner chaque mois", text: "Participez sur notre Instagram : abonnez-vous, likez, identifiez une amie." },
     reviews: { eyebrow: "Avis vérifiés", title: "Elles nous ont fait confiance", based: (n: number) => `${n} avis de clientes livrées`, verified: "Achat vérifié" },
   },
@@ -261,7 +261,7 @@ export const fr = {
     hoursValue: "Commandes 7j/7",
     addressValue: "Boutique en ligne · Algérie",
   },
-  links: { title: "El Fatina", subtitle: "Tous nos liens" },
+  links: { title: "Al Fatina", subtitle: "Tous nos liens" },
   status: {
     nouvelle: "Reçue", injoignable: "En attente de confirmation", confirmee: "Confirmée", en_preparation: "En préparation",
     expediee: "Expédiée", en_livraison: "En cours de livraison", livree: "Livrée", retour: "Retour en cours",
@@ -273,7 +273,7 @@ export const fr = {
     copy: "Copier le lien",
     copied: "Lien copié ✓",
     instagram: "Pour Instagram : copiez le lien, puis collez-le dans votre story (sticker « Lien ») ou en message.",
-    text: (name: string, price: string) => `${name} · ${price} chez El Fatina ✨`,
+    text: (name: string, price: string) => `${name} · ${price} chez Al Fatina ✨`,
   },
   badges: { bestseller: "Best-seller", trending: "Tendance", popular: "Populaire", new: "Nouveau", pick: "Coup de cœur" } as Record<string, string>,
   picker: {
@@ -331,7 +331,7 @@ export const fr = {
     cancelled: "Cette commande a été annulée.",
     returned: "Ce colis a été retourné à la boutique.",
     items: "Articles",
-    itemsPrivate: "Pour votre discrétion, les articles s'affichent avec le numéro de commande (EF-…) ou le lien reçu après la commande.",
+    itemsPrivate: "Pour votre discrétion, les articles s'affichent avec le numéro de commande (AF-…) ou le lien reçu après la commande.",
     subtotal: "Sous-total",
     shipping: "Livraison",
     discount: "Remise",
@@ -367,7 +367,7 @@ export const fr = {
   reviewsPlus: {
     onlyBuyers: "Avis 100 % vérifiés : seules les clientes qui ont reçu ce produit peuvent en laisser un.",
     cta: "J'ai reçu ce produit",
-    code: "N° de commande (EF-…)",
+    code: "N° de commande (AF-…)",
     phone: "Téléphone utilisé pour la commande",
     rate: "Votre note",
     text: "Votre avis (facultatif)",
@@ -421,8 +421,8 @@ export const fr = {
     whatsapp: {
       help: "Besoin d'aide ?",
       ask: "Une question ? Demandez sur WhatsApp",
-      askProduct: (name: string, url: string) => `Bonjour El Fatina ✨ J'ai une question sur « ${name} » : ${url}`,
-      hello: "Bonjour El Fatina ✨ J'ai besoin d'aide.",
+      askProduct: (name: string, url: string) => `Bonjour Al Fatina ✨ J'ai une question sur « ${name} » : ${url}`,
+      hello: "Bonjour Al Fatina ✨ J'ai besoin d'aide.",
     },
     flash: {
       title: "Vente flash",
@@ -434,7 +434,7 @@ export const fr = {
     },
     favorites: {
       share: "Partager ma liste",
-      shareText: "Ma liste d'envies chez El Fatina 💕",
+      shareText: "Ma liste d'envies chez Al Fatina 💕",
       shared: "Une liste partagée avec vous 💕",
       addAll: "Ajouter tout à mes favoris",
       added: "Ajoutés à vos favoris ✓",
@@ -452,10 +452,10 @@ export const fr = {
     },
     reviews: { photos: "📷 Ajouter des photos (3 max)", photosHint: "Visibles après validation par l'équipe.", remove: "Retirer la photo", photoAlt: "Photo de la cliente" },
     assistant: {
-      open: "Assistante El Fatina",
+      open: "Assistante Al Fatina",
       short: "Assistante",
       hint: "Besoin d'aide pour choisir ? Dites-moi ce que vous cherchez ✨",
-      title: "✨ Assistante El Fatina",
+      title: "✨ Assistante Al Fatina",
       intro: "Demandez-moi une pièce (couleur, occasion, taille, budget), le prix de livraison vers votre wilaya, où en est votre commande, l'adresse de la boutique, les promos…",
       placeholder: "Ex. robe noire pour un mariage, moins de 8000 DA",
       send: "Chercher",
@@ -476,7 +476,7 @@ export const fr = {
       instagram: "Ou suivez-nous sur Instagram",
     },
     install: {
-      title: "Installer El Fatina",
+      title: "Installer Al Fatina",
       text: "Un accès en un geste depuis votre écran d'accueil, comme une application.",
       cta: "Installer",
       later: "Plus tard",

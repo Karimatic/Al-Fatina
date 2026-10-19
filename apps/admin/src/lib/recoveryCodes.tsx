@@ -10,7 +10,7 @@ import { Button, useToast } from "../ui";
 export function RecoveryCodesBox({ codes, onDone, doneLabel }: { codes: string[]; onDone?: () => void; doneLabel?: string }) {
   const toast = useToast();
   const [kept, setKept] = useState(false);
-  const text = `El Fatina · ${tr("codes de secours")}\n${codes.join("\n")}\n`;
+  const text = `Al Fatina · ${tr("codes de secours")}\n${codes.join("\n")}\n`;
   return (
     <div className="space-y-3">
       <p className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">

@@ -274,9 +274,9 @@ function reminderText(c: CartRow): string {
   const link = `${location.origin}${ar ? "" : "/fr"}/panier?r=${c.id}`;
   const items = c.items.map((i) => i.name).join(ar ? "، " : ", ");
   if (ar) {
-    return `السلام عليكم ${c.name ?? ""} 🌸\nنسيتِ شيئًا في سلتك 🛒: ${items}.\nأكملي طلبك من هنا: ${link}\nEl Fatina`;
+    return `السلام عليكم ${c.name ?? ""} 🌸\nنسيتِ شيئًا في سلتك 🛒: ${items}.\nأكملي طلبك من هنا: ${link}\nAl Fatina`;
   }
-  return `Bonjour ${c.name ?? ""} 🌸\nVous avez oublié quelque chose dans votre panier 🛒 : ${items}.\nTerminez votre commande ici : ${link}\nEl Fatina`;
+  return `Bonjour ${c.name ?? ""} 🌸\nVous avez oublié quelque chose dans votre panier 🛒 : ${items}.\nTerminez votre commande ici : ${link}\nAl Fatina`;
 }
 
 const STEP_LABEL: Record<string, [string, number]> = {

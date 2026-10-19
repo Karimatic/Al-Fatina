@@ -1,4 +1,4 @@
-# El Fatina — runbook
+# Al Fatina — runbook
 
 What to do, step by step, for the things that go wrong or need care. Commands run from the repository
 root unless written otherwise. Live shop: https://el-fatina.karimmaticmz.workers.dev (no custom domain yet; Worker

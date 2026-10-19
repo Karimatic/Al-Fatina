@@ -124,7 +124,7 @@ export function PageView() {
   useEffect(() => setSlug(slugFromPath(location.pathname)), []);
   const { data, error, reload } = useApi<PageDTO>(slug && slug !== "_" ? `/pages/${encodeURIComponent(slug)}` : null);
   useEffect(() => {
-    if (data) document.title = `${ar ? data.titleAr : data.titleFr} · El Fatina`;
+    if (data) document.title = `${ar ? data.titleAr : data.titleFr} · Al Fatina`;
   }, [data, ar]);
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">

@@ -59,7 +59,7 @@ test("pixels wait for consent, then count the visit and the product", async ({ p
   q = await queues(page);
   const view = q.meta.find((e) => e[1] === "ViewContent")!;
   expect(view[2]).toMatchObject({ currency: "DZD", content_type: "product_group" });
-  expect((view[2] as { content_ids: string[] }).content_ids[0]).toMatch(/^EF-P\d+$/);
+  expect((view[2] as { content_ids: string[] }).content_ids[0]).toMatch(/^AF-P\d+$/);
   expect(q.tiktok.some((e) => e[0] === "track" && e[1] === "ViewContent")).toBe(true);
   await expect(page.getByRole("region", { name: "Publicités" })).toBeHidden(); // answered once
 });

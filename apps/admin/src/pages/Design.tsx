@@ -159,7 +159,7 @@ export function DesignEditor() {
   const ownFontUrl = d?.fontFile ? (/^(https?:)?\//.test(d.fontFile) ? d.fontFile : (q.data?.mediaBase ?? "") + d.fontFile) : null;
   useEffect(() => {
     if (!ownFontUrl) return;
-    const css = `@font-face{font-family:"El Fatina Custom";src:url("${ownFontUrl}");font-display:swap}`;
+    const css = `@font-face{font-family:"Al Fatina Custom";src:url("${ownFontUrl}");font-display:swap}`;
     let style = document.getElementById("own-font-preview");
     if (!style) {
       style = Object.assign(document.createElement("style"), { id: "own-font-preview" });
@@ -293,7 +293,7 @@ export function DesignEditor() {
                 >
                   <span className="block text-xs font-semibold text-ink-soft">{key === "custom" ? tr("✏️ Personnalisé : choisissez chaque police") : tr(label)}</span>
                   <span className="mt-1 block text-2xl italic" style={{ fontFamily: `${fam(f.display)}, Georgia, serif` }}>
-                    El Fatina
+                    Al Fatina
                   </span>
                   <span className="block text-lg" dir="rtl" style={{ fontFamily: `${fam(f.arabicDisplay)}, serif` }}>
                     الأناقة والجودة بأفضل سعر
@@ -448,10 +448,10 @@ function BannersCard({ d, set, media }: { d: DesignDTO; set: (p: Partial<DesignD
 }
 
 /** CSS font-family of a choice (the shop's own file has its preview name). */
-const fam = (name: string) => (name === OWN_FONT ? '"El Fatina Custom"' : `"${name}"`);
+const fam = (name: string) => (name === OWN_FONT ? '"Al Fatina Custom"' : `"${name}"`);
 
 const FONT_SLOTS: { key: keyof DesignDTO["customFont"]; label: string; sample: string; script: "latin" | "arabic" }[] = [
-  { key: "display", label: "Titres (français)", sample: "El Fatina", script: "latin" },
+  { key: "display", label: "Titres (français)", sample: "Al Fatina", script: "latin" },
   { key: "sans", label: "Texte (français)", sample: "La nouvelle collection est arrivée.", script: "latin" },
   { key: "arabicDisplay", label: "Titres (arabe)", sample: "الأناقة والجودة بأفضل سعر", script: "arabic" },
   { key: "arabic", label: "Texte (arabe)", sample: "وصلت التشكيلة الجديدة، التوصيل إلى 69 ولاية.", script: "arabic" },

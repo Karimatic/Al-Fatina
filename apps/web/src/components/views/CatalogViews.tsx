@@ -123,7 +123,7 @@ export function CategoryView() {
   }, [catalog.data, categories.data, slug, price, saleOnly, season]);
 
   useEffect(() => {
-    if (category) document.title = `${ar ? category.nameAr : category.nameFr} · El Fatina`;
+    if (category) document.title = `${ar ? category.nameAr : category.nameFr} · Al Fatina`;
   }, [category, ar]);
 
   const money = (n: number) => formatDA(n, locale);
@@ -218,7 +218,7 @@ export function PromotionsView() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <header className="mb-8 flex items-center gap-4 overflow-hidden bg-cream p-6 md:p-12">
         <div className="min-w-0 flex-1">
-          <p className="eyebrow-silk text-ink-soft">El Fatina</p>
+          <p className="eyebrow-silk text-ink-soft">Al Fatina</p>
           <h1 className="title-silk mt-2 text-3xl md:text-5xl">{P.title}</h1>
           <p className="mt-3 max-w-xl text-ink-soft">{P.text}</p>
         </div>

@@ -71,7 +71,7 @@ const { renderPage, PAGES, NOT_FOUND, APP_CLASS, BOOT_SCRIPT } = await import(pa
 // 3. pages
 const site = siteUrl();
 /**
- * The shop has one address (PUBLIC_ORIGIN, once El Fatina has a domain): a page opened on the old workers.dev address or
+ * The shop has one address (PUBLIC_ORIGIN, once Al Fatina has a domain): a page opened on the old workers.dev address or
  * on www. goes there before anything is drawn, same path. (Static pages never reach the Worker,
  * so this is the page's first line; the Worker redirects the pages it serves itself.)
  */

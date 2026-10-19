@@ -11,7 +11,7 @@ const IG = "https://www.instagram.com/el_fatina_/";
 
 /* ───────── Lookbook: the shop's Instagram posts ───────── */
 
-// El Fatina's own Instagram photos go in apps/web/public/ig/ and are listed here (6 square
+// Al Fatina's own Instagram photos go in apps/web/public/ig/ and are listed here (6 square
 // JPGs, the first shown large). Empty: the Instagram block shows no photo grid.
 const LOOKS: string[] = [];
 

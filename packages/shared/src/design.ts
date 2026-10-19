@@ -71,7 +71,7 @@ export const OWN_FONT = "upload";
 
 /** Font pairs: Latin display + Latin text + Arabic text + Arabic display (all self-hosted). */
 export const FONT_PRESETS = {
-  classic: { label: "El Fatina (Jost)", display: null, sans: null, arabic: null, arabicDisplay: null },
+  classic: { label: "Al Fatina (Jost)", display: null, sans: null, arabic: null, arabicDisplay: null },
   elegant: { label: "Élégant (Cormorant)", display: "Cormorant Garamond", sans: "Jost", arabic: "Noto Kufi Arabic", arabicDisplay: "Amiri" },
   modern: { label: "Moderne (Montserrat)", display: "Montserrat", sans: "Inter", arabic: "Cairo", arabicDisplay: "Cairo" },
   soft: { label: "Doux (Lora)", display: "Lora", sans: "Nunito", arabic: "Almarai", arabicDisplay: "Reem Kufi" },
@@ -102,7 +102,7 @@ export function designFonts(d: Pick<DesignDTO, "font" | "customFont">): FontChoi
 
 /** Ready-made colour themes. `accent` carries white text (buttons): every preset is ≥ 4.5:1. */
 export const COLOR_PRESETS = [
-  { key: "soie", label: "Soie (El Fatina)", accent: "#222222", soft: "#f7f3ee" },
+  { key: "soie", label: "Soie (Al Fatina)", accent: "#222222", soft: "#f7f3ee" },
   { key: "plum", label: "Prune", accent: "#8e1048", soft: "#fbe4ec" },
   { key: "rose", label: "Rose poudré", accent: "#b03a6a", soft: "#fdeaf1" },
   { key: "noir", label: "Noir & or", accent: "#1f1a17", soft: "#f4ede4" },

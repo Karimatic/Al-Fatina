@@ -316,7 +316,7 @@ function SalesMetrics({ month, prevMonth }: { month: Period; prevMonth: Period }
               <BrandMark size={26} light />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-xl font-medium">{tr("El Fatina")}</p>
+              <p className="truncate text-xl font-medium">{tr("Al Fatina")}</p>
               <p className="truncate text-sm text-ink-soft">{tr("En ligne · livraison 69 wilayas")}</p>
             </div>
           </div>
@@ -394,7 +394,7 @@ function Loyalty({ share }: { share: number | null }) {
         <div>
           <p className="text-lg font-semibold">{tr("Retour des clientes")}</p>
           <p className="mt-2 text-sm text-ink-soft md:text-base">
-            {tr("Part des commandes des 30 derniers jours passées par des clientes qui avaient déjà commandé chez El Fatina.")}
+            {tr("Part des commandes des 30 derniers jours passées par des clientes qui avaient déjà commandé chez Al Fatina.")}
           </p>
         </div>
       </div>

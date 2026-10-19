@@ -14,7 +14,7 @@ export const translateRoutes = new Hono<AppEnv>();
 
 const LANG = { fr: "French", ar: "Modern Standard Arabic (as used by Algerian shops)" } as const;
 
-const SYSTEM = `You translate texts of El Fatina, an online women's clothing shop in Algeria (dresses, sets, djebbas, pyjamas, lingerie and accessories), between French and Arabic.
+const SYSTEM = `You translate texts of Al Fatina, an online women's clothing shop in Algeria (dresses, sets, djebbas, pyjamas, lingerie and accessories), between French and Arabic.
 Rules:
 - Output ONLY the translation: no quotes, no explanation, no alternatives.
 - Keep exactly: **bold** markers, line breaks, emojis, numbers, prices, sizes (S, M, L, XL, 38…), codes, links and brand names.

@@ -76,7 +76,7 @@ describe("text helpers", () => {
   });
 
   it("fills templates", () => {
-    expect(fillTemplate("Bonjour {name}, commande {code}", { name: "Amina", code: "EF-1" })).toBe("Bonjour Amina, commande EF-1");
+    expect(fillTemplate("Bonjour {name}, commande {code}", { name: "Amina", code: "AF-1" })).toBe("Bonjour Amina, commande AF-1");
   });
 });
 

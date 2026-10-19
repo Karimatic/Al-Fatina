@@ -390,7 +390,7 @@ export function Shell() {
           <UpdateBar />
         </main>
         <footer className="mx-auto hidden w-full max-w-[90rem] items-center justify-between px-6 pb-6 text-xs text-ink-soft md:flex">
-          <span>© {new Date().getFullYear()} {tr("El Fatina · Administration")}</span>
+          <span>© {new Date().getFullYear()} {tr("Al Fatina · Administration")}</span>
           <span>{tr("En ligne · 69 wilayas")}</span>
         </footer>
       </div>

@@ -139,8 +139,8 @@ export function trackAd(event: "ViewContent" | "AddToCart" | "InitiateCheckout" 
   }
   const w = window as W;
   const value = opts.value ?? items.reduce((s, i) => s + i.price * (i.qty ?? 1), 0);
-  // the same ids as the Meta catalogue feed (/feeds/meta.csv: item_group_id EF-P<product>)
-  const ids_ = items.map((i) => `EF-P${i.id}`);
+  // the same ids as the Meta catalogue feed (/feeds/meta.csv: item_group_id AF-P<product>)
+  const ids_ = items.map((i) => `AF-P${i.id}`);
   try {
     w.fbq?.(
       "track",

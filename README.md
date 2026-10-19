@@ -1,8 +1,8 @@
-# El Fatina
+# Al Fatina
 
 [![CI](https://github.com/Karimatic/El-Fatina/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Karimatic/El-Fatina/actions/workflows/ci.yml)
 
-Storefront + admin panel for **El Fatina** (online women's clothing, Algeria), running entirely on the Cloudflare free tier.
+Storefront + admin panel for **Al Fatina** (online women's clothing, Algeria), running entirely on the Cloudflare free tier.
 The full product/architecture plan is in [`PLAN.md`](PLAN.md).
 
 ```
@@ -86,7 +86,7 @@ Admin → **Paramètres** (⚙️ in the top bar) → **Connexions → Telegram*
 3. **Envoyer un message test**. Every new order now arrives with ✅ Confirmer / 📵 Injoignable / ❌ Annuler buttons.
 
 Locally the buttons work while the admin panel is open (it polls Telegram). In production click **Activer les boutons** (webhook).
-Bot commands: `/id` (your Telegram ID, to link it in Équipe), `/jour` (today's numbers), `/cmd EF-XXXXXX`.
+Bot commands: `/id` (your Telegram ID, to link it in Équipe), `/jour` (today's numbers), `/cmd AF-XXXXXX`.
 
 ## First deploy (one-time Cloudflare setup)
 

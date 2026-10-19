@@ -161,13 +161,13 @@ accountRoutes.post("/integrations/telegram/chat", requirePermission("integration
   // the order buttons work right away on the live site
   let webhookUrl: string | null = null;
   if (cfg.token && c.env.PUBLIC_ORIGIN.startsWith("https://")) webhookUrl = await enableTelegramWebhook(c.env, cfg.token).catch(() => null);
-  const tested = await sendTelegramText(c.env, `✨ El Fatina : ce groupe reçoit maintenant les nouvelles commandes.`);
+  const tested = await sendTelegramText(c.env, `✨ Al Fatina : ce groupe reçoit maintenant les nouvelles commandes.`);
   c.executionCtx.waitUntil(processOutbox(c.env, 20).catch(() => 0));
   return c.json({ ok: true, tested, webhookUrl });
 });
 
 accountRoutes.post("/integrations/telegram/test", requirePermission("integrations.manage"), async (c) => {
-  const ok = await sendTelegramText(c.env, `✨ Test El Fatina : les commandes arriveront ici.\nEnvoyé par ${c.get("member").name.replace(/[<>&]/g, "")}.`);
+  const ok = await sendTelegramText(c.env, `✨ Test Al Fatina : les commandes arriveront ici.\nEnvoyé par ${c.get("member").name.replace(/[<>&]/g, "")}.`);
   if (!ok) throw new HttpError(409, "telegram_test_failed");
   return c.json({ ok: true });
 });
@@ -209,7 +209,7 @@ accountRoutes.post("/integrations/mail/test", requirePermission("integrations.ma
   const m = c.get("member");
   const res = await sendMail(c.env, {
     to: m.email,
-    subject: "Test d'envoi El Fatina",
+    subject: "Test d'envoi Al Fatina",
     text: "Si vous lisez ceci, l'envoi d'emails fonctionne.",
     html: mailLayout("Test d'envoi", ["Si vous lisez ceci, l'envoi d'emails fonctionne. ✨"]),
   });

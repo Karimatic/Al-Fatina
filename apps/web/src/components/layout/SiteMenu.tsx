@@ -85,7 +85,7 @@ export function SiteMenu() {
             >
               <div className="flex h-16 items-center justify-between border-b border-line ps-6 pe-2">
                 <span className="brand-mark text-base" dir="ltr">
-                  El Fatina
+                  Al Fatina
                 </span>
                 <button type="button" onClick={close} aria-label={t.common.close} className="grid size-11 place-items-center text-3xl font-light text-ink">
                   ×

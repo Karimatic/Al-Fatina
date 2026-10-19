@@ -1,5 +1,5 @@
 /**
- * The physical shop (off by default: El Fatina sells online): where it is, when it is open, and whether it is open now
+ * The physical shop (off by default: Al Fatina sells online): where it is, when it is open, and whether it is open now
  * (Algiers time, UTC+1, no daylight saving). Edited in Admin → Paramètres → Contact & réseaux.
  */
 
