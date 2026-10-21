@@ -140,4 +140,4 @@ export function PageTitle({ children }: { children: React.ReactNode }) {
 }
 
 export const inputCls =
-  "h-12 w-full rounded-[2px] border border-[#cfc6bb] bg-surface px-4 text-ink outline-none transition placeholder:text-ink-soft/70 focus:border-ink focus:ring-1 focus:ring-ink";
+  "h-12 w-full rounded-xl border border-line bg-surface px-4 text-ink outline-none transition placeholder:text-ink-soft/70 focus:border-ink focus:ring-1 focus:ring-ink";

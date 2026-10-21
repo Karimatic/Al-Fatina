@@ -1,8 +1,8 @@
 # Al Fatina — runbook
 
 What to do, step by step, for the things that go wrong or need care. Commands run from the repository
-root unless written otherwise. Live shop: https://el-fatina.karimmaticmz.workers.dev (no custom domain yet; Worker
-`el-fatina`, D1 `el-fatina-db`, R2 `el-fatina-media`).
+root unless written otherwise. Live shop: https://al-fatina.karimmaticmz.workers.dev (no custom domain yet; Worker
+`al-fatina`, D1 `el-fatina-db`, R2 `el-fatina-media`).
 
 ## 1. Deploy
 

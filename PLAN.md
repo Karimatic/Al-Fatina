@@ -77,7 +77,7 @@
 
 ## 4. Cloudflare free tier architecture
 
-- **One Worker (`el-fatina`) with Static Assets:**
+- **One Worker (`al-fatina`) with Static Assets:**
   - the storefront pages are pre-rendered HTML and served free (they never count against Worker
     requests);
   - the Worker runs only for `/api/*`, `/admin/*`, `/media/*`, product and category pages, sitemap,

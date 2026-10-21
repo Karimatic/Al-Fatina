@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const origin = (process.argv[2] ?? process.env.PUBLIC_ORIGIN ?? "https://el-fatina.karimmaticmz.workers.dev").replace(/\/$/, "");
+const origin = (process.argv[2] ?? process.env.PUBLIC_ORIGIN ?? "https://al-fatina.karimmaticmz.workers.dev").replace(/\/$/, "");
 const built = readFileSync(join(root, "dist", "index.html"), "utf8");
 const entry = /<script type="module" src="([^"]+)"/.exec(built)?.[1];
 if (!entry) {

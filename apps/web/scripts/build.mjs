@@ -82,7 +82,7 @@ const REDIRECT_BOOT =
     : "";
 const fonts = JSON.parse(readFileSync(join(web, "src/styles/font-preload.json"), "utf8"));
 const HERO_PRELOAD =
-  `<link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(max-width: 767px)" imagesrcset="/hero/silk-pearl-480.webp 480w, /hero/silk-pearl-960.webp 960w" imagesizes="100vw"/>`;
+  `<link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(max-width: 767px)" imagesrcset="/hero/silk-pearl-480.webp 480w, /hero/silk-pearl-960.webp 960w" imagesizes="190px"/>`;
 const localePath = (locale, path) => (locale === "ar" ? path : path === "/" ? "/fr" : `/fr${path}`);
 
 function writePage(page, locale, file) {

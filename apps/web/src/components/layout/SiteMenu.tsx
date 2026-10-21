@@ -143,7 +143,7 @@ export function SiteMenu() {
                         hrefLang={code}
                         lang={code}
                         aria-current={locale === code ? "true" : undefined}
-                        className={`grid h-11 place-items-center rounded-[2px] border text-sm transition ${locale === code ? "border-plum-600 bg-plum-600 text-white" : "border-line text-ink hover:border-ink"}`}
+                        className={`grid h-11 place-items-center rounded-full border text-sm transition ${locale === code ? "border-plum-600 bg-plum-600 text-white" : "border-line text-ink hover:border-ink"}`}
                       >
                         {label}
                       </a>
@@ -155,12 +155,12 @@ export function SiteMenu() {
               {(wa || contact?.instagram) && (
                 <div className="flex gap-2 border-t border-line p-4">
                   {contact?.instagram && (
-                    <a href={contact.instagram} target="_blank" rel="noopener noreferrer" className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[2px] border border-ink text-sm">
+                    <a href={contact.instagram} target="_blank" rel="noopener noreferrer" className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full border border-ink text-sm">
                       <InstagramIcon size={18} /> Instagram
                     </a>
                   )}
                   {wa && (
-                    <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" className="flex h-11 flex-1 items-center justify-center rounded-[2px] bg-[#25D366] text-sm font-medium text-[#062a1d]">
+                    <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" className="flex h-11 flex-1 items-center justify-center rounded-full bg-[#25D366] text-sm font-medium text-[#062a1d]">
                       WhatsApp
                     </a>
                   )}

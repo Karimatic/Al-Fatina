@@ -544,7 +544,7 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
               type="button"
               aria-disabled={!variant}
               onClick={buyNow}
-              className={`h-12 min-w-0 max-w-[48%] rounded-[2px] bg-plum-600 px-4 text-[12px] font-medium uppercase leading-tight tracking-[0.06em] text-white transition active:scale-[0.97] ${variant ? "" : "opacity-60"}`}
+              className={`h-12 min-w-0 max-w-[48%] rounded-full bg-plum-600 px-4 text-[12px] font-medium uppercase leading-tight tracking-[0.06em] text-white transition active:scale-[0.97] ${variant ? "" : "opacity-60"}`}
             >
               {buyLabel}
             </button>

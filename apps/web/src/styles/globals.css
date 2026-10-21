@@ -33,23 +33,23 @@
   --color-sale: #b0124a;
   --color-cream: #faf0f8;
 
-  --font-display: var(--font-p-jost), "Century Gothic", Arial, sans-serif;
+  --font-display: var(--font-p-cormorant), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-p-jost), system-ui, sans-serif;
   --font-arabic: var(--font-arabic-sans), "Segoe UI", Tahoma, sans-serif;
   --font-arabic-display: var(--font-arabic-sans), "Segoe UI", Tahoma, sans-serif;
 
-  /* soft corners: 2 px on buttons, fields, cards and sheets */
-  --radius-card: 2px;
-  --radius-xs: 2px;
-  --radius-sm: 2px;
-  --radius-md: 2px;
-  --radius-lg: 2px;
-  --radius-xl: 2px;
-  --radius-2xl: 2px;
-  --radius-3xl: 2px;
-  --radius-4xl: 2px;
-  --shadow-soft: 0 1px 2px rgb(34 34 34 / 0.04), 0 8px 24px rgb(34 34 34 / 0.06);
-  --shadow-lift: 0 4px 16px rgb(34 34 34 / 0.1);
+  /* soft, rounded shapes: photos and cards 18 px, fields 12 px, buttons are pills */
+  --radius-card: 18px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 24px;
+  --radius-4xl: 28px;
+  --shadow-soft: 0 1px 2px rgb(53 33 63 / 0.04), 0 12px 32px -8px rgb(110 58 166 / 0.14);
+  --shadow-lift: 0 18px 40px -14px rgb(158 58 146 / 0.35);
 
   --animate-shimmer: shimmer 1.4s ease-in-out infinite;
 
@@ -62,7 +62,7 @@
 /* ── The wordmark: AL FATINA in light Jost capitals, widely spaced ── */
 .brand-mark {
   display: inline-block;
-  font-family: var(--font-display);
+  font-family: var(--font-p-jost), "Century Gothic", Arial, sans-serif;
   font-weight: 400;
   font-style: normal;
   text-transform: uppercase;
@@ -82,12 +82,6 @@
 .bg-plum-700 { background-image: var(--grad-deep); }
 :is(a, button).bg-plum-600:hover { filter: brightness(0.94); }
 [dir="rtl"] .bg-plum-600 { background-image: linear-gradient(260deg, #c2397a 0%, #9e3a92 50%, #6e3aa6 100%); }
-
-/* Pills and chips get the soft 2 px corner like the buttons; round things with a fixed size stay
-   round (colour dots, icon buttons, avatars). */
-:where(a, button, span, label, p, div, input, select).rounded-full:not([class*="size-"]) {
-  border-radius: 2px;
-}
 
 /* Arabic letters are never spaced apart (they would break) */
 html[lang="ar"] :is(.uppercase, .heading-display, .title-silk, .eyebrow-silk) {
@@ -119,7 +113,7 @@ html[lang="ar"] :is(.uppercase, .heading-display, .title-silk, .eyebrow-silk) {
   100% { transform: scale(1); opacity: 1; }
 }
 .elfatina-splash-word {
-  font-family: var(--font-display);
+  font-family: var(--font-p-jost), "Century Gothic", Arial, sans-serif;
   font-weight: 400;
   font-size: 1.2rem;
   text-transform: uppercase;
@@ -194,10 +188,9 @@ html[lang="ar"] :is(.uppercase, .heading-display, .title-silk, .eyebrow-silk) {
   }
   .heading-display {
     font-family: var(--font-display);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    line-height: 1.15;
   }
   /* Latin brand text (dir="ltr") keeps the Latin face on Arabic pages */
   html[lang="ar"] .heading-display:not([dir="ltr"]) {
@@ -208,17 +201,18 @@ html[lang="ar"] :is(.uppercase, .heading-display, .title-silk, .eyebrow-silk) {
   /* section and page titles: light, widely spaced capitals */
   .title-silk {
     font-family: var(--font-display);
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    line-height: 1.2;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+    line-height: 1.08;
   }
   html[lang="ar"] .title-silk {
     font-family: var(--font-arabic-display);
     font-weight: 700;
+    line-height: 1.35;
   }
   /* the small capitals above a title ("Nouvelle collection") */
   .eyebrow-silk {
+    font-family: var(--font-p-jost), system-ui, sans-serif;
     font-size: 0.72rem;
     font-weight: 500;
     text-transform: uppercase;
@@ -230,18 +224,18 @@ html[lang="ar"] :is(.uppercase, .heading-display, .title-silk, .eyebrow-silk) {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    min-height: 3rem;
+    min-height: 3.1rem;
     padding-inline: 2rem;
-    border-radius: 2px;
+    border-radius: 999px;
     font-weight: 500;
     font-size: 0.8125rem;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    letter-spacing: 0.12em;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.25s ease, box-shadow 0.25s ease, filter 0.2s ease;
   }
-  .btn-silk { background: var(--color-plum-600) var(--grad-brand); color: #fff; }
-  .btn-silk:hover { filter: brightness(0.94); }
-  .btn-silk-line { border: 1px solid currentColor; }
+  .btn-silk { background: var(--color-plum-600) var(--grad-brand); color: #fff; box-shadow: 0 12px 26px -12px rgb(158 58 146 / 0.7); }
+  .btn-silk:hover { filter: brightness(0.95); transform: translateY(-1px); box-shadow: 0 16px 30px -12px rgb(158 58 146 / 0.75); }
+  .btn-silk-line { border: 1px solid currentColor; background: rgb(255 255 255 / 0.6); }
   .btn-silk-line:hover { background: var(--color-plum-600); color: #fff; border-color: var(--color-plum-600); }
   html[lang="ar"] :is(.btn-silk, .btn-silk-line) { letter-spacing: 0; font-size: 0.9375rem; font-weight: 700; }
 }
@@ -561,3 +555,35 @@ html[lang="ar"] .announce { letter-spacing: 0; font-size: 13px !important; }
 
 /* a pop-up panel receives the focus itself when it opens (lib/dialogFocus.ts): no ring around the whole panel */
 [role="dialog"]:focus { outline: none; }
+
+/* ── Soft dream: pastel washes, arched frames, gentle lift and float ── */
+/* a pale pink-lavender wash, two soft glows (a section's background) */
+.wash {
+  background:
+    radial-gradient(55% 70% at 8% 0%, rgb(251 214 232 / 0.75) 0%, transparent 62%),
+    radial-gradient(50% 65% at 96% 100%, rgb(228 214 250 / 0.8) 0%, transparent 60%),
+    #fdf6fb;
+}
+/* an arch: round on top, gently rounded at the foot (photos, category tiles) */
+.arch { border-radius: 999px 999px 22px 22px; overflow: hidden; }
+/* glows that drift slowly behind the hero (paused out of view, still with reduced motion) */
+.glow { position: absolute; border-radius: 999px; filter: blur(48px); opacity: 0.55; pointer-events: none; will-change: transform; animation: glow-float 14s ease-in-out infinite alternate; }
+@keyframes glow-float { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(18px, -22px, 0) scale(1.08); } }
+/* a gentle float for small badges */
+.float-soft { animation: float-soft 6s ease-in-out infinite; }
+@keyframes float-soft { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+/* cards rise a little under the mouse; their photo zooms slowly */
+.card-lift { transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.card-lift .card-photo { transition: box-shadow 0.35s ease; }
+@media (hover: hover) {
+  .card-lift:hover { transform: translateY(-4px); }
+  .card-lift:hover .card-photo { box-shadow: var(--shadow-lift); }
+  .card-lift:hover .card-photo img { transform: scale(1.04); }
+}
+.card-photo img { transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+/* text in the brand gradient (large titles only: the plain colour stays readable underneath) */
+.text-grad { background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@media (prefers-reduced-motion: reduce) {
+  .glow, .float-soft { animation: none; }
+  .card-lift, .card-lift:hover { transform: none; }
+}

@@ -127,7 +127,7 @@ export function CategoryView() {
   }, [category, ar]);
 
   const money = (n: number) => formatDA(n, locale);
-  const chip = (on: boolean) => `h-9 shrink-0 rounded-[2px] border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-plum-600 bg-plum-600 text-white" : "border-line hover:border-ink"}`;
+  const chip = (on: boolean) => `h-9 shrink-0 rounded-full border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-plum-600 bg-plum-600 text-white" : "border-line hover:border-ink"}`;
 
   return (
     <div className="mx-auto max-w-7xl px-3 pb-10 pt-6 md:px-6 md:pt-10">
@@ -212,7 +212,7 @@ export function PromotionsView() {
   });
   const shown = main === "all" ? sale : sale.filter((p) => p.categorySlug && categorySlugs(all, main).has(p.categorySlug));
   const best = sale[0] ? percentOff(sale[0]) : 0;
-  const chip = (on: boolean) => `h-9 shrink-0 rounded-[2px] border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-plum-600 bg-plum-600 text-white" : "border-line hover:border-ink"}`;
+  const chip = (on: boolean) => `h-9 shrink-0 rounded-full border px-4 text-[11.5px] font-medium uppercase tracking-[0.12em] transition ${on ? "border-plum-600 bg-plum-600 text-white" : "border-line hover:border-ink"}`;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">

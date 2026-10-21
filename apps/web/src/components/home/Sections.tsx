@@ -34,11 +34,15 @@ export function Reveal({ children, delay = 0, className = "" }: { children: Reac
 /** Section heading: title on the start side, "see all" on the end side. */
 export function SectionHead({ title, href, link }: { title: string; href?: string; link?: string }) {
   return (
-    <div className="mb-7 text-center md:mb-9">
-      <h2 className="title-silk text-[1.35rem] md:text-[1.9rem]">{title}</h2>
+    <div className="mb-8 text-center md:mb-11">
+      <span aria-hidden="true" className="mb-2 block text-sm text-plum-600">
+        ✦
+      </span>
+      <h2 className="title-silk text-[2rem] text-ink md:text-[2.75rem]">{title}</h2>
       {href && link && (
-        <a href={href} className="mt-2 inline-block text-[11.5px] uppercase tracking-[0.16em] text-ink-soft underline underline-offset-[6px] hover:text-ink">
+        <a href={href} className="mt-3 inline-flex items-center gap-1 rounded-full bg-white px-4 py-1.5 text-[12.5px] text-plum-700 ring-1 ring-line transition hover:ring-plum-600/50">
           {link}
+          <span aria-hidden="true" className="rtl:rotate-180">→</span>
         </a>
       )}
     </div>
@@ -79,7 +83,7 @@ export function InstagramCard({ children }: { children?: React.ReactNode }) {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="ig-btn inline-flex h-12 shrink-0 items-center gap-2 rounded-[2px] bg-plum-600 px-7 text-[13px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-black"
+              className="ig-btn inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-plum-600 px-7 text-[13px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-black"
             >
               <InstagramIcon size={18} />
               <span dir="ltr">{t.instagram.cta}</span>

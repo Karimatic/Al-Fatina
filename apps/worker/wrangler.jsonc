@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "el-fatina",
+  "name": "al-fatina",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": [
@@ -147,7 +147,7 @@
   },
   "vars": {
     "ENVIRONMENT": "production",
-    "PUBLIC_ORIGIN": "https://el-fatina.karimmaticmz.workers.dev",
+    "PUBLIC_ORIGIN": "https://al-fatina.karimmaticmz.workers.dev",
     "MEDIA_ORIGIN": "",
     // "console": no email service, admins sign in with an authenticator app
     "MAIL_PROVIDER": "console",

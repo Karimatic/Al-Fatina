@@ -30,7 +30,7 @@ export function SiteHeader() {
         </span>
         {t.silk.club}
       </p>
-      <header className="sticky top-0 z-40 border-b border-line bg-ivory">
+      <header className="sticky top-0 z-40 border-b border-line/70 bg-white/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-2 md:h-[4.75rem] md:px-6">
           {/* start: ☰ (everywhere: help, language, every link) + search on phones and tablets */}
           <div className="flex flex-1 items-center lg:flex-none">

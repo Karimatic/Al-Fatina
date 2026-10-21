@@ -52,7 +52,7 @@ export function SiteFooter() {
   ];
   const title = "eyebrow-silk mb-4 text-ink";
   return (
-    <footer className="mt-16 bg-cream">
+    <footer className="wash mt-16 rounded-t-[2.5rem]">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 sm:grid-cols-2 md:py-16 lg:grid-cols-4 lg:px-8">
         {columns.map((col) => (
           <nav key={col.title} aria-label={col.title}>
