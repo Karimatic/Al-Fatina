@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormGuard } from "@/lib/formGuard";
 import { buzz } from "@/lib/haptics";
-import { dateLocale, formatDA, imageUrl, normalizeDzPhone, type ImageRef, type ProductCardDTO, type ProductDetailDTO, type SiteConfigDTO } from "@elfatina/shared";
+import { dateLocale, formatDA, imageUrl, normalizeDzPhone, type ImageRef, type ProductCardDTO, type ProductDetailDTO } from "@elfatina/shared";
 import { FlashPanel } from "@/components/home/HomeExtras";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { BagIcon, HeartIcon } from "@/components/ui/icons";
@@ -16,7 +16,6 @@ import { AskWhatsApp, DeliveryEstimate } from "./DeliveryEstimate";
 import { Lightbox } from "./Lightbox";
 import { FindSimilarButton } from "./FindSimilar";
 import { SizeAdvisorButton } from "./SizeAdvisor";
-import { BoutiqueOpenBadge } from "@/components/views/BoutiqueView";
 import { ProductGrid } from "./ProductCard";
 import { ReviewForm } from "./ReviewForm";
 import { ShareButton } from "./ShareButton";
@@ -64,7 +63,6 @@ function ProductSkeleton() {
 function ProductDetail({ p }: { p: ProductDetailDTO }) {
   const { t, ar, href, locale } = useLocale();
   const favorites = useFavorites();
-  const site = useApi<SiteConfigDTO>("/site");
   const name = ar ? p.nameAr : p.nameFr;
   useEffect(() => {
     document.title = `${name} · Al Fatina`;
@@ -162,7 +160,6 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
   // computed by the API: hand-picked look → bought together → same category (no catalogue download)
   const related = p.related;
   const buyLabel = t.product.buyNow;
-  const boutique = site.data?.boutique;
   // the chosen size / colour if any, otherwise the product as a whole
   const availableNow = variant ? variant.available > 0 : p.inStock;
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -463,18 +460,6 @@ function ProductDetail({ p }: { p: ProductDetailDTO }) {
             <a href={href(`/tenue?p=${encodeURIComponent(p.slug)}`)} className="mt-2 flex h-12 items-center justify-center rounded-full border border-line bg-surface text-sm font-semibold">
               {t.plus.outfit.open}
             </a>
-            {boutique?.enabled && boutique.showOnProducts && availableNow && (
-              <a href={href("/boutique")} className="mt-3 flex items-center gap-3 rounded-2xl border border-line bg-surface p-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-rose-100 text-lg" aria-hidden="true">🏪</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">{t.plus.boutique.available}</span>
-                  <span className="block text-xs text-ink-soft">{t.plus.boutique.availableText}</span>
-                </span>
-                <span className="hidden shrink-0 sm:block">
-                  <BoutiqueOpenBadge boutique={boutique} className="text-xs" />
-                </span>
-              </a>
-            )}
           </div>
 
           {showExpress && variant && variant.available > 0 && (

@@ -585,7 +585,7 @@ function ReviewSheet({ review, onClose }: { review: Partial<Review>; onClose: ()
     >
       <div className="space-y-3">
         <p className="rounded-lg bg-rose-100/60 p-3 text-sm text-plum-700">
-          {tr("Pour un avis reçu ailleurs (Instagram, WhatsApp, en boutique). Il s'affiche sans le badge « Achat vérifié », réservé aux clientes livrées.")}
+          {tr("Pour un avis reçu ailleurs (Instagram, WhatsApp). Il s'affiche sans le badge « Achat vérifié », réservé aux clientes livrées.")}
         </p>
         <Select label={tr("Produit")} value={f.productId ?? ""} onChange={(e) => setF({ ...f, productId: e.target.value ? Number(e.target.value) : null })}>
           <option value="">{tr("Choisir un article…")}</option>

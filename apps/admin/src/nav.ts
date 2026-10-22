@@ -51,7 +51,7 @@ export const NAV: NavGroup[] = [
     items: [
       { path: "/produits", label: tr("Produits"), permission: "products.view", icon: Shirt },
       { path: "/stock", label: tr("Stock"), permission: "stock.view", icon: Boxes },
-      { path: "/ventes", label: tr("Ventes"), permission: "sales.view", icon: Receipt, also: ["/caisse"] },
+      { path: "/ventes", label: tr("Ventes"), permission: "sales.view", icon: Receipt },
     ],
   },
   {
@@ -93,7 +93,6 @@ export const NAV: NavGroup[] = [
 
 /** Pages without a tab of their own (breadcrumb + search); see NAV. */
 export const INNER_PAGES: { path: string; label: string; group: string; parent: string }[] = [
-  { path: "/caisse", label: tr("Vente au magasin"), group: tr("Catalogue"), parent: "/ventes" },
   { path: "/stock/inventaire", label: tr("Inventaire"), group: tr("Catalogue"), parent: "/stock" },
   { path: "/preparation", label: tr("Préparation"), group: tr("Commandes"), parent: "/commandes" },
   { path: "/expeditions", label: tr("Expéditions"), group: tr("Commandes"), parent: "/commandes" },

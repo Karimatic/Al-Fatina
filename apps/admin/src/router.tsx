@@ -46,7 +46,6 @@ const appRoutes = [
   page("/stock/inventaire", lazy(() => import("./pages/StockCount"), "StockCountsPage")),
   page("/stock/inventaire/$id", lazy(() => import("./pages/StockCount"), "StockCountPage")),
   page("/ventes", lazy(() => import("./pages/Sales"), "SalesPage")),
-  page("/caisse", lazy(() => import("./pages/Cashier"), "CashierPage")),
   page("/preparation", lazy(() => import("./pages/Packing"), "PackingPage")),
   page("/commandes", lazy(() => import("./pages/Orders"), "OrdersPage")),
   page("/expeditions", lazy(() => import("./pages/Logistics"), "LogisticsPage")),

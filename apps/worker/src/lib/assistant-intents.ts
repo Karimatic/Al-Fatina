@@ -1,14 +1,11 @@
 /**
  * The assistant's everyday questions, answered from the shop's real data before falling back
  * to the product search: last products seen, favourites, cart, "where is my order", delivery
- * price and time to a wilaya, the shop's place and hours, contact, offers, new arrivals, best
+ * price and time to a wilaya, « is there a shop? » (online only), contact, offers, new arrivals, best
  * sellers, a product's price and sizes in stock, a size from height and weight, the FAQ, and
  * follow-ups ("et en rouge ?"). Arabic, Darija and French. Rules only, no paid AI.
  */
 import {
-  boutiqueStatus,
-  DAY_NAMES,
-  DEFAULT_BOUTIQUE,
   formatDA,
   normalizeSearch,
   recommendSize,
@@ -90,7 +87,7 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
   }
   if (wordsCount <= 3 && hasAny(text, W.greet)) {
     return base(
-      T(ar, "وعليكم السلام ✨ أنا مساعدة Al Fatina. أبحث لك عن قطعة (لون، مناسبة، مقاس، ميزانية)، أخبرك بسعر التوصيل إلى ولايتك، أين وصل طلبك، أو أين محلنا.", "Bonjour ✨ Je suis l'assistante Al Fatina. Je trouve une pièce pour vous (couleur, occasion, taille, budget), je donne le prix de livraison vers votre wilaya, où en est votre commande, ou l'adresse de la boutique."),
+      T(ar, "وعليكم السلام ✨ أنا مساعدة Al Fatina. أبحث لك عن قطعة (لون، مناسبة، مقاس، ميزانية)، أخبرك بسعر التوصيل إلى ولايتك، أين وصل طلبك، أو كيف تتم الطلبية والتوصيل.", "Bonjour ✨ Je suis l'assistante Al Fatina. Je trouve une pièce pour vous (couleur, occasion, taille, budget), je donne le prix de livraison vers votre wilaya, où en est votre commande, ou comment se passent la commande et la livraison."),
       { intent: "greet" },
     );
   }
@@ -173,20 +170,22 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
     );
   }
 
-  // ── the shop, its hours, contact ──
+  // ── a shop to visit? Al Fatina sells online only ──
   if (hasAny(text, W.shop) || hasAny(text, W.hours)) {
-    const { boutique: saved } = await getSettings(env, ["boutique"]);
-    const b = { ...DEFAULT_BOUTIQUE, ...saved };
-    const s = boutiqueStatus(b.hours);
-    const day = s.next ? (s.next.today ? T(ar, "اليوم", "aujourd'hui") : s.next.tomorrow ? T(ar, "غدًا", "demain") : DAY_NAMES[ar ? "ar" : "fr"][s.next.day]) : "";
-    const status = s.open ? T(ar, `مفتوح الآن حتى ${s.closesAt}.`, `Ouvert maintenant jusqu'à ${s.closesAt}.`) : s.next ? T(ar, `مغلق الآن، يفتح ${day} على ${s.next.time}.`, `Fermé, ouvre ${day} à ${s.next.time}.`) : "";
-    return base(T(ar, `📍 محلنا: ${b.addressAr}. ${status}`, `📍 La boutique : ${b.addressFr}. ${status}`), {
-      intent: "shop",
-      actions: [
-        { label: T(ar, "📍 الخريطة والأوقات", "📍 Plan et horaires"), href: "/boutique" },
-        { label: T(ar, "🧭 الاتجاهات", "🧭 Itinéraire"), href: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(b.mapQuery)}` },
-      ],
-    });
+    return base(
+      T(
+        ar,
+        "الفاتنة متجر إلكتروني فقط، بدون محل. اطلبي من هنا في أي وقت، نوصل إلى الولايات الـ69 وتدفعين عند الاستلام.",
+        "Al Fatina est une boutique 100 % en ligne, sans magasin. Commandez ici à toute heure : nous livrons les 69 wilayas et vous payez à la réception.",
+      ),
+      {
+        intent: "shop",
+        actions: [
+          { label: T(ar, "🛍️ الجديد", "🛍️ Nouveautés"), href: "/nouveautes" },
+          { label: T(ar, "✉️ تواصلي معنا", "✉️ Nous écrire"), href: "/contact" },
+        ],
+      },
+    );
   }
   if (hasAny(text, W.contact) && !hasAny(text, W.price)) {
     const { contact } = await getSettings(env, ["contact"]);
@@ -291,6 +290,6 @@ export async function answer(env: Env, input: Input): Promise<AssistantReplyDTO>
       ? undefined
       : found.understood.length
         ? T(ar, "لم أجد قطعة متوفرة بهذه المواصفات. جربي لونًا أو مقاسًا آخر، أو اسأليني عن الجديد أو التخفيضات.", "Je n'ai rien trouvé en stock avec ces critères. Essayez une autre couleur ou taille, ou demandez-moi les nouveautés ou les promos.")
-        : T(ar, "أنا مساعدة Al Fatina ✨ أساعدك فقط في ما يخص المحل: البحث عن قطعة (لون، مقاس، ميزانية)، سعر التوصيل إلى ولايتك، طلبك، التبديل، أو عنوان المحل وأوقاته.", "Je suis l'assistante Al Fatina ✨ Je réponds seulement à ce qui concerne la boutique : trouver une pièce (couleur, taille, budget), le prix de livraison vers votre wilaya, votre commande, les échanges, l'adresse et les horaires."),
+        : T(ar, "أنا مساعدة Al Fatina ✨ أساعدك فقط في ما يخص المحل: البحث عن قطعة (لون، مقاس، ميزانية)، سعر التوصيل إلى ولايتك، طلبك، التبديل، أو طريقة الدفع.", "Je suis l'assistante Al Fatina ✨ Je réponds seulement à ce qui concerne la boutique : trouver une pièce (couleur, taille, budget), le prix de livraison vers votre wilaya, votre commande, les échanges ou le paiement."),
   };
 }

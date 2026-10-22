@@ -1,7 +1,6 @@
 import { normalizeDzPhone } from "@elfatina/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { api, errorMessage, post } from "../api";
 import { isAr, tr } from "../i18n";
 import { da } from "../lib/format";
@@ -10,10 +9,9 @@ import type { StockProduct, StockVariant } from "./Stock";
 import { variantLabel } from "../lib/variants";
 
 type Line = { variantId: number; qty: number; name: string; label: string; price: number; max: number };
-type Channel = "boutique" | "telephone" | "whatsapp" | "instagram" | "facebook";
+type Channel = "telephone" | "whatsapp" | "instagram" | "facebook";
 
 const CHANNELS: { value: Channel; label: string; hint: string }[] = [
-  { value: "boutique", label: tr("🏪 Au magasin"), hint: tr("La cliente est là : la vente est terminée tout de suite, le stock baisse.") },
   { value: "telephone", label: tr("📞 Téléphone"), hint: tr("Commande à livrer : elle rejoint les commandes du site, déjà confirmée.") },
   { value: "whatsapp", label: tr("💬 WhatsApp"), hint: tr("Commande à livrer : elle rejoint les commandes du site, déjà confirmée.") },
   { value: "instagram", label: tr("📸 Instagram"), hint: tr("Commande à livrer : elle rejoint les commandes du site, déjà confirmée.") },
@@ -21,20 +19,19 @@ const CHANNELS: { value: Channel; label: string; hint: string }[] = [
 ];
 
 /**
- * One screen for every sale made outside the website: in the shop, by phone, WhatsApp or
- * Instagram. Tap a piece, its size, then save: the stock is shared with the website, so the
+ * One screen for every order received outside the website (Al Fatina sells online only): by
+ * phone, WhatsApp, Instagram or Facebook. Tap a piece, its size, then save: the stock is shared with the website, so the
  * last piece sold here is no longer offered online.
  */
 export function SaleDesk() {
   const qc = useQueryClient();
   const toast = useToast();
-  const [channel, setChannel] = useState<Channel>("boutique");
+  const [channel, setChannel] = useState<Channel>("telephone");
   const [q, setQ] = useState("");
   const list = useQuery({ queryKey: ["stock-products", "cashier"], queryFn: () => api<{ products: StockProduct[] }>("/stock/products?filter=all") });
   const wilayas = useQuery({
     queryKey: ["wilayas-public"],
     queryFn: () => fetch("/api/geo/wilayas").then((r) => r.json() as Promise<{ code: number; fr: string; ar: string; home: number | null; desk: number | null }[]>),
-    enabled: channel !== "boutique",
   });
   const [open, setOpen] = useState<StockProduct | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
@@ -46,33 +43,34 @@ export function SaleDesk() {
   const [shipping, setShipping] = useState<number | null>(null);
   // one key per sale: two taps on « Vendre » (or a retry after a lost answer) make one sale
   const [saleKey, setSaleKey] = useState(() => crypto.randomUUID());
-  const inShop = channel === "boutique";
   const products = useMemo(
     () => (list.data?.products ?? []).filter((p) => p.status !== "archived" && `${p.name} ${p.nameAr}`.toLowerCase().includes(q.trim().toLowerCase())),
     [list.data, q],
   );
   const w = wilayas.data?.find((x) => x.code === wilaya);
-  const ship = inShop ? 0 : (shipping ?? (deliveryType === "bureau" ? w?.desk : w?.home) ?? 0);
+  const ship = shipping ?? (deliveryType === "bureau" ? w?.desk : w?.home) ?? 0;
   const subtotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
-  const phoneOk = inShop ? !phone.trim() || !!normalizeDzPhone(phone) : !!normalizeDzPhone(phone);
+  const phoneOk = !!normalizeDzPhone(phone);
   // the address is optional (the team often only has the town, or calls to get it)
-  const valid = lines.length > 0 && phoneOk && (inShop || name.trim().length >= 2);
+  const valid = lines.length > 0 && phoneOk && name.trim().length >= 2;
 
   const save = useMutation({
     mutationFn: () =>
       post<{ code: string; total: number }>("/sales/manual", {
         channel,
-        status: inShop ? "livree" : "confirmee",
+        status: "confirmee",
         name: name.trim() || undefined,
         phone: phone.trim() ? normalizeDzPhone(phone) : undefined,
         lines: lines.map((l) => ({ variantId: l.variantId, qty: l.qty })),
         idempotencyKey: saleKey,
-        ...(inShop
-          ? {}
-          : { wilaya, communeId: null, deliveryType, address: deliveryType === "domicile" && address.trim() ? address : undefined, shipping: ship }),
+        wilaya,
+        communeId: null,
+        deliveryType,
+        address: deliveryType === "domicile" && address.trim() ? address : undefined,
+        shipping: ship,
       }),
     onSuccess: (r) => {
-      toast(inShop ? tr("Vente {0} enregistrée · {1} · stock du site mis à jour ✓", { 0: r.code, 1: da(r.total) }) : tr("Commande {0} créée (confirmée) · {1} ✓", { 0: r.code, 1: da(r.total) }));
+      toast(tr("Commande {0} créée (confirmée) · {1} ✓", { 0: r.code, 1: da(r.total) }));
       setLines([]);
       setName("");
       setPhone("");
@@ -162,40 +160,38 @@ export function SaleDesk() {
             </ul>
           )}
           <div className="mt-3 space-y-2 border-t border-line pt-3">
-            <input className={`${inputCls} h-10`} placeholder={inShop ? tr("Nom de la cliente (facultatif)") : tr("Nom de la cliente")} value={name} onChange={(e) => setName(e.target.value)} />
-            <input className={`${inputCls} h-10`} inputMode="tel" placeholder={inShop ? tr("Téléphone (facultatif, pour sa fidélité)") : tr("Téléphone")} value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <input className={`${inputCls} h-10`} placeholder={tr("Nom de la cliente")} value={name} onChange={(e) => setName(e.target.value)} />
+            <input className={`${inputCls} h-10`} inputMode="tel" placeholder={tr("Téléphone")} value={phone} onChange={(e) => setPhone(e.target.value)} />
             {phone.trim() && !normalizeDzPhone(phone) && <p className="text-xs text-red-700">{tr("Numéro invalide")}</p>}
-            {!inShop && (
-              <>
-                <select className={`${inputCls} h-10`} value={wilaya} onChange={(e) => { setWilaya(Number(e.target.value)); setShipping(null); }} aria-label={tr("Wilaya")}>
-                  {wilayas.data?.map((x) => <option key={x.code} value={x.code}>{x.code} - {x.fr}</option>)}
-                </select>
-                <div className="grid grid-cols-2 gap-2">
-                  {(["domicile", "bureau"] as const).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      aria-pressed={deliveryType === t}
-                      onClick={() => { setDeliveryType(t); setShipping(null); }}
-                      className={`h-10 rounded-lg border text-sm font-medium ${deliveryType === t ? "border-plum-600 bg-plum-600/10 text-plum-700" : "border-line"}`}
-                    >
-                      {t === "domicile" ? tr("🏠 Domicile") : tr("🏢 Bureau (stop-desk)")}
-                    </button>
-                  ))}
-                </div>
-                {deliveryType === "domicile" && <input className={`${inputCls} h-10`} placeholder={tr("Adresse (facultatif)")} value={address} onChange={(e) => setAddress(e.target.value)} />}
-                <label className="flex items-center justify-between gap-2 text-sm">
-                  {tr("Livraison")}
-                  <input className={`${inputCls} h-10 w-32 text-end`} type="number" min={0} value={shipping ?? ship} onChange={(e) => setShipping(Number(e.target.value) || 0)} aria-label={tr("Frais de livraison (DA)")} />
-                </label>
-              </>
-            )}
+            <>
+              <select className={`${inputCls} h-10`} value={wilaya} onChange={(e) => { setWilaya(Number(e.target.value)); setShipping(null); }} aria-label={tr("Wilaya")}>
+                {wilayas.data?.map((x) => <option key={x.code} value={x.code}>{x.code} - {x.fr}</option>)}
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                {(["domicile", "bureau"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    aria-pressed={deliveryType === t}
+                    onClick={() => { setDeliveryType(t); setShipping(null); }}
+                    className={`h-10 rounded-lg border text-sm font-medium ${deliveryType === t ? "border-plum-600 bg-plum-600/10 text-plum-700" : "border-line"}`}
+                  >
+                    {t === "domicile" ? tr("🏠 Domicile") : tr("🏢 Bureau (stop-desk)")}
+                  </button>
+                ))}
+              </div>
+              {deliveryType === "domicile" && <input className={`${inputCls} h-10`} placeholder={tr("Adresse (facultatif)")} value={address} onChange={(e) => setAddress(e.target.value)} />}
+              <label className="flex items-center justify-between gap-2 text-sm">
+                {tr("Livraison")}
+                <input className={`${inputCls} h-10 w-32 text-end`} type="number" min={0} value={shipping ?? ship} onChange={(e) => setShipping(Number(e.target.value) || 0)} aria-label={tr("Frais de livraison (DA)")} />
+              </label>
+            </>
             <p className="flex items-baseline justify-between pt-1 text-lg">
               <span>{tr("Total")}</span>
               <b className="tabular-nums">{da(subtotal + ship)}</b>
             </p>
             <Button variant="primary" className="w-full" disabled={!valid} loading={save.isPending} onClick={() => save.mutate()}>
-              {inShop ? tr("✅ Encaisser") : tr("✅ Créer la commande")}
+              {tr("✅ Créer la commande")}
             </Button>
           </div>
         </Card>
@@ -225,11 +221,4 @@ export function SaleDesk() {
       )}
     </div>
   );
-}
-
-/** The old Caisse address opens the sale screen in Ventes. */
-export function CashierPage() {
-  const navigate = useNavigate();
-  useEffect(() => void navigate({ to: "/ventes", replace: true }), [navigate]);
-  return null;
 }

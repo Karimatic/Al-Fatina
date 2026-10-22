@@ -8,7 +8,6 @@
  */
 export type ViewKey =
   | "HomePage"
-  | "BoutiqueView"
   | "CategoryView"
   | "CategoriesView"
   | "CollectionView"
@@ -40,15 +39,6 @@ export interface PageDef {
 
 export const PAGES: PageDef[] = [
   { path: "/", view: "HomePage" },
-  {
-    path: "/boutique",
-    view: "BoutiqueView",
-    title: { ar: "محلنا", fr: "Notre boutique" },
-    description: {
-      ar: "العنوان، أوقات العمل والخريطة لمحل Al Fatina.",
-      fr: "Adresse, horaires et plan de la boutique Al Fatina.",
-    },
-  },
   { path: "/c/_", view: "CategoryView", title: { ar: "قسم", fr: "Catégorie" }, shell: true },
   { path: "/categories", view: "CategoriesView", title: { ar: "الأقسام", fr: "Catégories" } },
   { path: "/collection/_", view: "CollectionView", title: { ar: "تشكيلة", fr: "Collection" }, shell: true },

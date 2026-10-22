@@ -8,7 +8,6 @@ import { dirOf, type Locale } from "@elfatina/shared";
 import { App, APP_CLASS, type LanguageProvider } from "./App";
 import { HomePage } from "@/components/home/HomePage";
 import { ProductView } from "@/components/product/ProductView";
-import { BoutiqueView } from "@/components/views/BoutiqueView";
 import { CategoriesView, CategoryView, PromotionsView } from "@/components/views/CatalogViews";
 import { CollectionView, NewArrivalsView } from "@/components/views/DropViews";
 import { ContactView, LinksView, PageView } from "@/components/views/InfoViews";
@@ -25,7 +24,6 @@ import { localePath, NOT_FOUND, PAGES, type PageDef, type ViewKey } from "./page
 
 const VIEWS: Record<ViewKey, ComponentType> = {
   HomePage,
-  BoutiqueView,
   CategoryView,
   CategoriesView,
   CollectionView,

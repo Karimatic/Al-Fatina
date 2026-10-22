@@ -33,7 +33,7 @@ interface Member {
 /** The ready-made roles, what each one can do in one line (the order of the cards). */
 const ROLES: { key: keyof typeof ROLE_PRESETS | "custom"; icon: string; can: string }[] = [
   { key: "confirmation", icon: "📞", can: "Voit et confirme les commandes, appelle les clientes." },
-  { key: "fulfilment", icon: "📦", can: "Prépare et expédie les colis, gère le stock et la caisse." },
+  { key: "fulfilment", icon: "📦", can: "Prépare et expédie les colis, gère le stock." },
   { key: "marketing", icon: "📣", can: "Produits, promos, page d'accueil, avis et statistiques." },
   { key: "manager", icon: "⭐", can: "Tout le travail de la boutique, sauf l'équipe et les connexions." },
   { key: "readonly", icon: "👀", can: "Regarde seulement : commandes, produits, statistiques." },
@@ -78,7 +78,7 @@ const GROUPS: { title: string; items: [Permission, string][] }[] = [
       ["cost.view", "Voir les prix d'achat et marges"],
     ],
   },
-  { title: "Ventes", items: [["sales.view", "Voir les ventes"], ["sales.create", "Enregistrer une vente (caisse)"]] },
+  { title: "Ventes", items: [["sales.view", "Voir les ventes"], ["sales.create", "Enregistrer une commande manuelle"]] },
   {
     title: "Marketing",
     items: [

@@ -28,7 +28,7 @@ export function SalesPage() {
       <PageHeader
         group={tr("Catalogue")}
         title={tr("Ventes")}
-        subtitle={tr("Les ventes faites au magasin, par téléphone, WhatsApp ou Instagram, et leurs résultats.")}
+        subtitle={tr("Les commandes reçues par téléphone, WhatsApp, Instagram ou Facebook, et leurs résultats.")}
       />
       {can("sales.create") && (
         <Pills value={view} onChange={setView} options={[{ value: "new", label: tr("🧾 Nouvelle vente") }, { value: "results", label: tr("📊 Résultats") }]} />
@@ -82,7 +82,7 @@ export function SalesPage() {
             )}
           </Card>
           <Card title={tr("Dernières ventes manuelles")}>
-            {d.recentManual.length === 0 ? <p className="text-sm text-ink-soft">{tr("Les ventes de la Caisse et les commandes reçues sur Instagram, WhatsApp ou par téléphone apparaissent ici.")}</p> : (
+            {d.recentManual.length === 0 ? <p className="text-sm text-ink-soft">{tr("Les commandes reçues sur Instagram, WhatsApp, Facebook ou par téléphone s'affichent ici.")}</p> : (
               <ul className="space-y-2 text-sm">
                 {d.recentManual.map((o) => (
                   <li key={o.id} className="flex items-center justify-between gap-2">

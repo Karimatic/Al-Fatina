@@ -1,17 +1,15 @@
 /**
- * Admin → packing mode, returns analysis, product profitability and the shop
- * (boutique) page settings.
+ * Admin → packing mode, returns analysis and product profitability (Al Fatina sells online only:
+ * no shop page settings).
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import { cleanText, DEFAULT_BOUTIQUE, OUTCOME_REASON_LABEL, type OutcomeReason } from "@elfatina/shared";
+import { OUTCOME_REASON_LABEL, type OutcomeReason } from "@elfatina/shared";
 import type { AppEnv } from "../../env";
-import { auditStmt } from "../../lib/audit";
 import { mediaUrl, variantLabels } from "../../lib/catalog";
 import { body, HttpError, intParam } from "../../lib/http";
 import { putImage } from "../../lib/media";
 import { applyStatusChange } from "../../lib/orders";
-import { bumpCatalogStmt, getSetting, setSettingStmt } from "../../lib/settings";
 import { syncOrderMessage } from "../../lib/telegram";
 import { actorOf, requirePermission } from "../../middleware/access";
 import { statsRange } from "./dashboard";
@@ -254,26 +252,4 @@ insightRoutes.get("/stats/profit", requirePermission("stats.view"), async (c) =>
     totals: { revenue: sum("revenue"), cost: sum("cost"), delivery: sum("delivery"), returns: sum("returns"), discounts: sum("discounts"), profit: sum("profit") },
     missingCost: rows.filter((r) => r.missingCost).length,
   });
-});
-
-/* ───────────── The shop (boutique) page ───────────── */
-
-const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
-const boutiqueInput = z.object({
-  enabled: z.boolean(),
-  addressFr: cleanText(200),
-  addressAr: cleanText(200),
-  mapQuery: cleanText(200),
-  hours: z.array(z.object({ open: hhmm, close: hhmm }).nullable()).length(7),
-  noteFr: cleanText(300).default(""),
-  noteAr: cleanText(300).default(""),
-  showOnProducts: z.boolean(),
-});
-
-insightRoutes.get("/boutique", requirePermission("marketing.edit"), async (c) => c.json({ ...DEFAULT_BOUTIQUE, ...(await getSetting(c.env, "boutique")) }));
-
-insightRoutes.put("/boutique", requirePermission("marketing.edit"), async (c) => {
-  const input = await body(c, boutiqueInput);
-  await c.env.DB.batch([setSettingStmt(c.env, "boutique", input), bumpCatalogStmt(c.env), auditStmt(c.env, actorOf(c.get("member")), "update", "settings", "boutique")]);
-  return c.json(input);
 });

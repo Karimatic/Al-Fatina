@@ -15,7 +15,6 @@ const src = (p: string) => fileURLToPath(new URL(`./src/${p}`, import.meta.url))
 const VIEW_MODULE: Record<ViewKey, string> = {
   HomePage: "components/home/HomePage.tsx",
   ProductView: "components/product/ProductView.tsx",
-  BoutiqueView: "components/views/BoutiqueView.tsx",
   CategoriesView: "components/views/CatalogViews.tsx",
   CategoryView: "components/views/CatalogViews.tsx",
   PromotionsView: "components/views/CatalogViews.tsx",
