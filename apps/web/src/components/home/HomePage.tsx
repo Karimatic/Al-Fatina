@@ -7,7 +7,7 @@ import { useDesign, useSite } from "@/lib/site";
 import { DropBanner } from "@/components/views/DropViews";
 import { Banners, Featured, FlashBlock, Newsletter } from "./HomeExtras";
 import { Faq, InstagramCard } from "./Sections";
-import { ContestCard, LookbookGrid, RecentlyViewed, ReviewWall } from "./Showcase";
+import { LookbookGrid, RecentlyViewed, ReviewWall } from "./Showcase";
 import { CategoryBanners, ExploreGrid, PromiseRow, SelectionTabs, SilkHero, TrendingRail } from "./Silk";
 
 /**
@@ -62,7 +62,6 @@ export function HomePage() {
         <LookbookGrid />
       </InstagramCard>
     ),
-    contest: () => <ContestCard />,
     recent: () => <RecentlyViewed products={products} />,
     faq: () => <Faq />,
     newsletter: () => <Newsletter />,
