@@ -159,15 +159,16 @@ export function Newsletter() {
   return (
     <section className="mx-auto max-w-6xl px-3 py-6 md:px-4">
       <Reveal>
-        <div className="relative overflow-hidden rounded-[1.75rem] bg-rose-100 px-5 py-8 text-center md:px-10">
-          <span aria-hidden="true" className="pointer-events-none absolute -end-10 -top-10 size-56 rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-surface)_50%,transparent),transparent)]" />
-          <p className="text-3xl" aria-hidden="true">💌</p>
-          <h2 className="heading-display mt-2 text-3xl">{N.title}</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft">{N.text}</p>
+        <div className="relative overflow-hidden rounded-[2rem] bg-plum-600 px-6 py-10 text-center text-white md:px-12 md:py-14">
+          <span aria-hidden="true" className="glow -end-10 -top-16 size-60 bg-white/40" />
+          <span aria-hidden="true" className="glow -bottom-20 -start-10 size-60 bg-[#f6b8d6]/60 [animation-delay:-6s]" />
+          <p className="relative text-3xl" aria-hidden="true">💌</p>
+          <h2 className="title-silk relative mt-3 text-[2.2rem] md:text-[3rem]">{N.title}</h2>
+          <p className="relative mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-white">{N.text}</p>
           {state === "done" ? (
-            <p className="mt-5 font-semibold text-plum-700">{N.done}</p>
+            <p className="relative mt-6 font-medium">{N.done}</p>
           ) : state === "ios" ? (
-            <p className="mx-auto mt-5 max-w-sm text-sm font-medium text-plum-700">{N.ios}</p>
+            <p className="relative mx-auto mt-6 max-w-sm text-sm font-medium">{N.ios}</p>
           ) : supported ? (
             <button
               type="button"
@@ -177,14 +178,14 @@ export function Newsletter() {
                 const r = await subscribeNews(locale);
                 setState(r === "ok" ? "done" : r === "denied" ? "denied" : "error");
               }}
-              className="lift mt-5 inline-flex h-12 items-center rounded-full bg-plum-600 px-7 font-semibold text-white disabled:opacity-60"
+              className="relative mt-7 inline-flex h-12 items-center rounded-full bg-white px-8 text-[13px] font-medium uppercase tracking-[0.12em] text-plum-700 shadow-[0_12px_28px_-12px_rgb(0_0_0/0.4)] transition hover:-translate-y-px disabled:opacity-60"
             >
               {N.cta}
             </button>
           ) : null}
           {state === "denied" && <p className="mt-2 text-sm text-danger">{N.denied}</p>}
           {state === "error" && <p className="mt-2 text-sm text-danger">{t.common.error}</p>}
-          <a href={ig} target="_blank" rel="noopener noreferrer" className="mt-4 flex items-center justify-center gap-1.5 text-sm font-semibold text-plum-700">
+          <a href={ig} target="_blank" rel="noopener noreferrer" className="relative mt-5 flex items-center justify-center gap-1.5 text-sm font-medium text-white underline-offset-4 hover:underline">
             <InstagramIcon size={16} /> {N.instagram}
           </a>
         </div>

@@ -65,7 +65,7 @@ export interface Settings {
 
 export const DEFAULTS: Settings = {
   store: {
-    name: "Al Fatina", tagline_fr: "L’élégance & la qualité au meilleur prix", tagline_ar: "الأناقة والجودة بأفضل سعر",
+    name: "Al Fatina", tagline_fr: "Belle, douce, et toujours vous", tagline_ar: "جميلة، ناعمة، وعلى طبيعتك دائمًا",
     city_fr: "", city_ar: "", hours_fr: "Commandes 7j/7", hours_ar: "الطلبات 7/7", wilaya: 35,
   },
   contact: {
@@ -78,10 +78,10 @@ export const DEFAULTS: Settings = {
     messages_ar: ["التوصيل إلى 69 ولاية", "الدفع عند الاستلام", "اطلبي أونلاين · 7/7"],
   },
   hero: {
-    eyebrow_fr: "Nouvelle collection", eyebrow_ar: "تشكيلة جديدة",
-    title_fr: "L’élégance & la qualité au meilleur prix", title_ar: "الأناقة والجودة بأفضل سعر",
-    subtitle_fr: "Robes, ensembles et tenues pour femmes choisis avec soin, livrés partout en Algérie.",
-    subtitle_ar: "فساتين، أطقم وأزياء نسائية مختارة بعناية، تصلك إلى كل أنحاء الجزائر.",
+    eyebrow_fr: "La douceur au quotidien", eyebrow_ar: "الرقة في كل يوم",
+    title_fr: "Belle, douce, et toujours vous", title_ar: "جميلة، ناعمة، وعلى طبيعتك دائمًا",
+    subtitle_fr: "Des pièces tendres et élégantes, choisies pour que vous vous sentiez bien chaque jour, livrées avec soin partout en Algérie.",
+    subtitle_ar: "قطع رقيقة وأنيقة اخترناها لتشعري بالراحة كل يوم، تصلك بعناية إلى كل أنحاء الجزائر.",
   },
   checkout: {
     cod: true, express_on_product: true, max_orders_per_phone_per_hour: 3,

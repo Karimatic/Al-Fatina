@@ -5,9 +5,9 @@ export const fr = {
   meta: {
     title: "Al Fatina · Mode féminine en ligne",
     description:
-      "L’élégance & la qualité au meilleur prix. Vêtements pour femmes choisis avec soin. Livraison 69 wilayas, paiement à la livraison. Commandez en ligne 7j/7.",
+      "Belle, douce, et toujours vous. Vêtements pour femmes choisis avec soin. Livraison 69 wilayas, paiement à la livraison. Commandez en ligne 7j/7.",
   },
-  brand: { tagline: "L’élégance & la qualité au meilleur prix" },
+  brand: { tagline: "Belle, douce, et toujours vous" },
   announcement: STORE_TEXTS.fr.announcement,
   skip: "Aller au contenu",
   nav: { home: "Accueil", categories: "Catégories", search: "Recherche", favorites: "Favoris", cart: "Panier", track: "Mes commandes", trackShort: "Commandes", menu: "Menu", language: "Langue", shop: "La boutique", help: "Aide", follow: "Suivez-nous" },
@@ -454,7 +454,7 @@ export const fr = {
     assistant: {
       open: "Assistante Al Fatina",
       short: "Assistante",
-      hint: "Besoin d'aide pour choisir ? Dites-moi ce que vous cherchez ✨",
+      hint: "Bonjour ✨ Je vous aide à trouver la pièce parfaite, la bonne taille, ou à suivre votre commande.",
       title: "✨ Assistante Al Fatina",
       intro: "Demandez-moi une pièce (couleur, occasion, taille, budget), le prix de livraison vers votre wilaya, où en est votre commande, l'adresse de la boutique, les promos…",
       placeholder: "Ex. robe noire pour un mariage, moins de 8000 DA",

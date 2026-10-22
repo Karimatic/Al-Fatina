@@ -48,32 +48,31 @@ export function BottomNav() {
     { to: "/favoris", label: t.nav.favorites, Icon: HeartIcon, match: (p: string) => p.startsWith("/favoris") },
     { to: "/panier", label: t.nav.cart, Icon: BagIcon, match: (p: string) => p.startsWith("/panier") || p.startsWith("/commande") },
   ];
+  // a floating dock: a frosted capsule above the bottom edge; the page you are on opens into a
+  // gradient pill with its name, the others are icons alone (their names are read aloud)
   return (
     <nav
       aria-label="Navigation"
-      className={`fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] transition-transform duration-300 md:hidden ${hidden ? "translate-y-full" : ""}`}
+      className={`fixed inset-x-3 bottom-[calc(0.6rem+env(safe-area-inset-bottom))] z-40 rounded-full bg-white/90 p-1.5 shadow-[0_14px_36px_-12px_rgb(110_58_166/0.45)] ring-1 ring-line backdrop-blur-md transition-transform duration-300 md:hidden ${hidden ? "translate-y-[150%]" : ""}`}
     >
-      <ul className="grid grid-cols-5">
+      <ul className="flex items-center justify-between">
         {items.map(({ to, label, Icon, match }) => {
           const active = path !== "" && match(path);
           return (
-            <li key={to}>
+            <li key={to} className={active ? "min-w-0 flex-[1.6]" : "flex-1"}>
               <a
                 href={href(to)}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex h-16 flex-col items-center justify-center gap-1 text-[10px] uppercase tracking-[0.08em] transition ${active ? "font-medium text-ink" : "text-ink-soft"}`}
+                aria-label={active ? undefined : label}
+                className={`relative mx-auto flex h-12 items-center justify-center gap-1.5 rounded-full transition-all duration-300 ${active ? "bg-plum-600 px-3.5 text-white" : "w-12 text-ink-soft hover:text-ink"}`}
               >
-                {/* the page you are on: a thin line along the top of its tab */}
-                {active && <span aria-hidden="true" className="absolute inset-x-4 top-0 h-px bg-plum-600" />}
-                <span className="grid h-7 place-items-center">
-                  <Icon size={20} />
-                </span>
-                <span className="max-w-full truncate px-0.5">{label}</span>
+                <Icon size={20} />
+                {active && <span className="truncate text-[12.5px] font-medium">{label}</span>}
                 {label === t.nav.trackShort && order && (
-                  <span className="absolute top-1.5 size-2.5 rounded-full bg-sale ring-2 ring-white ms-7" aria-label={t.status[order.status]} />
+                  <span className="absolute end-2 top-2 size-2.5 rounded-full bg-sale ring-2 ring-white" aria-label={t.status[order.status]} />
                 )}
                 {to === "/panier" && count > 0 && (
-                  <span className="absolute top-1 grid min-w-5 place-items-center rounded-full bg-plum-600 px-1 text-[10px] font-bold leading-5 text-white ring-2 ring-white ms-8">
+                  <span className="absolute -end-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-sale px-1 text-[10px] font-bold leading-5 text-white ring-2 ring-white">
                     {count}
                   </span>
                 )}

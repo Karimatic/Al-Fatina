@@ -296,7 +296,7 @@ export function DesignEditor() {
                     Al Fatina
                   </span>
                   <span className="block text-lg" dir="rtl" style={{ fontFamily: `${fam(f.arabicDisplay)}, serif` }}>
-                    الأناقة والجودة بأفضل سعر
+                    جميلة، ناعمة، وعلى طبيعتك دائمًا
                   </span>
                 </button>
               );
@@ -453,7 +453,7 @@ const fam = (name: string) => (name === OWN_FONT ? '"Al Fatina Custom"' : `"${na
 const FONT_SLOTS: { key: keyof DesignDTO["customFont"]; label: string; sample: string; script: "latin" | "arabic" }[] = [
   { key: "display", label: "Titres (français)", sample: "Al Fatina", script: "latin" },
   { key: "sans", label: "Texte (français)", sample: "La nouvelle collection est arrivée.", script: "latin" },
-  { key: "arabicDisplay", label: "Titres (arabe)", sample: "الأناقة والجودة بأفضل سعر", script: "arabic" },
+  { key: "arabicDisplay", label: "Titres (arabe)", sample: "جميلة، ناعمة، وعلى طبيعتك دائمًا", script: "arabic" },
   { key: "arabic", label: "Texte (arabe)", sample: "وصلت التشكيلة الجديدة، التوصيل إلى 69 ولاية.", script: "arabic" },
 ];
 

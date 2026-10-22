@@ -551,7 +551,7 @@ Commandez en ligne **7j/7**, payez à la livraison, et échangez si la taille ne
 
 Suivez nos nouveautés et nos essayages en vidéo sur Instagram.', '## Al Fatina
 
-**الأناقة والجودة بأفضل سعر.** الفاتنة Al Fatina متجر أزياء نسائية أونلاين يوصل إلى كل أنحاء الجزائر: قطع نختارها لانسدالها وراحتها وجودة تفاصيلها.
+**جميلة، ناعمة، وعلى طبيعتك دائمًا.** الفاتنة Al Fatina متجر أزياء نسائية أونلاين يوصل إلى كل أنحاء الجزائر: قطع نختارها لانسدالها وراحتها وجودة تفاصيلها.
 
 ## وعدنا
 

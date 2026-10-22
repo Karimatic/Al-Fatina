@@ -535,7 +535,7 @@ html[lang="ar"] .announce { letter-spacing: 0; font-size: 13px !important; }
    and the floating buttons slide down with it: a transform (smooth, done by the graphics chip),
    not a change of `bottom` (the page laid out again on every frame). */
 :root {
-  --nav-h: 4rem;
+  --nav-h: 4.6rem; /* the floating dock: 3.75 rem + its gap above the edge */
 }
 .follow-nav {
   transition: transform 0.3s ease;
@@ -587,3 +587,16 @@ html[lang="ar"] .announce { letter-spacing: 0; font-size: 13px !important; }
   .glow, .float-soft { animation: none; }
   .card-lift, .card-lift:hover { transform: none; }
 }
+
+/* the assistant: a round gradient orb with a soft ring that breathes out */
+.assistant-orb::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 999px;
+  border: 2px solid rgb(201 139 198 / 0.55);
+  animation: orb-breathe 3s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes orb-breathe { 0% { transform: scale(0.92); opacity: 0.9; } 100% { transform: scale(1.25); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .assistant-orb::before { animation: none; opacity: 0.5; } }

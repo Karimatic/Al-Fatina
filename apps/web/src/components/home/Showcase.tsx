@@ -41,17 +41,23 @@ export function LookbookGrid() {
 export function ContestCard() {
   const { t } = useLocale();
   const C = t.home.contest;
+  // a light card: the gift in a gradient circle, the title in the serif, a pill to join
   return (
-    <section className="mx-auto max-w-6xl px-4 py-6">
+    <section className="mx-auto max-w-6xl px-4 py-8 md:px-8">
       <Reveal>
-        <a href={IG} target="_blank" rel="noopener noreferrer" className="lift group relative flex items-center gap-4 overflow-hidden rounded-[1.75rem] bg-noir p-5 text-white md:p-8">
-          <span className="relative grid size-14 shrink-0 place-items-center bg-plum-600 text-2xl transition group-hover:scale-105">🎁</span>
-          <span className="relative min-w-0 flex-1">
-            <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-rose-300">{C.eyebrow}</span>
-            <span className="heading-display mt-0.5 block text-xl leading-snug md:text-3xl">{C.title}</span>
-            <span className="mt-1 block text-sm text-white/70">{C.text}</span>
+        <a href={IG} target="_blank" rel="noopener noreferrer" className="card-lift group flex flex-col items-center gap-5 rounded-[2rem] bg-white p-6 text-center shadow-soft ring-1 ring-line md:flex-row md:p-8 md:text-start">
+          <span aria-hidden="true" className="float-soft grid size-20 shrink-0 place-items-center rounded-full bg-plum-600 text-3xl shadow-[0_14px_30px_-12px_rgb(158_58_146/0.8)]">
+            🎁
           </span>
-          <span aria-hidden="true" className="relative grid size-10 shrink-0 place-items-center rounded-full bg-surface text-ink rtl:rotate-180">→</span>
+          <span className="min-w-0 flex-1">
+            <span className="eyebrow-silk block text-plum-700">{C.eyebrow}</span>
+            <span className="title-silk mt-1 block text-[1.9rem] text-ink md:text-[2.4rem]">{C.title}</span>
+            <span className="mt-1 block text-[14.5px] text-ink-soft">{C.text}</span>
+          </span>
+          <span className="btn-silk-line shrink-0 text-ink group-hover:bg-plum-600 group-hover:text-white">
+            Instagram
+            <span aria-hidden="true" className="rtl:rotate-180">→</span>
+          </span>
         </a>
       </Reveal>
     </section>

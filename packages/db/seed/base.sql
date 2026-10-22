@@ -11,9 +11,9 @@ INSERT INTO roles (key, name, permissions) VALUES
 ON CONFLICT(key) DO UPDATE SET name = excluded.name, permissions = excluded.permissions;
 
 INSERT OR IGNORE INTO settings (key, value) VALUES
-('store', '{"name":"Al Fatina","tagline_fr":"L''élégance & la qualité au meilleur prix","tagline_ar":"الأناقة والجودة بأفضل سعر","city_fr":"","city_ar":"","wilaya":35,"hours_fr":"Commandes 7j/7","hours_ar":"الطلبات 7/7","currency":"DZD"}'),
+('store', '{"name":"Al Fatina","tagline_fr":"Belle, douce, et toujours vous","tagline_ar":"جميلة، ناعمة، وعلى طبيعتك دائمًا","city_fr":"","city_ar":"","wilaya":35,"hours_fr":"Commandes 7j/7","hours_ar":"الطلبات 7/7","currency":"DZD"}'),
 ('contact', '{"phone":null,"whatsapp":null,"instagram":"https://www.instagram.com/el_fatina_/","tiktok":null,"facebook":null,"maps":null,"address_fr":"","address_ar":""}'),
-('hero', '{"eyebrow_fr":"Nouvelle collection","eyebrow_ar":"تشكيلة جديدة","title_fr":"L’élégance & la qualité au meilleur prix","title_ar":"الأناقة والجودة بأفضل سعر","subtitle_fr":"Pyjamas, lingerie, nuisettes et djebbas choisis avec soin, livrés partout en Algérie.","subtitle_ar":"بيجامات، ملابس داخلية، قمصان نوم وجبب مختارة بعناية، تصلك إلى كل أنحاء الجزائر."}'),
+('hero', '{"eyebrow_fr":"La douceur au quotidien","eyebrow_ar":"الرقة في كل يوم","title_fr":"Belle, douce, et toujours vous","title_ar":"جميلة، ناعمة، وعلى طبيعتك دائمًا","subtitle_fr":"Des pièces tendres et élégantes, choisies pour que vous vous sentiez bien chaque jour, livrées avec soin partout en Algérie.","subtitle_ar":"قطع رقيقة وأنيقة اخترناها لتشعري بالراحة كل يوم، تصلك بعناية إلى كل أنحاء الجزائر."}'),
 ('notifications', '{"telegram_new_order":true,"telegram_status_change":true,"telegram_low_stock":true,"telegram_review":true,"telegram_contact":true,"trust_group_members":false}'),
 ('announcement', '{"active":true,"messages_fr":["Livraison dans les 69 wilayas","Paiement à la livraison","Échange possible","Commandez en ligne · 7j/7"],"messages_ar":["التوصيل إلى 69 ولاية","الدفع عند الاستلام","إمكانية التبديل","اطلبي أونلاين · 7/7"]}'),
 ('checkout', '{"cod":true,"express_on_product":true,"max_orders_per_phone_per_hour":3,"free_shipping_over":null,"desk_enabled":true}'),

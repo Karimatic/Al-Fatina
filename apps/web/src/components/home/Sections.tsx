@@ -51,81 +51,88 @@ export function SectionHead({ title, href, link }: { title: string; href?: strin
 
 /* ───────── Instagram: the big detailed card ───────── */
 
-/** The Instagram block: the follow card with the shop's photos inside it. */
+/**
+ * The Instagram block, Al Fatina style: no card, a calm centred moment on the wash: the account
+ * name large in the brand gradient, one line, the follow pill, the figures as quiet text; the
+ * shop's photos under it when there are some.
+ */
 export function InstagramCard({ children }: { children?: React.ReactNode }) {
   const { t } = useLocale();
   const contact = useSite().data?.contact;
   const href = contact?.instagram || "https://www.instagram.com/el_fatina_/";
-  // follower count as written in Admin → Contact (no chip when it's empty)
   const stats: [string, string][] = [...(contact?.followers ? [[contact.followers, t.instagram.followers] as [string, string]] : []), ...t.instagram.stats];
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10">
-      <Reveal>
-        <div className="ig-card relative overflow-hidden rounded-[2rem] p-6 md:p-8">
-          <div aria-hidden="true" className="pointer-events-none absolute -end-16 -top-16 size-72 rounded-full bg-[radial-gradient(closest-side,var(--color-rose-100),transparent)]" />
-          <div className="relative flex flex-col items-center gap-5 text-center md:flex-row md:text-start">
-            <a href={href} target="_blank" rel="noopener noreferrer" className="ig-logo grid size-20 shrink-0 place-items-center rounded-[1.6rem] text-white shadow-lg transition hover:scale-105" aria-label="Instagram">
-              <InstagramIcon size={40} strokeWidth={1.8} />
-            </a>
-            <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-700">{t.instagram.label}</p>
-              <h2 className="heading-display mt-1 text-2xl md:text-3xl">{t.instagram.heading}</h2>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">{t.instagram.text}</p>
-              <ul className="mt-4 flex flex-wrap justify-center gap-2 md:justify-start">
-                {stats.map(([value, label]) => (
-                  <li key={label} className="rounded-full border border-line bg-ivory-deep/70 px-3 py-1.5 text-xs">
-                    <b className="font-semibold text-plum-700" dir="ltr">{value}</b> <span className="text-ink-soft">{label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ig-btn inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-plum-600 px-7 text-[13px] font-medium uppercase tracking-[0.14em] text-white transition hover:bg-black"
-            >
-              <InstagramIcon size={18} />
-              <span dir="ltr">{t.instagram.cta}</span>
-            </a>
-          </div>
-          {children && <div className="relative mt-6">{children}</div>}
-        </div>
-      </Reveal>
+    <section className="wash">
+      <div className="mx-auto max-w-4xl px-5 py-16 text-center md:py-24">
+        <Reveal>
+          <span aria-hidden="true" className="mx-auto grid size-14 place-items-center rounded-full bg-plum-600 text-white shadow-[0_14px_30px_-12px_rgb(158_58_146/0.8)]">
+            <InstagramIcon size={26} />
+          </span>
+          <p className="eyebrow-silk mt-5 text-plum-700">{t.instagram.label}</p>
+          <a href={href} target="_blank" rel="noopener noreferrer" className="title-silk text-grad mt-2 inline-block text-[2.4rem] md:text-[3.6rem]" dir="ltr">
+            @el_fatina_
+          </a>
+          <p className="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-ink-soft">{t.instagram.text}</p>
+          <p className="mt-4 text-[13px] text-ink-soft">
+            {stats.map(([value, label], i) => (
+              <span key={label}>
+                {i > 0 && <span aria-hidden="true" className="mx-2 text-plum-600">✦</span>}
+                <b className="font-medium text-ink" dir="ltr">{value}</b> {label}
+              </span>
+            ))}
+          </p>
+          <a href={href} target="_blank" rel="noopener noreferrer" className="btn-silk mt-7">
+            <InstagramIcon size={17} />
+            <span dir="ltr">{t.instagram.cta}</span>
+          </a>
+        </Reveal>
+        {children && <div className="mt-10">{children}</div>}
+      </div>
     </section>
   );
 }
 
 /* ───────── FAQ ───────── */
 
-/** Questions in the page's language: built in, or edited in Admin → Paramètres → Textes. */
+/**
+ * Questions, Al Fatina style: two columns on computers: the title and a « write to us » card on
+ * the start side, the questions as separate soft cards on the other (one under the other on
+ * phones). Built in, or edited in Admin → Paramètres → Textes.
+ */
 export function Faq() {
   const { t, href } = useLocale();
   const list = useStoreTexts().faq;
   return (
-    <section className="mx-auto max-w-3xl px-4 py-10" aria-labelledby="faq-title">
-      <h2 id="faq-title" className="heading-display mb-5 text-center text-[1.65rem] md:text-4xl">
-        {t.faq.title}
-      </h2>
-      <div className="divide-y divide-line overflow-hidden rounded-[1.5rem] border border-line bg-surface">
-        {list.map((f) => (
-          <details key={f.q} className="faq-item group">
-            <summary className="flex cursor-pointer items-center gap-4 px-5 py-4">
-              <span className="flex-1 font-semibold">{f.q}</span>
-              <span className="faq-plus grid size-8 shrink-0 place-items-center rounded-full bg-ivory-deep text-lg leading-none text-ink" aria-hidden="true">
-                +
-              </span>
-            </summary>
-            <p className="px-5 pb-5 text-sm leading-relaxed text-ink-soft">{f.a}</p>
-          </details>
-        ))}
+    <section className="mx-auto max-w-6xl px-4 py-16 md:px-8 md:py-24" aria-labelledby="faq-title">
+      <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:gap-14">
+        <div className="text-center md:sticky md:top-28 md:self-start md:text-start">
+          <span aria-hidden="true" className="text-sm text-plum-600">
+            ✦
+          </span>
+          <h2 id="faq-title" className="title-silk mt-2 text-[2.1rem] text-ink md:text-[2.9rem]">
+            {t.faq.title}
+          </h2>
+          <div className="wash mt-6 rounded-3xl p-6 text-center shadow-soft md:text-start">
+            <p className="text-[15px] text-ink">{t.faq.helpTitle}</p>
+            <a href={href("/contact")} className="btn-silk mt-4">
+              {t.faq.helpCta}
+            </a>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {list.map((f) => (
+            <details key={f.q} className="faq-item group rounded-2xl bg-white shadow-soft ring-1 ring-line transition open:ring-plum-600/30">
+              <summary className="flex cursor-pointer items-center gap-4 px-5 py-4 md:px-6 md:py-5">
+                <span className="flex-1 text-[15px] font-medium text-ink">{f.q}</span>
+                <span className="faq-plus grid size-8 shrink-0 place-items-center rounded-full bg-plum-600 text-lg leading-none text-white" aria-hidden="true">
+                  +
+                </span>
+              </summary>
+              <p className="px-5 pb-5 text-[14.5px] leading-relaxed text-ink-soft md:px-6">{f.a}</p>
+            </details>
+          ))}
+        </div>
       </div>
-      <p className="mt-4 text-center text-sm text-ink-soft">
-        {t.faq.helpTitle}{" "}
-        <a href={href("/contact")} className="font-semibold text-plum-600 underline-offset-4 hover:underline">
-          {t.faq.helpCta}
-        </a>
-      </p>
     </section>
   );
 }

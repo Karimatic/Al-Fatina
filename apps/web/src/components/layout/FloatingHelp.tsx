@@ -61,8 +61,6 @@ export function FloatingHelp() {
   if (!path || path.startsWith("/commande") || path === "/liens") return null;
   // pages with a bar fixed at the bottom (buy bar, outfit total): sit above it
   const onProduct = path.startsWith("/produit/") || path.startsWith("/tenue");
-  // pages full of product cards: on a phone the button is the icon only (it covered prices)
-  const compact = onProduct || ["/c/", "/boutique", "/nouveautes", "/promotions", "/recherche", "/collection/"].some((p) => path.startsWith(p));
   return (
     <>
       <div
@@ -77,9 +75,12 @@ export function FloatingHelp() {
               setHint(false);
               setOpen(true);
             }}
-            className="toast-in max-w-[14rem] rounded-2xl rounded-ee-sm bg-surface px-3.5 py-2.5 text-start text-sm font-medium shadow-[0_12px_30px_-10px_rgb(23_10_16/0.45)] ring-1 ring-line"
+            className="toast-in flex max-w-[16rem] items-start gap-2.5 rounded-3xl rounded-ee-md bg-white/95 p-3 text-start text-[13.5px] leading-snug shadow-soft ring-1 ring-line backdrop-blur"
           >
-            {t.plus.assistant.hint}
+            <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-plum-600 text-[11px] font-medium tracking-wider text-white">
+              AF
+            </span>
+            <span>{t.plus.assistant.hint}</span>
           </button>
         )}
         <button
@@ -89,18 +90,16 @@ export function FloatingHelp() {
             setOpen(true);
           }}
           aria-label={t.plus.assistant.open}
-          className={`assistant-fab lift relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-plum-600 ps-1.5 text-sm ${compact ? "pe-1.5 md:pe-4" : "pe-4"} font-medium text-white shadow-[0_6px_20px_-6px_rgb(0_0_0/0.45)]`}
+          className="assistant-orb relative grid size-14 place-items-center rounded-full bg-plum-600 text-white shadow-[0_14px_30px_-10px_rgb(158_58_146/0.75)] transition hover:scale-105 active:scale-95"
         >
-          <span className="grid size-9 place-items-center rounded-full bg-white/20" aria-hidden="true">
+          <span className="grid place-items-center" aria-hidden="true">
             <span className="assistant-spark">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2c.6 4.6 2.4 6.4 7 7-4.6.6-6.4 2.4-7 7-.6-4.6-2.4-6.4-7-7 4.6-.6 6.4-2.4 7-7Z" />
                 <path d="M19 14c.3 2 1 2.7 3 3-2 .3-2.7 1-3 3-.3-2-1-2.7-3-3 2-.3 2.7-1 3-3Z" opacity=".8" />
               </svg>
             </span>
           </span>
-          {/* on a product page's phone layout: the icon only, the page needs the room */}
-          <span className={`whitespace-nowrap ${compact ? "max-md:hidden" : ""}`}>{t.plus.assistant.short}</span>
         </button>
       </div>
       {open && <AssistantPanel onClose={close} locale={locale} />}
