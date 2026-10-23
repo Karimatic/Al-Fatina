@@ -8,10 +8,10 @@ export function BrandMark({ size = 28, className, light = false }: { size?: numb
 }
 
 const SIZES = {
-  sm: { text: "text-xl", blossom: 24, gap: "gap-1.5", sub: "text-[10px]" },
-  md: { text: "text-[1.4rem]", blossom: 30, gap: "gap-2", sub: "text-[11px]" },
+  sm: { text: "text-[0.95rem]", blossom: 24, gap: "gap-1.5", sub: "text-[10px]" },
+  md: { text: "text-[1.1rem]", blossom: 30, gap: "gap-2", sub: "text-[11px]" },
   // phones: must fit a ~310 px card (no wrapping, the word is one mark)
-  lg: { text: "text-[1.7rem] min-[400px]:text-3xl sm:text-[2.6rem]", blossom: 38, gap: "gap-2.5", sub: "text-[11px] sm:text-xs" },
+  lg: { text: "text-[1.25rem] min-[400px]:text-[1.4rem] sm:text-[1.9rem]", blossom: 38, gap: "gap-2.5", sub: "text-[11px] sm:text-xs" },
 } as const;
 
 export function Wordmark({
