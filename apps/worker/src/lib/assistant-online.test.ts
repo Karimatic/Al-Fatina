@@ -12,7 +12,7 @@ describe("assistant: Al Fatina sells online only", () => {
       ["vous êtes ouvert à quelle heure ?", "fr"],
       ["وين راكم المحل تاعكم", "ar"],
     ] as const) {
-      const r = await answer(env(), { q, locale });
+      const r = await answer(env(), { q, locale, context: { recent: [], favorites: [], cart: [], orders: [], history: [] } });
       expect(r.intent).toBe("shop");
       expect(r.reply).toMatch(locale === "fr" ? /100 % en ligne/ : /متجر إلكتروني فقط/);
       expect(r.actions?.some((a) => a.href.includes("google.com/maps") || a.href === "/boutique")).toBe(false);
