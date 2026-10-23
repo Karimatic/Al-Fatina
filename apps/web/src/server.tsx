@@ -55,7 +55,7 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
  * each page as itself). Shells get their canonical from the Worker, per slug.
  */
 /** Default picture of link previews (the built-in home photo, 640 × 640). */
-export const SHARE_IMAGE = { src: "/og.png", width: 640, height: 640 };
+export const SHARE_IMAGE = { src: "/og.jpg", width: 640, height: 640 };
 
 /**
  * Home page only: who the shop is (Organization: name, logo, Instagram, Boumerdès) and the site
@@ -141,7 +141,7 @@ function headTags(page: PageDef, locale: Locale, siteUrl: string): string {
     `<meta name="twitter:card" content="summary"/>`,
     `<meta name="twitter:title" content="${esc(title)}"/>`,
     `<meta name="twitter:description" content="${esc(description)}"/>`,
-    `<link rel="icon" href="/icon.svg"/>`,
+    `<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png"/>`,
     `<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"/>`,
   );
   if (page.path === "/") tags.push(shopJsonLd(locale, abs));

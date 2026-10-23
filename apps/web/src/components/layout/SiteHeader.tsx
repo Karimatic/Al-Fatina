@@ -45,9 +45,8 @@ export function SiteHeader() {
               // the shop's own logo (Admin → Page d'accueil → Apparence)
               <img src={logo} alt="Al Fatina" className="h-8 w-auto max-w-[10rem] object-contain md:h-10" />
             ) : (
-              <span className="brand-mark whitespace-nowrap text-[1.05rem] min-[400px]:text-[1.2rem] md:text-[1.5rem]" dir="ltr">
-                Al Fatina
-              </span>
+              // the logo: الفاتنة in gold calligraphy with "Al Fatina"
+              <img src="/logo.webp" alt="Al Fatina" width={56} height={60} fetchPriority="high" className="h-[58px] w-auto md:h-[68px]" />
             )}
           </a>
 

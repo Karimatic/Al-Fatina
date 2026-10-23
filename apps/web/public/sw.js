@@ -11,7 +11,7 @@
  *    (the last 120).
  * Every other request (orders, forms, the admin) goes straight to the network, untouched. */
 
-const OFFLINE = "elfatina-offline-v2";
+const OFFLINE = "elfatina-offline-v3";
 const PAGES = "elfatina-pages-v1";
 const DATA_CACHE = "elfatina-data-v1";
 const FILES = "elfatina-files-v1";
@@ -20,7 +20,7 @@ const WAIT_MS = 4000;
 const MAX_SAVED = { [PAGES]: 40, [DATA_CACHE]: 60, [FILES]: 120 };
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(OFFLINE).then((c) => c.addAll(["/offline", "/icon.svg"])).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(OFFLINE).then((c) => c.addAll(["/offline", "/icons/icon-192.png"])).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (event) => {
   event.waitUntil(
@@ -110,9 +110,9 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || "Al Fatina ✨", {
       body: data.body || "",
-      icon: data.icon || "/icon.svg",
+      icon: data.icon || "/icons/icon-192.png",
       image: data.icon || undefined,
-      badge: "/icon.svg",
+      badge: "/icons/favicon-32.png",
       tag: data.tag || undefined,
       renotify: !!data.tag,
       data: { url: data.url || "/" },

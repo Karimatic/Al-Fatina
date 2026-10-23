@@ -84,9 +84,7 @@ export function SiteMenu() {
               className="menu-panel absolute inset-y-0 start-0 flex w-[min(22rem,88vw)] flex-col bg-ivory outline-none"
             >
               <div className="flex h-16 items-center justify-between border-b border-line ps-6 pe-2">
-                <span className="brand-mark text-base" dir="ltr">
-                  Al Fatina
-                </span>
+                <img src="/logo.webp" alt="Al Fatina" width={41} height={44} className="h-11 w-auto" />
                 <button type="button" onClick={close} aria-label={t.common.close} className="grid size-11 place-items-center text-3xl font-light text-ink">
                   ×
                 </button>

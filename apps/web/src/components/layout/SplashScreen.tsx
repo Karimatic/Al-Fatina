@@ -16,11 +16,8 @@ export function SplashScreen() {
     <>
       <div id="elfatina-splash" className="elfatina-splash" aria-hidden="true">
         <div className="elfatina-splash-mark">
-          <BrandMark size={52} />
+          <BrandMark size={150} />
         </div>
-        <p className="elfatina-splash-word heading-display" dir="ltr">
-          Al Fatina
-        </p>
         <span className="elfatina-splash-bar">
           <span className="elfatina-splash-bar-fill" />
         </span>

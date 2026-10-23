@@ -61,13 +61,10 @@ export const InstagramIcon = (p: IconProps) => (
 
 export const TRUST_ICONS = { truck: TruckIcon, cash: CashIcon, swap: SwapIcon, pin: PinIcon } as const;
 
-/** Al Fatina's mark: "AF" in Jost, in the text colour (the app icon's letters). */
+/** Al Fatina's logo (gold calligraphy, transparent background). */
 export function BrandMark({ size = 28, className }: { size?: number; className?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" className={className}>
-      <path fill="currentColor" d="M18.43 37.50L28.28 37.50L31.39 44.84L34.71 44.84L23.35 19.16L12 44.84L15.32 44.84L18.43 37.50ZM19.62 34.71L23.35 25.90L27.09 34.71L19.62 34.71ZM52 20.38L39.42 20.38L39.42 44.84L42.39 44.84L42.39 32.96L51.65 32.96L51.65 30.17L42.39 30.17L42.39 23.18L52 23.18L52 20.38Z" />
-    </svg>
-  );
+  // the logo: الفاتنة in gold calligraphy with "Al Fatina" (public/logo.webp, transparent); size = its height
+  return <img src="/logo.webp" alt="" aria-hidden="true" width={Math.round((size * 446) / 480)} height={size} decoding="async" className={className} />;
 }
 
 export const PhoneIcon = (p: IconProps) => (

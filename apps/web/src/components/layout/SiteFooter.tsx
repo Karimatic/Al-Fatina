@@ -91,9 +91,7 @@ export function SiteFooter() {
           {design.logo ? (
             <img src={design.logo} alt="Al Fatina" className="h-8 w-auto max-w-[9rem] object-contain" />
           ) : (
-            <p className="brand-mark text-sm" dir="ltr">
-              Al Fatina
-            </p>
+            <img src="/logo.webp" alt="Al Fatina" width={89} height={96} loading="lazy" className="h-24 w-auto" />
           )}
           <p className="text-xs text-ink-soft">
             © {new Date().getFullYear()} Al Fatina · {t.footer.rights}
