@@ -1,5 +1,5 @@
 import { formatDA, imageSrcSet, imageUrl, type ImageRef, artKey } from "@elfatina/shared";
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useLocale } from "@/lib/locale";
 
 export function Price({ value, compareAt, className = "" }: { value: number; compareAt?: number | null; className?: string }) {
@@ -75,6 +75,14 @@ export function ProductImage({
 }) {
   // one gradient id per placeholder (the same id twice on a page is invalid and may not paint)
   const sheen = `sheen${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  // the blurred preview shows only until the photo has arrived: products photographed without
+  // background are transparent, and a preview left behind them looked like blurry shadows
+  const img = useRef<HTMLImageElement>(null);
+  const [loaded, setLoaded] = useState(false);
+  // a photo that finished before this code ran (pre-rendered page, cache) fires no load event
+  useEffect(() => {
+    if (img.current?.complete && img.current.naturalWidth > 0) setLoaded(true);
+  }, [image?.src]);
   // callers may position the frame themselves ("absolute inset-0"); otherwise it is the positioning context
   const pos = className.split(/\s+/).some((c) => c === "absolute" || c === "fixed") ? "" : "relative";
   if (image) {
@@ -82,9 +90,18 @@ export function ProductImage({
       // the theme's background behind every photo: it shows around products photographed without background
       <div
         className={`${pos} overflow-hidden ${className}`}
-        style={{ backgroundImage: `${image.lqip ? `url(${image.lqip}), ` : ""}${TILE_BG}`, backgroundSize: "cover" }}
+        style={{ backgroundImage: TILE_BG }}
       >
+        {image.lqip && (
+          <span
+            aria-hidden="true"
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${loaded ? "opacity-0" : ""}`}
+            style={{ backgroundImage: `url(${image.lqip})` }}
+          />
+        )}
         <img
+          ref={img}
+          onLoad={() => setLoaded(true)}
           src={imageUrl(image, 960)}
           srcSet={imageSrcSet(image)}
           sizes={sizes}
